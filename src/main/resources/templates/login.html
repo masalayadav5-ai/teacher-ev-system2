@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+<h2>Teacher Evaluation System - Login</h2>
+
+<form action="/do-login" method="POST">
+    <input type="text" name="username" />
+    <input type="password" name="password" />
+    <button type="submit">Login</button>
+</form>
+
+
+<p th:if="${param.error}" style="color:red;">
+    Invalid username or password!
+</p>
+
+</body>
+</html>
