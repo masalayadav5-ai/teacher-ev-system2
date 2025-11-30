@@ -1,22 +1,90 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Evaluation System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-<h2>Teacher Evaluation System - Login</h2>
+    <!-- 🔥 VIDEO BACKGROUND -->
+    <video class="bg-video" autoplay muted loop>
+        <source src="/images/login_bg.mp4" type="video/mp4">
+    </video>
+     
+    <!-- HEADER -->
+    <header>
+        <div class="logo">SmarTeach</div>
 
-<form action="/do-login" method="POST">
-    <input type="text" name="username" />
-    <input type="password" name="password" />
-    <button type="submit">Login</button>
-</form>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Courses</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </nav>
 
+        <div class="search-box">
+            <input type="text" placeholder="Search...">
+            <button>Search</button>
+        </div>
+    </header>
 
-<p th:if="${param.error}" style="color:red;">
-    Invalid username or password!
-</p>
+    <!-- HERO SECTION -->
+    <section class="hero">
+
+        <div class="text-area">
+            <h1>Empower Education with <span>Smart Evaluation</span></h1>
+            <p>Our platform helps institutions analyze teaching quality effectively using modern tools.</p>
+            <button class="join-btn">Get Started</button>
+        </div>
+
+        <!-- LOGIN BOX -->
+        <div class="form-container">
+            <div class="auth-wrapper">
+
+                <div class="login-box">
+                    <h2>Login Here</h2>
+
+                    <p th:if="${param.error}" style="color:red; margin-bottom:10px;">
+                        Invalid username or password!
+                    </p>
+
+                    <p th:if="${param.logout}" style="color:green; margin-bottom:10px;">
+                        You have been logged out successfully.
+                    </p>
+
+                    <form action="/do-login" method="POST">
+
+                        <input type="text" name="username" placeholder="Enter Username" required>
+
+                        <div class="password-wrapper">
+                            <input type="password" id="login-pass" name="password" placeholder="Enter Password" required>
+                            <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
+                        </div>
+
+                        <button class="login-btn" type="submit">Login</button>
+                    </form>
+
+                    <p class="login-with">Log in with</p>
+
+                    <div class="social-icons">
+                        <i class="fab fa-facebook"></i>
+                        <i class="fab fa-instagram"></i>
+                        <i class="fab fa-twitter"></i>
+                        <i class="fab fa-google"></i>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ✅ Load JS at bottom so icons exist before JS runs -->
+    <script src="/js/script.js"></script>
 
 </body>
 </html>

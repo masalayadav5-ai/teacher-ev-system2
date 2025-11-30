@@ -1,10 +1,7 @@
 package com.college.academic.evaluationsystem.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
+import java.time.Instant;
 
 @Entity
 @Table(name = "users")
@@ -14,26 +11,39 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
+
+    // stored encoded (BCrypt)
     private String password;
 
-    public Long getId() {
-        return id;
-    }
+    @Column(unique = true, nullable = false)
+    private String email;
 
-    public String getUsername() {
-        return username;
-    }
+    private boolean enabled = false; // set true after user sets password
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    // One-time token for initial password change
+    private String otpToken;
 
-    public String getPassword() {
-        return password;
-    }
+    private Instant otpExpiry; // expiration timestamp for OTP
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public Long getId() { return id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public String getOtpToken() { return otpToken; }
+    public void setOtpToken(String otpToken) { this.otpToken = otpToken; }
+
+    public Instant getOtpExpiry() { return otpExpiry; }
+    public void setOtpExpiry(Instant otpExpiry) { this.otpExpiry = otpExpiry; }
 }
