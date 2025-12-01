@@ -1,2 +1,115 @@
-<h1>Welcome to Teacher Evaluation System</h1>
-<p>You are logged in successfully.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="d-flex">
+
+        <!-- Sidebar -->
+        <div class="sidebar bg-white border-end p-3" id="sidebar">
+            <h4 class="mb-4">Admin Panel</h4>
+            <ul class="nav flex-column">
+                <li class="nav-item active"><a class="nav-link" href="#"><i class="bi bi-speedometer2 me-2"></i><span>Dashboard</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people me-2"></i><span>Students</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i><span>Teachers</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-journal-text me-2"></i><span>Evaluation</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-calendar-week me-2"></i><span>Session Planner</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear me-2"></i><span>Settings</span></a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content flex-grow-1" id="content">
+
+            <!-- Top Navbar -->
+            <nav class="navbar bg-white border-bottom px-4 d-flex justify-content-between align-items-center">
+
+                <!-- Sidebar Toggle -->
+                <button class="btn btn-light" id="toggleSidebar"><i class="bi bi-list fs-4"></i></button>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Dark Mode Toggle -->
+                    <button class="btn btn-light" id="darkModeBtn"><i class="bi bi-moon-stars fs-5"></i></button>
+
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" href="#" id="dropdownUser" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-4 me-2"></i>
+                            <strong>Admin Username</strong>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Dashboard Cards -->
+            <div class="container mt-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="dashboard-card card p-4 shadow-sm">
+                            <h5>Total Students</h5>
+                            <p class="mt-2 fs-4 fw-bold">120</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dashboard-card card p-4 shadow-sm">
+                            <h5>Total Teachers</h5>
+                            <p class="mt-2 fs-4 fw-bold">35</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="dashboard-card card p-4 shadow-sm">
+                            <h5>Pending Evaluations</h5>
+                            <p class="mt-2 fs-4 fw-bold">8</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+  <script>
+// Sidebar toggle for mobile
+document.querySelector(".menu-toggle").addEventListener("click", () => {
+    document.querySelector(".sidebar").classList.toggle("active");
+});
+
+// AUTO-SAVE THEME
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+}
+</script>
+<a th:classappend="${page=='dashboard'} ? 'active'" href="/admin/dashboard">Dashboard</a>
+<a th:classappend="${page=='teachers'} ? 'active'" href="/admin/teachers">Teachers</a>
+<a th:classappend="${page=='students'} ? 'active'" href="/admin/students">Students</a>
+
+</body>
+</html>

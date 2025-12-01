@@ -7,6 +7,10 @@ import java.time.Instant;
 @Table(name = "users")
 public class User {
 
+    public static Object builder() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -14,18 +18,20 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    // stored encoded (BCrypt)
+    @Column(nullable = false)
     private String password;
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    private boolean enabled = false; // set true after user sets password
+    private boolean enabled = true; // IMPORTANT
 
-    // One-time token for initial password change
     private String otpToken;
 
-    private Instant otpExpiry; // expiration timestamp for OTP
+    private Instant otpExpiry;
+
+    @Column(nullable = false)
+    private String role = "ROLE_USER";
 
     public Long getId() { return id; }
 
@@ -46,4 +52,7 @@ public class User {
 
     public Instant getOtpExpiry() { return otpExpiry; }
     public void setOtpExpiry(Instant otpExpiry) { this.otpExpiry = otpExpiry; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

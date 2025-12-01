@@ -1,0 +1,137 @@
+/* -------------------------- */
+/* GLOBAL SETTINGS */
+/* -------------------------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+:root {
+    --sidebar-bg: #1f2937;
+    --sidebar-text: #ffffff;
+    --sidebar-hover: #4b5563;
+    --active-bg: #111827;
+    --active-text: #60a5fa;
+
+    --content-bg: #f3f4f6;
+    --content-text: #111827;
+
+    --transition-speed: 0.3s;
+}
+
+/* DARK THEME */
+[data-theme="dark"] {
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #e2e8f0;
+    --sidebar-hover: #1e293b;
+    --active-bg: #1e293b;
+    --active-text: #38bdf8;
+
+    --content-bg: #1e293b;
+    --content-text: #e2e8f0;
+}
+
+/* SMOOTH TRANSITION */
+body {
+    background: var(--content-bg);
+    color: var(--content-text);
+    transition: background var(--transition-speed), color var(--transition-speed);
+}
+
+
+
+
+/* -------------------------- */
+/* SIDEBAR */
+/* -------------------------- */
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding-top: 15px;
+    transition: transform var(--transition-speed);
+}
+
+.sidebar h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 14px 22px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 17px;
+    transition: background var(--transition-speed), padding-left var(--transition-speed);
+}
+
+.sidebar a:hover {
+    background: var(--sidebar-hover);
+    padding-left: 30px;
+}
+
+/* ACTIVE PAGE HIGHLIGHT */
+.sidebar a.active {
+    background: var(--active-bg);
+    color: var(--active-text);
+    font-weight: 600;
+    border-left: 4px solid var(--active-text);
+}
+
+
+
+/* -------------------------- */
+/* MAIN CONTENT */
+/* -------------------------- */
+
+.main-content {
+    margin-left: 260px;
+    padding: 20px;
+    transition: margin var(--transition-speed);
+}
+
+
+
+/* -------------------------- */
+/* MOBILE SIDEBAR */
+/* -------------------------- */
+
+.menu-toggle {
+    display: none;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 10px;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 999;
+    color: var(--content-text);
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+}

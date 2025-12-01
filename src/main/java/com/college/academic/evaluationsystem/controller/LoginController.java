@@ -5,6 +5,7 @@
 package com.college.academic.evaluationsystem.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -21,8 +22,10 @@ public class LoginController {
         return "login";
     }
 
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "dashboard";
-    }
+   @GetMapping("/dashboard")
+public String dashboard(Model model) {
+    model.addAttribute("page", "dashboard");
+    return "dashboard";
+}
+
 }
