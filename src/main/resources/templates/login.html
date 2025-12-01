@@ -1,23 +1,30 @@
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Evaluation System</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>SmarTeach | Teacher Evaluation System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
 
-    <!-- 🔥 VIDEO BACKGROUND -->
-    <video class="bg-video" autoplay muted loop>
-        <source src="/images/login_bg.mp4" type="video/mp4">
+    <!-- BACKGROUND VIDEO -->
+    <video class="bg-video" autoplay muted loop playsinline>
+        <source src="/videos/login_bg.mp4" type="video/mp4">
     </video>
-     
-    <!-- HEADER -->
-    <header>
-        <div class="logo">SmarTeach</div>
+
+    <!-- DARK OVERLAY -->
+    <div class="overlay"></div>
+
+    <!-- NAVBAR -->
+    <header class="fade-in nav-blur">
+        <div class="logo">
+            <i class="fa-solid fa-chalkboard-user"></i> SmarTeach
+        </div>
 
         <nav>
             <a href="#">Home</a>
@@ -28,63 +35,73 @@
 
         <div class="search-box">
             <input type="text" placeholder="Search...">
-            <button>Search</button>
+            <button><i class="fa fa-search"></i></button>
         </div>
     </header>
 
     <!-- HERO SECTION -->
-    <section class="hero">
-
+    <section class="hero fade-in">
         <div class="text-area">
-            <h1>Empower Education with <span>Smart Evaluation</span></h1>
-            <p>Our platform helps institutions analyze teaching quality effectively using modern tools.</p>
+            <h1>Empower Education with 
+    <span class="typing"><span class="smarteach-color">SmarTeach</span></span>
+</h1>
+
+            <p class="tagline">Transforming Feedback Into Better Teaching.<br>
+                <span class="rotating-text">Plan Better Sessions • Evaluate Smarter • Improve Outcomes</span>
+            </p>
             <button class="join-btn">Get Started</button>
         </div>
 
-        <!-- LOGIN BOX -->
-        <div class="form-container">
-            <div class="auth-wrapper">
+        <!-- LOGIN CARD -->
+        <div class="auth-wrapper fade-in">
+            <div class="login-box">
+                <h2>Login</h2>
 
-                <div class="login-box">
-                    <h2>Login Here</h2>
+                <p th:if="${param.error}" class="error-msg">Invalid username or password!</p>
+                <p th:if="${param.logout}" class="success-msg">Logged out successfully.</p>
 
-                    <p th:if="${param.error}" style="color:red; margin-bottom:10px;">
-                        Invalid username or password!
-                    </p>
-
-                    <p th:if="${param.logout}" style="color:green; margin-bottom:10px;">
-                        You have been logged out successfully.
-                    </p>
-
-                    <form action="/do-login" method="POST">
-
-                        <input type="text" name="username" placeholder="Enter Username" required>
-
-                        <div class="password-wrapper">
-                            <input type="password" id="login-pass" name="password" placeholder="Enter Password" required>
-                            <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
-                        </div>
-
-                        <button class="login-btn" type="submit">Login</button>
-                    </form>
-
-                    <p class="login-with">Log in with</p>
-
-                    <div class="social-icons">
-                        <i class="fab fa-facebook"></i>
-                        <i class="fab fa-instagram"></i>
-                        <i class="fab fa-twitter"></i>
-                        <i class="fab fa-google"></i>
+                <form action="/do-login" method="POST">
+                    <div class="input-wrapper">
+                        <i class="fa fa-user icon"></i>
+                        <input type="text" name="username" placeholder="Username" required>
                     </div>
-                </div>
 
+                    <div class="password-wrapper input-wrapper">
+                        <i class="fa fa-lock icon"></i>
+                        <input type="password" id="login-pass" name="password" placeholder="Password" required>
+                        <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
+                    </div>
+
+                    <button class="login-btn" type="submit">Login</button>
+                </form>
+
+                <p class="login-with">Or login with</p>
+
+                <div class="social-icons">
+                    <i class="fab fa-facebook"></i>
+                    <i class="fab fa-instagram"></i>
+                    <i class="fab fa-twitter"></i>
+                    <i class="fab fa-google"></i>
+                </div>
             </div>
         </div>
-
     </section>
 
-    <!-- ✅ Load JS at bottom so icons exist before JS runs -->
     <script src="/js/script.js"></script>
+    <!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-social">
+        <a href="#"><i class="fab fa-facebook"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-google"></i></a>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2025 SmarTeach. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a></p>
+    </div>
+</footer>
 
 </body>
 </html>
+.....................................................................
