@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmarTeach | Students</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/student.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <div></div>
+            <div class="topbar-right">
+                <button class="add-btn">+ Register Student</button>
+            </div>
+        </header>
+
+        <!-- ===================== STUDENT PAGE ===================== -->
+        <section class="content-area">
+
+            <h2 class="page-title">Student Management</h2>
+            <p class="page-subtitle">Overview & actions</p>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card glass">
+                    <h3>Total Students</h3>
+                    <p class="stat-value">—</p>
+                </div>
+
+                <div class="stat-card glass">
+                    <h3>Active Students</h3>
+                    <p class="stat-value">—</p>
+                </div>
+
+                <div class="stat-card glass">
+                    <h3>Pending Approvals</h3>
+                    <p class="stat-value">—</p>
+                </div>
+            </div>
+
+            <!-- Student Table -->
+            <div class="card glass student-table-card">
+
+                <div class="table-header">
+                    <h3 class="table-title">Student List</h3>
+
+                    <div class="table-actions">
+                        <input type="text" placeholder="Search student..." class="table-search">
+                    </div>
+                </div>
+
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Program</th>
+                            <th>Semester</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td><span class="badge pending">Pending</span></td>
+                            <td><button class="view-btn">View</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!-- Dashboard Cards -->
+<section class="cards">
+    <div class="card">
+        <div class="label">Total Teachers</div>
+        <div class="value" id="teachersCount">—</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Total Students</div>
+        <div class="value" id="studentsCount">—</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Sessions This Month</div>
+        <div class="value" id="sessionsCount">—</div>
+    </div>
+
+    <div class="card">
+        <div class="label">Pending Evaluations</div>
+        <div class="value" id="pendingEvalCount">—</div>
+    </div>
+</section>
+
+<!-- Dashboard Main Content -->
+<section class="content-grid">
+
+    <!-- Chart Panel -->
+    <div class="panel">
+        <div class="panel-title">Teacher Performance Trend</div>
+        <div class="panel-subtitle">Average rating per month</div>
+
+        <div class="line-chart">
+            <div class="placeholder">Line Chart Placeholder</div>
+        </div>
+
+        <div class="rating-section">
+            <div class="pie-chart">
+                <div class="placeholder">Pie Chart</div>
+            </div>
+
+            <div class="dept-ratings">
+                <div class="dept-title">Department-wise Ratings</div>
+                <div class="bars"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <aside>
+        <div class="panel">
+            <div class="panel-title">Recent Teacher Activities</div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Teacher</th>
+                        <th>Activity</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Upcoming Sessions</div>
+            <div class="upcoming-list" id="upcomingSessions"></div>
+        </div>
+    </aside>
+
+</section>

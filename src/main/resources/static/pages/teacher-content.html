@@ -1,0 +1,66 @@
+<!-- Page Header -->
+<div class="page-header">
+    <h2 class="page-title">Teachers</h2>
+    <button class="btn btn-primary">+ Add Teacher</button>
+</div>
+
+<!-- Teachers Panel -->
+<div class="panel">
+    <div class="panel-title">Teacher List</div>
+    <div class="panel-subtitle">Manage all registered teachers</div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Teacher Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="teacherTableBody">
+            <!-- Data will be fetched dynamically later -->
+            <tr>
+                <td colspan="5" style="text-align:center; padding:20px; color:#666;">
+                    No teachers found.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal (Only structure, no logic) -->
+<div id="teacherModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h3 class="modal-title">Add Teacher</h3>
+
+        <label>Full Name</label>
+        <input type="text" placeholder="Enter teacher name">
+
+        <label>Email</label>
+        <input type="email" placeholder="Enter email">
+
+        <label>Department</label>
+        <select>
+            <option selected disabled>Select department</option>
+            <option>Computer Science</option>
+            <option>Electronics</option>
+            <option>Civil</option>
+            <option>Electrical</option>
+            <option>Management</option>
+        </select>
+
+        <label>Status</label>
+        <select>
+            <option>Active</option>
+            <option>Inactive</option>
+        </select>
+
+        <div class="modal-actions">
+            <button class="btn btn-primary">Save</button>
+            <button class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
