@@ -27,7 +27,19 @@ a {
     border: none;
     font-size: 26px;
     cursor: pointer;
-    margin-right: 10px;
+    margin-left: auto; 
+    color: #475569;
+}
+.sidebar.collapsed .brand-text {
+    display: none;
+}
+ 
+
+.sidebar.collapsed .toggle-btn {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Collapsible Sidebar */
@@ -43,11 +55,13 @@ a {
 
 /* Hide text when collapsed */
 .sidebar.collapsed .nav-link {
-    justify-content: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
-.sidebar .nav-link i {
-    font-size: 18px;
+.sidebar.collapsed .nav-link i {
+    margin: 0 !important;
 }
 
 .sidebar.collapsed .nav-link i {
@@ -62,6 +76,52 @@ a {
 .sidebar.collapsed .nav-link span {
     display: none;
 }
+/* Hide brand text when collapsed */
+.sidebar.collapsed .brand-text {
+    display: none;
+}
+
+/* Hide brand logo when collapsed */
+.sidebar.collapsed .logo {
+    display: none;
+}
+.sidebar.collapsed .brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+nav ul,
+.nav {
+    list-style: none !important;
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+}
+.nav-item {
+    list-style: none;
+}
+
+/* Toggle button styling */
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    margin-left: auto;
+    color: #475569;
+}
+
+/* In collapsed mode, center the toggle button */
+.sidebar.collapsed .toggle-btn {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Brand container */
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
 .sidebar {
     width: 250px;
@@ -74,8 +134,8 @@ a {
 
 .brand {
     display: flex;
-    gap: 12px;
     align-items: center;
+    justify-content: space-between;  /* pushes toggle to right */
 }
 
 .logo {
@@ -107,6 +167,7 @@ nav {
     margin-top: 18px;
     gap: 8px;
 }
+
 
 .nav-item {
     padding: 10px;
