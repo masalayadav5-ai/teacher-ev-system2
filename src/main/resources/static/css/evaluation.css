@@ -9,9 +9,9 @@
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+/*    padding: 20px;*/
     color: #333;
-    background-color: #fff;
+/*    background-color: rgba(76, 111, 255, 0.08);*/
 }
 
 /* Header */
@@ -39,7 +39,7 @@
 .survey-section {
     margin-bottom: 40px;
     padding: 30px;
-    background-color: #f8f9fa;
+    background-color: rgba(76, 111, 255, 0.08);
     border-radius: 12px;
     border: 1px solid #eaeaea;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -47,15 +47,19 @@
 
 .section-title {
     font-size: 22px;
-    color: #2c3e50;
+    color: #4c6fff;
     margin-bottom: 10px;
     font-weight: 600;
+    text-align: center; /* ← add this */
+    
 }
+
 
 .section-subtitle {
     font-size: 15px;
     color: #7f8c8d;
     margin-bottom: 25px;
+    text-align: center;
 }
 
 /* Questions */
@@ -362,4 +366,24 @@
 
 .scale-number.selected {
     animation: pulse 0.3s ease;
+}
+/* backbuttoncode */
+.back-container {
+    margin-bottom: 15px;
+}
+
+.back-container button,
+.back-btn {
+    padding: 8px 16px;
+    background: #4c6fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+}
+
+.back-container button:hover,
+.back-btn:hover {
+    background: #3f5be0;
 }

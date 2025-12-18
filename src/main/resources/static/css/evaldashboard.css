@@ -1,0 +1,66 @@
+/** {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}*/
+ 
+/*  Main content 
+.content {
+    flex: 1;
+    padding: 30px;
+}*/
+ 
+/* Cards grid */
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+}
+
+/* Evaluation card */
+.eval-card {
+    background: rgba(76, 111, 255, 0.08);
+    padding: 25px 15px;
+    border-radius: 15px;
+    text-align: center;
+    color: #083b44;
+}
+
+.aavatar {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #fff;
+}
+
+.eval-card h4 {
+    margin-bottom: 15px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.eval-card button {
+    background: #4c6fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color:white;
+    
+}
+
+.eval-card button:hover {
+    background: #3a57de;
+}
+ .header-actions {
+    display: flex;
+    gap: 10px;   /* space between buttons */
+}

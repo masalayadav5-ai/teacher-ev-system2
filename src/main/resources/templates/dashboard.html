@@ -65,14 +65,14 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/evaluation.html')">
+                        <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
                             <i class="bi bi-journal-text"></i>
                             <span>Evaluation</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/session-planner.html')">
+                        <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
                             <i class="bi bi-calendar-week"></i>
                             <span>Session Planner</span>
                         </a>
@@ -152,7 +152,7 @@ function toggleSidebar() {
 }
 
 /* -------------------------------------
-   UNIVERSAL MODAL SYSTEM (Student + Teacher)
+   UNIVERSAL MODAL SYSTEM (Student + Teacher + viewparameter)
 -------------------------------------- */
 
 let modalListenerAdded = false;
@@ -161,9 +161,10 @@ function initModals() {
 
     const studentPanel = document.getElementById("studentPanel");
     const teacherPanel = document.getElementById("teacherPanel");
+    const viewparaPanel = document.getElementById("viewparaPanel");
 
     // If neither modal exists on page, do nothing
-    if (!studentPanel && !teacherPanel) return;
+    if (!studentPanel && !teacherPanel && !viewparaPanel) return;
 
     // Add only ONE click listener for all pages
     if (!modalListenerAdded) {
@@ -176,6 +177,7 @@ function modalHandler(e) {
 
     const studentPanel = document.getElementById("studentPanel");
     const teacherPanel = document.getElementById("teacherPanel");
+    const viewparaPanel = document.getElementById("viewparaPanel");
 
     /* ----------------------------
        OPEN MODALS
@@ -190,6 +192,10 @@ function modalHandler(e) {
     if (e.target.closest(".teacher-add-btn") && teacherPanel) {
         teacherPanel.classList.add("show");
     }
+    
+    if (e.target.closest(".viewpara") ) {
+        viewparaPanel.classList.add("show");
+    }
 
     /* ----------------------------
        CLOSE MODALS
@@ -198,11 +204,13 @@ function modalHandler(e) {
     if (e.target.closest(".modal-close")) {
         if (studentPanel) studentPanel.classList.remove("show");
         if (teacherPanel) teacherPanel.classList.remove("show");
+        if (viewparaPanel) viewparaPanel.classList.remove("show");
     }
 
     // Click outside modal
     if (e.target === studentPanel) studentPanel.classList.remove("show");
     if (e.target === teacherPanel) teacherPanel.classList.remove("show");
+    if (e.target === viewparaPanel) viewparaPanel.classList.remove("show");
 }
 
 </script>
