@@ -5,10 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmarTeach | Admin Dashboard</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+ 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <!-- Bootstrap Icons (required for nav icon) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <!-- for evaluation icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+ <link rel="stylesheet" href="/css/student.css">
+<link rel="stylesheet" href="/css/register_stu.css">
+
 </head>
 
 <body>
@@ -90,7 +97,7 @@
 
                 
 
-                <div class="top-title">Dashboard <span class="subtitle">Overview & insights</span></div>
+                <div class="top-title">Welcome, Admin !</div>
 
                 <div class="top-actions">
                     <div class="avatar">A</div>
@@ -98,8 +105,7 @@
             </div>
 
             <!-- CONTENT AREA -->
-            <div id="content-area"></div>
-
+ <div id="content-area"></div>
             <div class="footer">
                 © 2025 SmarTeach — Teacher Evaluation & Session Planner
             </div>
@@ -109,21 +115,133 @@
     </div>
 
     <!-- JS FUNCTIONS -->
-    <script>
-        function loadPage(pageUrl) {
-            fetch(pageUrl)
-                .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
-                .then(html => document.getElementById("content-area").innerHTML = html);
+ <script>
+
+function loadPage(pageUrl) {
+    const area = document.getElementById("content-area");
+
+    area.classList.remove("loaded");
+
+    fetch(pageUrl)
+        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
+        .then(html => {
+
+            // Remove scripts from loaded pages
+            html = html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+
+            area.innerHTML = html;
+
+            requestAnimationFrame(() => {
+                area.classList.add("loaded");
+            });
+
+            const topTitle = document.querySelector(".top-title");
+            topTitle.style.display = pageUrl.includes("dashboard-content.html") ? "block" : "none";
+
+            // Rebind modals for loaded page
+            initModals();
+        });
+}
+
+window.onload = function () {
+    loadPage('/pages/dashboard-content.html');
+};
+
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("collapsed");
+}
+
+/* -------------------------------------
+   UNIVERSAL MODAL SYSTEM (Student + Teacher)
+-------------------------------------- */
+
+let modalListenerAdded = false;
+
+function initModals() {
+
+    const studentPanel = document.getElementById("studentPanel");
+    const teacherPanel = document.getElementById("teacherPanel");
+
+    // If neither modal exists on page, do nothing
+    if (!studentPanel && !teacherPanel) return;
+
+    // Add only ONE click listener for all pages
+    if (!modalListenerAdded) {
+        document.body.addEventListener("click", modalHandler);
+        modalListenerAdded = true;
+    }
+}
+
+function modalHandler(e) {
+
+    const studentPanel = document.getElementById("studentPanel");
+    const teacherPanel = document.getElementById("teacherPanel");
+
+    /* ----------------------------
+       OPEN MODALS
+    ---------------------------- */
+
+    // Student
+    if (e.target.closest(".student-add-btn") && studentPanel) {
+        studentPanel.classList.add("show");
+    }
+
+    // Teacher
+    if (e.target.closest(".teacher-add-btn") && teacherPanel) {
+        teacherPanel.classList.add("show");
+    }
+
+    /* ----------------------------
+       CLOSE MODALS
+    ---------------------------- */
+
+    if (e.target.closest(".modal-close")) {
+        if (studentPanel) studentPanel.classList.remove("show");
+        if (teacherPanel) teacherPanel.classList.remove("show");
+    }
+
+    // Click outside modal
+    if (e.target === studentPanel) studentPanel.classList.remove("show");
+    if (e.target === teacherPanel) teacherPanel.classList.remove("show");
+}
+
+</script>
+<script>
+  const searchInput = document.getElementById('teacherSearch');
+const filterSelect = document.getElementById('teacherFilter');
+const table = document.querySelector('.teacher-table tbody');
+
+searchInput.addEventListener('keyup', filterTable);
+filterSelect.addEventListener('change', filterTable);
+
+function filterTable() {
+    const filterValue = searchInput.value.toLowerCase();
+    const filterColumn = filterSelect.value;
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        let text = '';
+
+        if (filterColumn === 'all') {
+            text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+        } else if (filterColumn === 'name') {
+            text = cells[0].textContent.toLowerCase();
+        } else if (filterColumn === 'email') {
+            text = cells[1].textContent.toLowerCase();
+        } else if (filterColumn === 'department') {
+            text = cells[2].textContent.toLowerCase();
+        } else if (filterColumn === 'status') {
+            text = cells[3].textContent.toLowerCase();
         }
 
-        window.onload = function() {
-            loadPage('/pages/dashboard-content.html');
-        };
+        row.style.display = text.includes(filterValue) ? '' : 'none';
+    });
+}
+</script>
 
-        function toggleSidebar() {
-            document.getElementById("sidebar").classList.toggle("collapsed");
-        }
-    </script>
+
+
 
 </body>
 </html>

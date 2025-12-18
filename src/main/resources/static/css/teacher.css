@@ -1,189 +1,95 @@
- /* Page Header */
-.page-header {
+ 
+.table-search {
+    padding: 10px 14px;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    width: 220px;
+    transition: 0.2s ease;
+}
+
+.table-search:focus {
+    border-color: #4c6fff;
+    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.2);
+}
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: 0.3s ease;
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.modal-card {
+    background: #fff;
+    width: 400px;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-30px);
+    transition: 0.3s ease;
+    max-width: 95%;
+}
+
+.modal-overlay.show .modal-card {
+    transform: translateY(0);
+}
+
+.modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
-.page-title {
-    font-size: 22px;
-    font-weight: 600;
-    color: #333;
+.modal-body .form-group {
+    margin-bottom: 12px;
 }
 
-/* Buttons */
-.btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.btn-primary {
-    background: #4A6CF7;
-    color: #fff;
-    transition: 0.2s ease;
-}
-
-.btn-primary:hover {
-    background: #3b59d4;
-}
-
-.btn-secondary {
-    background: #ddd;
-    color: #333;
-}
-
-.btn-secondary:hover {
-    background: #c7c7c7;
-}
-
-/* Small action buttons */
-.btn-sm {
-    padding: 5px 10px;
+.modal-body label {
     font-size: 13px;
-    margin-right: 4px;
-}
-
-.btn-edit {
-    background: #4caf50;
-    color: #fff;
-}
-
-.btn-delete {
-    background: #e63946;
-    color: #fff;
-}
-
-/* Panel */
-.panel {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
-}
-
-.panel-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.panel-subtitle {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-/* Table */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th {
-    text-align: left;
-    padding: 12px;
-    font-size: 14px;
-    color: #555;
-    border-bottom: 1px solid #eee;
-    font-weight: 600;
-}
-
-.table td {
-    padding: 12px;
-    font-size: 14px;
-    color: #444;
-    border-bottom: 1px solid #f1f1f1;
-}
-
-.table tbody tr:hover {
-    background: #f9f9f9;
-    transition: 0.2s ease;
-}
-
-/* Status Badges */
-.status {
-    padding: 5px 10px;
-    border-radius: 50px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status.active {
-    background: #e1fcd7;
-    color: #3b7f27;
-}
-
-.status.inactive {
-    background: #ffe3e3;
-    color: #c62828;
-}
-
-/* Modal */
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-}
-
-.modal-content {
-    background: #fff;
-    width: 380px;
-    padding: 20px 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    animation: popup 0.25s ease;
-}
-
-@keyframes popup {
-    from { transform: scale(0.92); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-/* Modal inputs */
-.modal-content label {
-    font-size: 14px;
     font-weight: 500;
-    margin-bottom: 5px;
-    display: block;
-    color: #444;
+    color: #333;
 }
 
-.modal-content input,
-.modal-content select {
+.modal-body input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 12px;
+    border-radius: 8px;
     font-size: 14px;
 }
 
-.modal-content input:focus,
-.modal-content select:focus {
+.modal-body input:focus {
     border-color: #4A6CF7;
     outline: none;
 }
 
-/* Modal actions */
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4A6CF7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: #3f5be0;
 }
