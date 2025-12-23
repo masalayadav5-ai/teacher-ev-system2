@@ -1,0 +1,132 @@
+/* ================= COMMON STYLES ================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #4c6fff;
+}
+
+.page-subtitle {
+    font-size: 15px;
+    color: #777;
+    margin-bottom: 24px;
+}
+/* Modal Background */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: 0.3s ease;
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* Modal Card */
+.modal-card {
+    background: #fff;
+    width: 600px;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-30px);
+    transition: 0.3s ease;
+    max-width: 95%;
+}
+
+.modal-overlay.show .modal-card {
+    transform: translateY(0);
+}
+
+/* Close Button */
+.modal-close {
+    position: absolute;
+    top: 12px;
+    right: 18px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-close:hover { color: #000; }
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4A6CF7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.submit-btn:hover {
+    background: #3f5be0;
+}
+
+/* Form Input */
+input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+input:focus {
+    border-color: #4A6CF7;
+    outline: none;
+}
+
+/* Add Button (topbar) */
+.add-btn {
+    padding: 9px 18px;
+    background: #4c6fff;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.add-btn:hover {
+    background: #3a57de;
+}
+
+/* Table Search Input */
+.table-search {
+    padding: 10px 14px;
+    border: 1px solid #dcdcdc;
+    border-radius: 10px;
+    width: 220px;
+    transition: 0.2s ease;
+}
+
+.table-search:focus {
+    border-color: #4c6fff;
+    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.2);
+}

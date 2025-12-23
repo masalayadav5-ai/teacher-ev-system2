@@ -1,3 +1,7 @@
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/teacher.css">
+
+<div class="teacher-page">
 <div class="layout">
 
     <main class="main-content">
@@ -23,11 +27,14 @@
         <option value="department">Department</option>
         <option value="status">Status</option>
     </select>
-    <input type="text" placeholder="Search teacher..." id="teacherSearch" class="table-search">
+ <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search teacher..." class="table-search">
+    </div>    
         </div>
     </div>
 
-    <table class="student-table">
+    <table class="teacher-table">
         <thead>
             <tr>
                 <th>Teacher Name</th>
@@ -111,4 +118,5 @@
             <button class="submit-btn">Submit</button>
         </div>
     </div>
+</div>
 </div>

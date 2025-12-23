@@ -1,95 +1,95 @@
- 
-.table-search {
-    padding: 10px 14px;
-    border: 1px solid #dcdcdc;
-    border-radius: 10px;
-    width: 220px;
-    transition: 0.2s ease;
-}
 
-.table-search:focus {
-    border-color: #4c6fff;
-    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.2);
-}
-/* Modal */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding-top: 40px;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: 0.3s ease;
-    z-index: 1000;
-}
 
-.modal-overlay.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.modal-card {
-    background: #fff;
-    width: 400px;
+/* Teacher Table Card */
+.teacher-page .teacher-table-card {
     padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transform: translateY(-30px);
-    transition: 0.3s ease;
-    max-width: 95%;
+    margin-top: 20px;
 }
 
-.modal-overlay.show .modal-card {
-    transform: translateY(0);
+/* Table */
+.teacher-page .teacher-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.modal-body .form-group {
-    margin-bottom: 12px;
-}
-
-.modal-body label {
-    font-size: 13px;
-    font-weight: 500;
+.teacher-page .teacher-table th {
+    text-align: left;
+    padding: 14px;
+    background: rgba(76, 111, 255, 0.08);
+    font-size: 14px;
+    font-weight: 600;
     color: #333;
 }
 
-.modal-body input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+.teacher-page .teacher-table td {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
     font-size: 14px;
 }
 
-.modal-body input:focus {
-    border-color: #4A6CF7;
-    outline: none;
+/* Badge */
+.teacher-page .badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.teacher-page .search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.submit-btn {
-    width: 100%;
-    padding: 12px;
-    background: #4A6CF7;
+/* Search icon */
+.teacher-page .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #888;
+    pointer-events: none;
+}
+/* Input with icon padding */
+.teacher-page .table-search {
+    width: 220px;
+    padding: 10px 16px 10px 38px; /* 👈 space for icon */
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: all 0.25s ease;
+}
+.teacher-page .badge.pending {
+    background: #fff2c2;
+    color: #b98700;
+}
+
+/* View Button */
+.teacher-page .view-btn {
+    padding: 7px 16px;
+    background: #4c6fff;
     color: #fff;
     border: none;
     border-radius: 10px;
-    font-size: 15px;
     cursor: pointer;
-    transition: 0.2s ease;
+    font-size: 13px;
 }
 
-.submit-btn:hover {
-    background: #3f5be0;
+.teacher-page .view-btn:hover {
+    background: #3a57de;
+}
+/* Header layout (same as student page) */
+.teacher-page .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+/* Push filter + search to the right */
+.teacher-page .table-actions {
+    margin-left: auto;              /* 👈 KEY LINE */
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }

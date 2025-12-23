@@ -1,0 +1,122 @@
+/* ---------------- CARD ---------------- */
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 25px;
+}
+
+.card h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* ---------------- FORM ---------------- */
+.session-form .form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group {
+    flex: 1;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+  
+
+/* ---------------- TABLE ---------------- */
+.session-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.session-table th,
+.session-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.session-table th {
+    background: #f2f4ff;
+    text-align: left;
+}
+
+ .day-title {
+    margin: 15px 0 10px;
+    font-size: 16px;
+    color: #4c6fff;
+}
+
+.day-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+    background: #fafafa;
+}
+
+.day-card h5 {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.day-card input,
+.day-card textarea {
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.add-day-btn {
+    margin-top: 10px;
+    background: transparent;
+    color: #4c6fff;
+    border: 1px dashed #4c6fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.session-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.session-table tbody tr:hover {
+    background-color: rgba(255, 193, 7, 0.15);
+}
+
+
+
+
+
+/* ---------------- ANIMATION ---------------- */
+@keyframes fadeIn {
+    from {
+        transform: translateY(-15px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

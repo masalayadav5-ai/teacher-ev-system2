@@ -79,12 +79,12 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/settings.html')">
-                            <i class="bi bi-gear"></i>
-                            <span>Settings</span>
-                        </a>
-                    </li>
-
+                            <a class="nav-link" id="settingsLink" href="#">
+                         <i class="bi bi-gear"></i>
+                          <span>Settings</span>
+                            </a>
+                          </li>
+ 
                 </ul>
             </nav>
         </aside>
@@ -106,6 +106,75 @@
 
             <!-- CONTENT AREA -->
  <div id="content-area"></div>
+ <link rel="stylesheet" href="css/setting.css">
+<!-- Settings Modal Overlay -->
+<div class="settings-overlay" id="settingsModal">
+
+    <div class="settings-modal">
+
+        <!-- Modal Header -->
+        <div class="settings-header">
+            <h2>System Settings</h2>
+                        <span class="modal-close">&times;</span>
+
+         </div>
+
+        <!-- Modal Body -->
+        <div class="settings-body">
+
+            <!-- Left Menu -->
+            <aside class="settings-menu">
+                <ul>
+                    <li class="active">General</li>
+                    <li>Users & Roles</li>
+                    <li>Evaluation</li>
+                    <li>Session Planner</li>
+                    <li>Students</li>
+                    <li>Notifications</li>
+                    <li>Security</li>
+                    <li>System</li>
+                </ul>
+            </aside>
+
+            <!-- Right Content -->
+            <section class="settings-content">
+
+                <!-- General Settings -->
+                <div class="settings-section">
+                    <h3>General Settings</h3>
+
+                    <div class="form-group">
+                        <label>Institution Name</label>
+                        <input type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Academic Year</label>
+                        <select>
+                            <option>2024 – 2025</option>
+                            <option>2025 – 2026</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Time Zone</label>
+                        <select>
+                            <option>GMT +05:45 (Nepal)</option>
+                        </select>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="settings-footer">
+             <button class="btn-primary">Save Changes</button>
+        </div>
+
+    </div>
+</div>
+
             <div class="footer">
                 © 2025 SmarTeach — Teacher Evaluation & Session Planner
             </div>
@@ -119,6 +188,7 @@
 
 function loadPage(pageUrl) {
     const area = document.getElementById("content-area");
+    initSessionPlan();
 
     area.classList.remove("loaded");
 
@@ -140,6 +210,7 @@ function loadPage(pageUrl) {
 
             // Rebind modals for loaded page
             initModals();
+            initSessionPlan();
         });
 }
 
@@ -152,7 +223,7 @@ function toggleSidebar() {
 }
 
 /* -------------------------------------
-   UNIVERSAL MODAL SYSTEM (Student + Teacher + viewparameter)
+   UNIVERSAL MODAL SYSTEM (Student + Teacher + viewparameter+ sessionadd)
 -------------------------------------- */
 
 let modalListenerAdded = false;
@@ -162,9 +233,13 @@ function initModals() {
     const studentPanel = document.getElementById("studentPanel");
     const teacherPanel = document.getElementById("teacherPanel");
     const viewparaPanel = document.getElementById("viewparaPanel");
+    const sessionModal = document.getElementById("sessionModal");
+    const settingsModal = document.getElementById("settingsModal");
+
+
 
     // If neither modal exists on page, do nothing
-    if (!studentPanel && !teacherPanel && !viewparaPanel) return;
+    if (!studentPanel && !teacherPanel && !viewparaPanel && !sessionModal && !settingsModal) return;
 
     // Add only ONE click listener for all pages
     if (!modalListenerAdded) {
@@ -178,6 +253,10 @@ function modalHandler(e) {
     const studentPanel = document.getElementById("studentPanel");
     const teacherPanel = document.getElementById("teacherPanel");
     const viewparaPanel = document.getElementById("viewparaPanel");
+    const sessionModal = document.getElementById("sessionModal");
+    const settingsModal = document.getElementById("settingsModal");
+
+
 
     /* ----------------------------
        OPEN MODALS
@@ -192,10 +271,19 @@ function modalHandler(e) {
     if (e.target.closest(".teacher-add-btn") && teacherPanel) {
         teacherPanel.classList.add("show");
     }
-    
+    // addparameter
     if (e.target.closest(".viewpara") ) {
         viewparaPanel.classList.add("show");
     }
+    //addsession
+    if (e.target.closest(".addsession") ) {
+        sessionModal.classList.add("show");
+    }
+    // Settings
+if (e.target.closest("#settingsLink") && settingsModal) {
+    e.preventDefault();
+    settingsModal.classList.add("show");
+}
 
     /* ----------------------------
        CLOSE MODALS
@@ -205,17 +293,25 @@ function modalHandler(e) {
         if (studentPanel) studentPanel.classList.remove("show");
         if (teacherPanel) teacherPanel.classList.remove("show");
         if (viewparaPanel) viewparaPanel.classList.remove("show");
+        if (sessionModal) sessionModal.classList.remove("show");
+        if (settingsModal) settingsModal.classList.remove("show");
+
+
     }
 
     // Click outside modal
     if (e.target === studentPanel) studentPanel.classList.remove("show");
     if (e.target === teacherPanel) teacherPanel.classList.remove("show");
     if (e.target === viewparaPanel) viewparaPanel.classList.remove("show");
+    if (e.target === sessionModal) sessionModal.classList.remove("show");
+    if (e.target === settingsModal) settingsModal.classList.remove("show");
+
 }
 
 </script>
+<!--searchteacher-->
 <script>
-  const searchInput = document.getElementById('teacherSearch');
+ const searchInput = document.getElementById('teacherSearch');
 const filterSelect = document.getElementById('teacherFilter');
 const table = document.querySelector('.teacher-table tbody');
 
@@ -247,8 +343,8 @@ function filterTable() {
     });
 }
 </script>
-
-
+<!--plansession-->
+<script src="js/sessionplan.js"></script>
 
 
 </body>
