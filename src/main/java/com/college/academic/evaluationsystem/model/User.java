@@ -6,10 +6,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "users")
 public class User {
-
-    public static Object builder() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+ 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

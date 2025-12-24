@@ -217,23 +217,47 @@ nav a:hover::after {
 }
 .input-wrapper .icon {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: #00f2fe;
 }
 .input-wrapper input {
     width: 100%;
-    padding: 12px 12px 12px 40px;
-    border: none;
+    height: 48px;
+    padding-left: 42px;          /* lock icon space */
+    padding-right: 42px;
+    border: 1px solid transparent;
     border-radius: 8px;
     background: rgba(255,255,255,0.15);
     color: white;
+    outline: none;
+    transition: 0.3s;
 }
-
+.input-wrapper input:focus {
+    border: 1px solid #00f2fe;
+    box-shadow: 
+        0 0 0 2px rgba(0, 242, 254, 0.35),
+        0 0 12px rgba(0, 242, 254, 0.6);
+    background: rgba(255,255,255,0.18);
+}
+.input-wrapper input::placeholder {
+    color: rgba(255, 255, 255, 0.9);
+}
+/* Password wrapper layout */
+.password-wrapper {
+    position: relative;
+}
+ 
 /* Eye icon */
-.password-wrapper i.toggle-pass {
-    right: 12px;
+.password-wrapper .toggle-pass {
+    position: absolute;
+    right: 14px;          /* INSIDE input */
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #00f2fe;
+    font-size: 1.1rem;
 }
 
 /* Login button */
