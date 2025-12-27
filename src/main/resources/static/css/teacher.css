@@ -1,16 +1,69 @@
+/* ================= TEACHER PAGE ================= */
 
+.teacher-page .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 30px;
+}
 
-/* Teacher Table Card */
+/* ================= STAT CARDS ================= */
+
+.teacher-page .stat-card {
+    flex: 1;
+    background: #ffffff;
+    padding: 28px 20px;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.teacher-page .stat-card h3 {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.teacher-page .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #4c6fff;
+}
+
+/* ================= TABLE CARD ================= */
+
 .teacher-page .teacher-table-card {
     padding: 25px;
     margin-top: 20px;
 }
 
-/* Table */
+/* ================= TABLE ================= */
+
 .teacher-page .teacher-table {
     width: 100%;
     border-collapse: collapse;
 }
+
+.teacher-page .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.teacher-page .table-title {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.teacher-page .table-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+/* ================= TABLE CELLS ================= */
 
 .teacher-page .teacher-table th {
     text-align: left;
@@ -27,20 +80,14 @@
     font-size: 14px;
 }
 
-/* Badge */
-.teacher-page .badge {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-}
+/* ================= SEARCH ================= */
+
 .teacher-page .search-wrapper {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* Search icon */
 .teacher-page .search-icon {
     position: absolute;
     left: 14px;
@@ -50,21 +97,89 @@
     color: #888;
     pointer-events: none;
 }
-/* Input with icon padding */
+
 .teacher-page .table-search {
     width: 220px;
-    padding: 10px 16px 10px 38px; /* 👈 space for icon */
+    padding: 10px 16px 10px 38px;
     border: 1px solid #ddd;
     border-radius: 12px;
     font-size: 14px;
     transition: all 0.25s ease;
 }
-.teacher-page .badge.pending {
-    background: #fff2c2;
-    color: #b98700;
+
+.teacher-page .table-search:focus {
+    outline: none;
+    border-color: #4c6fff;
+    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.2);
 }
 
-/* View Button */
+/* ================= BADGES ================= */
+
+.teacher-page .badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.pending {
+    background: #facc15;
+    color: #000;
+}
+
+.badge.active {
+    background: #22c55e;
+    color: white;
+}
+
+/* ================= ACTION BUTTONS ================= */
+
+.action-btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    margin-right: 5px;
+    min-width: 90px;
+    transition: background 0.3s ease;
+}
+
+/* DEFAULT BUTTON (fallback) */
+.action-btn {
+    background: #4c6fff;
+    color: #ffffff;
+}
+
+.action-btn:hover {
+    background: #3a57de;
+}
+
+/* ================= STATUS BUTTONS ================= */
+
+/* APPROVE BUTTON (status = Pending) */
+.approve-btn {
+    background: #22c55e;
+    color: white;
+}
+
+.approve-btn:hover {
+    background: #16a34a;
+}
+
+/* PENDING BUTTON (status = Active) */
+.pending-btn {
+    background: #facc15;
+    color: #000;
+}
+
+.pending-btn:hover {
+    background: #eab308;
+}
+
+/* ================= VIEW BUTTON ================= */
+
 .teacher-page .view-btn {
     padding: 7px 16px;
     background: #4c6fff;
@@ -78,18 +193,33 @@
 .teacher-page .view-btn:hover {
     background: #3a57de;
 }
-/* Header layout (same as student page) */
-.teacher-page .table-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+
+/* ================= MESSAGE POPUP ================= */
+
+.message-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 300px;
+    max-width: 500px;
+    padding: 12px 20px;
+    text-align: center;
+    font-weight: 600;
+    border-radius: 6px;
+    font-size: 15px;
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-/* Push filter + search to the right */
-.teacher-page .table-actions {
-    margin-left: auto;              /* 👈 KEY LINE */
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* SUCCESS MESSAGE */
+.message-container.success {
+    background-color: #28a745;
+    color: #ffffff;
+}
+
+/* ERROR MESSAGE */
+.message-container.error {
+    background-color: #dc3545;
+    color: #ffffff;
 }

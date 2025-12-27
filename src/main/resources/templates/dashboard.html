@@ -60,7 +60,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/teacher-content.html')">
+                        <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
                             <i class="bi bi-person-lines-fill"></i>
                             <span>Teachers</span>
                         </a>
@@ -203,6 +203,7 @@ function loadPage(pageUrl) {
 
             area.innerHTML = html;
 
+
             requestAnimationFrame(() => {
                 area.classList.add("loaded");
             });
@@ -213,6 +214,9 @@ function loadPage(pageUrl) {
             // Rebind modals for loaded page
             initModals();
             initSessionPlan();
+            if (pageUrl.includes("student.html")) {
+    initStudentPage();
+}
         });
 }
 
@@ -310,6 +314,23 @@ if (e.target.closest("#settingsLink") && settingsModal) {
 
 }
 
+// In your dashboard.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Your dashboard initialization code here
+    
+    // Check if elements exist before adding listeners
+    const element = document.getElementById('someElementId');
+    if (element) {
+        element.addEventListener('click', function() {
+            // your code
+        });
+    }
+    
+    // OR use optional chaining
+    document.getElementById('someElementId')?.addEventListener('click', function() {
+        // your code
+    });
+});
 </script>
 <!--searchteacher-->
 <script>
@@ -347,6 +368,8 @@ function filterTable() {
 </script>
 <!--plansession-->
 <script src="js/sessionplan.js"></script>
+<script src="js/student.js"></script>
+<script src="js/teacher.js"></script>
 
 
 </body>

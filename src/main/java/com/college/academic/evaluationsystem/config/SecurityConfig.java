@@ -20,13 +20,14 @@ public class SecurityConfig {
         this.loginService = loginService;
     }
 
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/login", "/css/**", "/js/**", "/teacher.html",
+                .requestMatchers("/auth/**", "/login","/do-login", "/css/**", "/js/**", "/teacher.html",
                  "/teacher/register","/images/**","/videos/**").permitAll()
                 .anyRequest().authenticated()
             )

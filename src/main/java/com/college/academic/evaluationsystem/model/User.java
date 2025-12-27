@@ -1,12 +1,10 @@
 package com.college.academic.evaluationsystem.model;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 
 @Entity
 @Table(name = "users")
 public class User {
- 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,14 +19,13 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    private boolean enabled = true; // IMPORTANT
-
-    private String otpToken;
-
-    private Instant otpExpiry;
+//    private boolean enabled = true; // account status
 
     @Column(nullable = false)
-    private String role = "ROLE_USER";
+    private String role = "STUDENT";
+
+    @Column(nullable = false)
+    private String status = "Pending"; // default Pending
 
     public Long getId() { return id; }
 
@@ -41,15 +38,14 @@ public class User {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
-
-    public String getOtpToken() { return otpToken; }
-    public void setOtpToken(String otpToken) { this.otpToken = otpToken; }
-
-    public Instant getOtpExpiry() { return otpExpiry; }
-    public void setOtpExpiry(Instant otpExpiry) { this.otpExpiry = otpExpiry; }
-
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public void setEnabled(boolean b) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+    
 }

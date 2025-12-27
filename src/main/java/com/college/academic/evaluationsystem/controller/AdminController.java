@@ -3,15 +3,13 @@ package com.college.academic.evaluationsystem.controller;
 import com.college.academic.evaluationsystem.model.User;
 import com.college.academic.evaluationsystem.repository.UserRepository;
 import com.college.academic.evaluationsystem.service.EmailService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Controller
@@ -27,33 +25,38 @@ public class AdminController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
-    // =============================================================
-    // 🟦 ADMIN DASHBOARD
-    // =============================================================
+    // MAIN ADMIN DASHBOARD
     @GetMapping("/dashboard")
-    public String dashboard(Authentication auth, Model model) {
-
-        String username = (auth != null) ? auth.getName() : "Admin";
-        model.addAttribute("username", username);
-
-        return "dashboard";  // dashboard.html
+    public String dashboard(Model model) {
+        model.addAttribute("username", "Admin");
+        return "dashboard"; // Loads dashboard.html layout
     }
 
+    // STATIC PAGES
+    @GetMapping("/student")
+    public String studentPage() { return "redirect:/pages/student.html"; }
 
-    // =============================================================
-    // 🟦 CREATE USER
-    // =============================================================
+    @GetMapping("/teachers")
+    public String teacherPage() { return "redirect:/pages/teachers.html"; }
+
+    @GetMapping("/evaluation")
+    public String evaluationPage() { return "redirect:/pages/evaluation.html"; }
+
+    @GetMapping("/session-planner")
+    public String sessionPlannerPage() { return "redirect:/pages/session-planner.html"; }
+
+    @GetMapping("/settings")
+    public String settingsPage() { return "redirect:/pages/settings.html"; }
+
+    //------------------------------------
+    // CREATE USER
+    //------------------------------------
     @PostMapping("/create-user")
     @ResponseBody
     public String createUser(@RequestParam String username, @RequestParam String email) {
 
-        if (repo.findByUsername(username).isPresent()) {
-            return "username_exists";
-        }
-        if (repo.findByEmail(email).isPresent()) {
-            return "email_exists";
-        }
+        if (repo.findByUsername(username).isPresent()) return "username_exists";
+        if (repo.findByEmail(email).isPresent()) return "email_exists";
 
         User user = new User();
         user.setUsername(username);
@@ -61,24 +64,40 @@ public class AdminController {
 
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPassword(passwordEncoder.encode(tempPassword));
-
-        String otp = UUID.randomUUID().toString();
-        user.setOtpToken(otp);
-        user.setOtpExpiry(Instant.now().plus(30, ChronoUnit.MINUTES));
-        user.setEnabled(false);
+        user.setEnabled(true); // enable immediately
+        user.setStatus("Pending"); // default status
 
         repo.save(user);
 
-        String link = "http://localhost:8080/auth/confirm?token=" + otp;
+        String body = String.format("""
+                Hello %s,
+                
+                Your account has been created.
+                Temporary Password: %s
+                
+                You can login and change your password.
+                """, username, tempPassword);
 
-        String body = String.format("Hello %s,\n\nYour account has been created.\n\n" +
-                "Temporary Password: %s\n\n" +
-                "Set your new permanent password using the link below:\n%s\n\n",
-                username, tempPassword, link);
-
-        emailService.sendSimpleMessage(email, "Your new account - set password", body);
+        emailService.sendSimpleMessage(email, "Account Created", body);
 
         return "ok";
     }
 
+    // ===================== TOGGLE USER STATUS =====================
+    @PutMapping("/users/{id}/status")
+    @ResponseBody
+    public String toggleUserStatus(@PathVariable Long id) {
+        User user = repo.findById(id).orElse(null);
+        if (user == null) return "User not found";
+
+        // Toggle between "Pending" and "Active"
+        String newStatus = "Pending".equals(user.getStatus()) ? "Active" : "Pending";
+        user.setStatus(newStatus);
+
+        // Enable account if status is Active, disable if Pending
+        user.setEnabled("Active".equals(newStatus));
+
+        repo.save(user);
+        return "ok";
+    }
 }

@@ -1,0 +1,186 @@
+<link rel="stylesheet" href="/css/dashboard.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/teacher.css">
+
+<div class="teacher-page">
+<div class="layout">
+
+    <main class="main-content">
+
+         <section class="content-area">
+          <div class="page-header">
+            <h2 class="page-title">Teacher Management</h2>
+            <button onclick="openAddTeacher()"  class="add-btn teacher-add-btn">+ Register Teacher</button>
+          </div>
+          
+          <p class="page-subtitle">Overview & actions</p>
+
+            <div class="stats-row">
+                <div class="stat-card glass">
+                    <h3>Total Teachers</h3>
+                    <p class="stat-value" id="totalTeachers">—</p>
+                </div>
+
+                <div class="stat-card glass">
+                    <h3>Active Teachers</h3>
+                    <p class="stat-value" id="activeTeachers">—</p>
+                </div>
+
+                <div class="stat-card glass">
+                    <h3>Pending Approvals</h3>
+                    <p class="stat-value" id="pendingTeachers">—</p>
+                </div>
+            </div>
+
+            <div class="card glass teacher-table-card">
+                <div class="table-header">
+                    <h3 class="table-title">Teacher List</h3>
+                    <div class="table-actions">
+                        <div class="search-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" placeholder="Search teacher..." 
+                                   class="table-search" id="searchTeacher">
+                        </div>
+                    </div>
+                </div>
+
+                <table class="teacher-table">
+                    <thead>
+                        <tr>
+                            <th>Teacher ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="teacherTableBody">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<!-- Modal for Teacher Registration -->
+<div id="teacherPanel" class="modal-overlay">
+    <div class="modal-card">
+         <!-- FIXED HEADER -->
+        <div class="modal-header">
+            <h2>Add Teacher</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        
+        <!-- SCROLLABLE CONTENT -->
+        <div class="modal-body">
+            <form id="teacherForm">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" placeholder="Enter full name" 
+                           id="fullName" name="fullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Teacher ID *</label>
+                    <input type="text" id="teacherId" name="teacherId"
+       placeholder="Enter Teacher ID"
+       pattern="\d+"
+       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+       required>
+                </div>
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" placeholder="Enter username" 
+                           id="username" name="username">
+                </div>
+                
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" placeholder="Enter address" 
+                           id="address" name="address">
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Number *</label>
+                    <input type="text"
+       id="contact"
+       name="contact"
+       placeholder="Enter Contact Number"
+       maxlength="10"
+       oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+       required>
+                </div>
+
+                <div class="form-group">
+                    <label>Department *</label>
+                    <select id="department" name="department" required>
+                        <option value="">-- Select Department --</option>
+                        <option value="Computer Engineering">Computer Engineering</option>
+                        <option value="Civil Engineering">Civil Engineering</option>
+                        <option value="Electrical Engineering">Electrical Engineering</option>
+                        <option value="Mechanical Engineering">Mechanical Engineering</option>
+                        <option value="Business Administration">Business Administration</option>
+                        <option value="Science">Science</option>
+                        <option value="Humanities">Humanities</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Qualification *</label>
+                    <select id="qualification" name="qualification" required>
+                        <option value="">-- Select Qualification --</option>
+                        <option value="PhD">PhD</option>
+                        <option value="Master's Degree">Master's Degree</option>
+                        <option value="Bachelor's Degree">Bachelor's Degree</option>
+                        <option value="Diploma">Diploma</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Experience (Years) *</label>
+                    <input type="number" 
+                           id="experience" 
+                           name="experience" 
+                           placeholder="Enter years of experience" 
+                           min="0" 
+                           max="50" 
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" placeholder="Enter email" 
+                           id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <div id="passwordRow">
+                        <label>Password *</label>
+                        <input type="password" placeholder="Enter password" 
+                               id="password" name="password" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div id="confirmPasswordRow">
+                        <label>Confirm Password *</label>
+                        <input type="password" placeholder="Confirm password" 
+                               id="confirmPassword" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" class="submit-btn" id="submitTeacherBtn">Submit</button>
+            <!-- Success/Error Message -->
+            <div id="formMessage" class="message-container" style="display: none;"></div>
+        </div>
+    </div>
+</div>
+</div>

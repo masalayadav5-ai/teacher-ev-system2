@@ -33,7 +33,7 @@ public class LoginService implements UserDetailsService {
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
                 .authorities(List.of(new SimpleGrantedAuthority(user.getRole())))
-                .disabled(!user.isEnabled())   // if enabled = false → login blocked
+                // if enabled = false → login blocked
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
