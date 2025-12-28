@@ -21,7 +21,7 @@ public class Teacher {
     private String contact;
     private String department;
     private String qualification;
-    private String experience;
+    private Integer experience;
     private String email;
     private String password;
     private String status = "Pending";
@@ -92,11 +92,11 @@ public class Teacher {
         this.qualification = qualification;
     }
 
-    public String getExperience() {
+    public Integer getExperience() {
         return experience;
     }
 
-    public void setExperience(String experience) {
+    public void setExperience(Integer experience) {
         this.experience = experience;
     }
 

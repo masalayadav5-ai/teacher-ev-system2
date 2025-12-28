@@ -1,6 +1,5 @@
 // ================= API BASE URL =================
-const API_BASE_URL = "http://localhost:8080/api";
-let editingStudentId = null;
+const STUDENT_API_BASE_URL = "http://localhost:8080/api";let editingStudentId = null;
 
 // ================= INIT STUDENT PAGE =================
 function initStudentPage() {
@@ -68,7 +67,7 @@ function initStudentPage() {
 
         // ===== DUPLICATE STUDENT ID CHECK =====
         try {
-            const res = await fetch(`${API_BASE_URL}/students`);
+            const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
             const students = await res.json();
 
             const exists = students.some(s =>
@@ -104,8 +103,8 @@ function initStudentPage() {
         }
 
         const url = editingStudentId
-            ? `${API_BASE_URL}/students/${editingStudentId}`
-            : `${API_BASE_URL}/students`;
+            ? `${STUDENT_API_BASE_URL}/students/${editingStudentId}`
+            : `${STUDENT_API_BASE_URL}/students`;
 
         const method = editingStudentId ? "PUT" : "POST";
 
@@ -160,7 +159,7 @@ function initStudentPage() {
 // ================= LOAD STUDENTS =================
 async function loadStudents() {
     const studentTableBody = document.getElementById("studentTableBody");
-    const res = await fetch(`${API_BASE_URL}/students`);
+    const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
     const students = await res.json();
 
     studentTableBody.innerHTML = "";
@@ -196,7 +195,7 @@ async function toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === "Pending" ? "Active" : "Pending";
 
     try {
-        const response = await fetch(`${API_BASE_URL}/students/${id}/status`, {
+        const response = await fetch(`${STUDENT_API_BASE_URL}/students/${id}/status`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: newStatus })
@@ -219,7 +218,7 @@ async function toggleStatus(id, currentStatus) {
 
 // ================= LOAD STATS =================
 async function loadStatistics() {
-    const res = await fetch(`${API_BASE_URL}/students/stats`);
+    const res = await fetch(`${STUDENT_API_BASE_URL}/students/stats`);
     const stats = await res.json();
     document.getElementById("totalStudents").textContent = stats.total;
     document.getElementById("activeStudents").textContent = stats.active;
@@ -247,7 +246,7 @@ function openAddStudent() {
 
 // ================= EDIT STUDENT =================
 async function editStudent(id) {
-    const res = await fetch(`${API_BASE_URL}/students`);
+    const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
     const students = await res.json();
     const s = students.find(st => st.id === id);
     if (!s) return;
@@ -279,24 +278,111 @@ async function editStudent(id) {
 
 // ================= VIEW STUDENT =================
 async function viewStudent(id) {
-    const res = await fetch(`${API_BASE_URL}/students`);
-    const students = await res.json();
-    const s = students.find(st => st.id === id);
-    if (!s) return alert("Student not found!");
+    console.log("viewStudent called with ID:", id);
+    
+    try {
+        console.log("Fetching students from API...");
+        const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
+        const students = await res.json();
+        console.log("Total students fetched:", students.length);
+        
+        const s = students.find(st => st.id === id);
+        console.log("Found student:", s);
+        
+        if (!s) {
+            showMessage("Student not found!", "error");
+            return;
+        }
 
-    alert(`Student Profile
-------------------------
-Name: ${s.fullName}
-ID: ${s.studentId}
-Username: ${s.username}
-Faculty: ${s.faculty}
-Semester: ${s.semester}
-Batch: ${s.batch}
-Contact: ${s.contact}
-Email: ${s.email}
-Status: ${s.status}`);
+        // Store student data
+        console.log("Storing student data in localStorage:", s);
+        localStorage.setItem('currentStudentProfile', JSON.stringify(s));
+        
+        // Verify storage
+        const stored = localStorage.getItem('currentStudentProfile');
+        console.log("Verified stored data:", stored);
+        
+        // Directly load profile page
+        console.log("Loading profile page...");
+        fetch('/pages/studentprofile.html')
+            .then(res => {
+                console.log("Profile HTML response status:", res.status);
+                return res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>";
+            })
+            .then(html => {
+                console.log("Profile HTML loaded, length:", html.length);
+                const area = document.getElementById("content-area");
+                if (!area) {
+                    console.error("content-area element not found!");
+                    return;
+                }
+                
+                area.innerHTML = html;
+                console.log("Profile HTML inserted into content-area");
+                
+                // Load and init profile script
+                const script = document.createElement('script');
+                script.src = '/js/studentprofile.js?v=' + Date.now(); // Add cache buster
+                
+                // Define the onload handler
+                script.onload = function() {
+                    console.log("studentprofile.js loaded successfully");
+                    console.log("Checking if initStudentProfile exists:", typeof window.initStudentProfile);
+                    
+                    // Give it a moment to register
+                    setTimeout(function() {
+                        if (typeof window.initStudentProfile === 'function') {
+                            console.log("Calling initStudentProfile...");
+                            window.initStudentProfile();
+                        } else {
+                            console.error("window.initStudentProfile is not a function!");
+                            console.log("Available window functions:", Object.keys(window).filter(key => typeof window[key] === 'function'));
+                        }
+                    }, 100);
+                };
+                
+                script.onerror = function(error) {
+                    console.error("Error loading studentprofile.js:", error);
+                };
+                
+                document.body.appendChild(script);
+                console.log("studentprofile.js script tag added to body");
+            })
+            .catch(error => {
+                console.error("Error loading profile page:", error);
+            });
+        
+    } catch (error) {
+        console.error("Error in viewStudent:", error);
+        showMessage("Error loading student details!", "error");
+    }
 }
 
+// ================= LOAD STUDENT PROFILE PAGE =================
+function loadStudentProfilePage() {
+    // Load the student profile HTML
+    fetch('/pages/studentprofile.html')
+        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>")
+        .then(html => {
+            const area = document.getElementById("content-area");
+            area.innerHTML = html;
+            
+            // Load student profile JavaScript
+            const script = document.createElement('script');
+            script.src = '/js/studentprofile.js';
+            document.body.appendChild(script);
+            
+            // Initialize profile after script loads
+            setTimeout(() => {
+                if (window.initStudentProfile) {
+                    window.initStudentProfile();
+                }
+            }, 100);
+        })
+        .catch(error => {
+            console.error("Error loading profile page:", error);
+        });
+}
 // ================= MESSAGE =================
 function showMessage(msg, type) {
     const box = document.getElementById("formMessage");

@@ -28,24 +28,22 @@ public class TeacherService {
         return teacherRepository.findById(id).orElse(null);
     }
 
-    // ✅ UPDATE TEACHER
     public Teacher updateTeacher(Long id, Teacher data) {
-        Teacher t = teacherRepository.findById(id).orElse(null);
-        if (t == null) return null;
+        Teacher teacher = teacherRepository.findById(id).orElse(null);
+        if (teacher == null) return null;
 
-        t.setFullName(data.getFullName());
-        t.setUsername(data.getUsername());
-        t.setAddress(data.getAddress());
-        t.setContact(data.getContact());
-        t.setDepartment(data.getDepartment());
-        t.setQualification(data.getQualification());
-        t.setExperience(data.getExperience());
-        t.setEmail(data.getEmail());
+        teacher.setFullName(data.getFullName());
+        teacher.setUsername(data.getUsername());
+        teacher.setAddress(data.getAddress());
+        teacher.setContact(data.getContact());
+        teacher.setDepartment(data.getDepartment());
+        teacher.setQualification(data.getQualification());
+        teacher.setExperience(data.getExperience());
+        teacher.setEmail(data.getEmail());
 
-        return teacherRepository.save(t);
+        return teacherRepository.save(teacher);
     }
 
-    // ✅ DELETE TEACHER
     public void deleteTeacher(Long id) {
         teacherRepository.deleteById(id);
     }

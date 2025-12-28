@@ -9,7 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import java.util.UUID;
 
 @Controller
@@ -26,12 +27,30 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
     // MAIN ADMIN DASHBOARD
-    @GetMapping("/dashboard")
-    public String dashboard(Model model) {
-        model.addAttribute("username", "Admin");
-        return "dashboard"; // Loads dashboard.html layout
-    }
+//    @GetMapping("/dashboard")
+//    public String dashboard(Model model) {
+//        model.addAttribute("username", "Admin");
+//        return "dashboard"; // Loads dashboard.html layout
+//    }
 
+@GetMapping("/dashboard")
+public String dashboard(Model model, Authentication authentication) {
+
+    // Logged-in username
+    String username = authentication.getName();
+
+    // Logged-in role
+    String role = authentication.getAuthorities()
+            .stream()
+            .map(GrantedAuthority::getAuthority)
+            .findFirst()
+            .orElse("ROLE_USER");
+
+    model.addAttribute("username", username);
+    model.addAttribute("role", role.replace("ROLE_", ""));
+
+    return "dashboard"; // dashboard.html
+}
     // STATIC PAGES
     @GetMapping("/student")
     public String studentPage() { return "redirect:/pages/student.html"; }

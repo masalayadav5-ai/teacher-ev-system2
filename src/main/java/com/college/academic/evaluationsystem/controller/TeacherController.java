@@ -7,8 +7,8 @@ import com.college.academic.evaluationsystem.repository.UserRepository;
 import com.college.academic.evaluationsystem.service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -81,10 +81,10 @@ public class TeacherController {
         teacher.setStatus(status);
         teacherRepository.save(teacher);
 
-        // ---- Sync with Users table ----
-        User user = userRepository.findByUsername(teacher.getUsername()).orElse(null);
-
+        // Sync with Users table
         if ("Active".equalsIgnoreCase(status)) {
+            User user = userRepository.findByUsername(teacher.getUsername()).orElse(null);
+            
             if (user == null) {
                 user = new User();
                 user.setUsername(teacher.getUsername());
