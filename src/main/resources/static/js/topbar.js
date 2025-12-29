@@ -1,13 +1,17 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const topTitle = document.querySelector(".top-title");
     if (!topTitle) return;
 
-    const username = localStorage.getItem("username");
-    const role = localStorage.getItem("userRole");
+    try {
+const res = await fetch("/admin/api/userinfo");
+        const data = await res.json();
 
-    if (username && role) {
+        const username = data.username || "Guest";
+        const role = data.role || "USER";
+
         topTitle.textContent = `Welcome, ${username} (${role})`;
-    } else {
+    } catch (err) {
+        console.error("Failed to load user info:", err);
         topTitle.textContent = "Welcome!";
     }
 });

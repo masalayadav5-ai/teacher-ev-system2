@@ -3,6 +3,8 @@ package com.college.academic.evaluationsystem.controller;
 import com.college.academic.evaluationsystem.model.User;
 import com.college.academic.evaluationsystem.repository.UserRepository;
 import com.college.academic.evaluationsystem.service.EmailService;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,30 +29,13 @@ public class AdminController {
     private PasswordEncoder passwordEncoder;
 
     // MAIN ADMIN DASHBOARD
-//    @GetMapping("/dashboard")
-//    public String dashboard(Model model) {
-//        model.addAttribute("username", "Admin");
-//        return "dashboard"; // Loads dashboard.html layout
-//    }
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        model.addAttribute("username", "Admin");
+        return "dashboard"; // Loads dashboard.html layout
+    }
 
-@GetMapping("/dashboard")
-public String dashboard(Model model, Authentication authentication) {
 
-    // Logged-in username
-    String username = authentication.getName();
-
-    // Logged-in role
-    String role = authentication.getAuthorities()
-            .stream()
-            .map(GrantedAuthority::getAuthority)
-            .findFirst()
-            .orElse("ROLE_USER");
-
-    model.addAttribute("username", username);
-    model.addAttribute("role", role.replace("ROLE_", ""));
-
-    return "dashboard"; // dashboard.html
-}
     // STATIC PAGES
     @GetMapping("/student")
     public String studentPage() { return "redirect:/pages/student.html"; }
@@ -119,4 +104,31 @@ public String dashboard(Model model, Authentication authentication) {
         repo.save(user);
         return "ok";
     }
+    //------------------------------------
+    // NEW: USER INFO ENDPOINT FOR STATIC PAGES
+    //------------------------------------
+    @GetMapping("/api/userinfo")
+    @ResponseBody
+    public Map<String, String> getUserInfo(Authentication authentication) {
+        Map<String, String> map = new HashMap<>();
+
+        if (authentication != null) {
+            map.put("username", authentication.getName());
+
+            String role = authentication.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse("ROLE_USER");
+
+            map.put("role", role.replace("ROLE_", ""));
+        } else {
+            map.put("username", "Guest");
+            map.put("role", "USER");
+        }
+
+        return map;
+    }
 }
+
+ 

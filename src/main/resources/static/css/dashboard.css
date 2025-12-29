@@ -209,10 +209,41 @@ nav {
 }
 
 .top-title {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e2a78;      /* Darker professional color */
+    letter-spacing: 0.5px;
+}
+.top-title {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.top-title::before {
+    content: "\1F44B";   /* 👋 waving hand emoji */
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+.top-actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
 }
 
+.top-actions .avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #4f46e5; /* professional purple-blue */
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+.top-actions .avatar:hover {
+    background-color: #3b35b0; /* darker on hover */
+}
 .subtitle {
     color: #64748b;
     font-size: 12px;
@@ -227,21 +258,6 @@ nav {
     background: white;
 }
 
-.top-actions {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #e6eef8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 /* Dashboard Cards */
 .cards {
