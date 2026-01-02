@@ -20,23 +20,27 @@ public class LoginService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = repo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Make sure this import is correct:
-        // import org.springframework.security.core.userdetails.User;
+        // Check if user account is active
+        if (!"Active".equals(user.getStatus())) {
+            throw new UsernameNotFoundException("Account is not active. Please contact administrator.");
+        }
 
+        // Make sure to add ROLE_ prefix for Spring Security
+        String roleWithPrefix = "ROLE_" + user.getRole();
+        
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities(List.of(new SimpleGrantedAuthority(user.getRole())))
-                // if enabled = false → login blocked
+                .authorities(List.of(new SimpleGrantedAuthority(roleWithPrefix)))
                 .accountExpired(false)
                 .accountLocked(false)
                 .credentialsExpired(false)
+                .disabled(false) // Explicitly set disabled based on status
                 .build();
     }
 }

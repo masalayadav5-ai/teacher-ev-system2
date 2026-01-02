@@ -143,8 +143,10 @@
 }
 
 /* ================= ACTION BUTTONS ================= */
-
+/* ================= ACTION BUTTONS (Edit / View) ================= */
 .action-btn {
+    background: #3b82f6;          /* BLUE */
+    color: #fff;
     padding: 9px 18px;
     border: none;
     border-radius: 10px;
@@ -156,37 +158,42 @@
     transition: background 0.3s ease;
 }
 
-/* DEFAULT BUTTON (fallback) */
-.action-btn {
-    background: #4c6fff;
-    color: #ffffff;
-}
-
 .action-btn:hover {
-    background: #3a57de;
+    background: #2563eb;
 }
 
-/* ================= STATUS BUTTONS ================= */
+/* ================= STATUS BUTTON BASE ================= */
+.status-btn {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    min-width: 90px;
+    transition: all 0.2s ease;
+}
 
-/* APPROVE BUTTON (status = Pending) */
+/* ================= STATUS COLORS ================= */
+
+/* PENDING → YELLOW */
+.pending-btn {
+    background: #f59e0b;
+    color: #fff;
+}
+.pending-btn:hover {
+    background: #d97706;
+}
+
+/* ACTIVE → GREEN */
 .approve-btn {
     background: #22c55e;
-    color: white;
+    color: #fff;
 }
-
 .approve-btn:hover {
     background: #16a34a;
 }
 
-/* PENDING BUTTON (status = Active) */
-.pending-btn {
-    background: #facc15;
-    color: #000;
-}
-
-.pending-btn:hover {
-    background: #eab308;
-}
 
 /* ================= VIEW BUTTON ================= */
 

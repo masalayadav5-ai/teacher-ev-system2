@@ -16,7 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/admin")
+//@RequestMapping("/admin")
 public class AdminController {
 
     @Autowired
@@ -68,8 +68,9 @@ public class AdminController {
 
         String tempPassword = UUID.randomUUID().toString().substring(0, 8);
         user.setPassword(passwordEncoder.encode(tempPassword));
-        user.setEnabled(true); // enable immediately
+         // enable immediately
         user.setStatus("Pending"); // default status
+        user.setFirstLogin(true);   
 
         repo.save(user);
 
@@ -98,8 +99,7 @@ public class AdminController {
         String newStatus = "Pending".equals(user.getStatus()) ? "Active" : "Pending";
         user.setStatus(newStatus);
 
-        // Enable account if status is Active, disable if Pending
-        user.setEnabled("Active".equals(newStatus));
+        
 
         repo.save(user);
         return "ok";

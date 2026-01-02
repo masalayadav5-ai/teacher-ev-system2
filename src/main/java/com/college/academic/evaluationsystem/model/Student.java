@@ -23,6 +23,9 @@ public class Student {
     private String batch;
     private String email;
     
+@Column(name = "hide", nullable = false)
+private String hide = "0";   // 0 = visible, 1 = hidden
+    
     private String password; // Add this field
 
     private String status = "Pending";
@@ -124,4 +127,12 @@ public class Student {
     public void setStatus(String status) {
         this.status = status;
     }
+     public String getHide() {
+    return hide;
+}
+
+public void setHide(String hide) {
+    this.hide = hide;
+}
+
 }

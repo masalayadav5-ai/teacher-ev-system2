@@ -168,30 +168,61 @@ async function loadStudents() {
         studentTableBody.innerHTML = `<tr><td colspan="6" align="center">No students found</td></tr>`;
         return;
     }
+students.slice().reverse().forEach(s => {
+    const isPending = s.status === "Pending";
 
-    students.slice().reverse().forEach(s => {
-        studentTableBody.innerHTML += `
-        <tr>
-            <td>${s.studentId}</td>
-            <td>${s.fullName}</td>
-            <td>${s.faculty}</td>
-            <td>${s.semester}</td>
-            <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
-            <td>
-                <button 
-                    class="action-btn ${s.status === 'Pending' ? 'approve-btn' : 'pending-btn'}"
-                    onclick="toggleStatus(${s.id}, '${s.status}')">
-                    ${s.status === "Pending" ? "Approve" : "Pending"}
-                </button>
-                <button class="action-btn edit" onclick="editStudent(${s.id})">Edit</button>
-                <button class="action-btn view" onclick="viewStudent(${s.id})">View</button>
-            </td>
-        </tr>`;
-    });
+    studentTableBody.innerHTML += `
+    <tr>
+        <td>${s.studentId}</td>
+        <td>${s.fullName}</td>
+        <td>${s.faculty}</td>
+        <td>${s.semester}</td>
+
+        <!-- STATUS COLUMN -->
+        <td>
+            <button 
+                class="status-btn ${isPending ? 'pending-btn' : 'approve-btn'}"
+                onclick="toggleStatus(${s.id}, '${s.status}')">
+                ${isPending ? "Pending" : "Active"}
+            </button>
+        </td>
+
+        <!-- ACTION COLUMN -->
+        <td>
+            <button class="action-btn edit" onclick="editStudent(${s.id})">Edit</button>
+            <button class="action-btn view" onclick="viewStudent(${s.id})">View</button>
+            <button class="action-btn hide" onclick="hidestudent(${s.id})">Delete</button>
+
+        </td>
+    </tr>`;
+});
+}
+// ================= HIDE (SOFT DELETE) =================
+async function hidestudent(id) {
+    if (!confirm("Are you sure you want to delete this student?")) return;
+
+    try {
+        const response = await fetch(`${STUDENT_API_BASE_URL}/students/${id}/hide`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showMessage(result.message || "Student hidden successfully!", "success");
+            loadStudents(); // Refresh table
+            loadStatistics();
+        } else {
+            showMessage(result.message || "Failed to hide student!", "error");
+        }
+    } catch (error) {
+        console.error("Error hiding student:", error);
+        showMessage("Server error! Could not hide student.", "error");
+    }
 }
 
-// ================= TOGGLE STATUS =================
-async function toggleStatus(id, currentStatus) {
+ async function toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === "Pending" ? "Active" : "Pending";
 
     try {
@@ -218,12 +249,23 @@ async function toggleStatus(id, currentStatus) {
 
 // ================= LOAD STATS =================
 async function loadStatistics() {
-    const res = await fetch(`${STUDENT_API_BASE_URL}/students/stats`);
-    const stats = await res.json();
-    document.getElementById("totalStudents").textContent = stats.total;
-    document.getElementById("activeStudents").textContent = stats.active;
-    document.getElementById("pendingStudents").textContent = stats.pending;
+    try {
+        const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
+        const students = await res.json();
+
+        const visibleStudents = students.filter(s => s.hide === "0"); // Only visible
+        const total = visibleStudents.length;
+        const active = visibleStudents.filter(s => s.status === "Active").length;
+        const pending = visibleStudents.filter(s => s.status === "Pending").length;
+
+        document.getElementById("totalStudents").textContent = total;
+        document.getElementById("activeStudents").textContent = active;
+        document.getElementById("pendingStudents").textContent = pending;
+    } catch (error) {
+        console.error("Error loading statistics:", error);
+    }
 }
+
 
 // ================= ADD STUDENT =================
 function openAddStudent() {

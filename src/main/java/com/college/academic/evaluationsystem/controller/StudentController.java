@@ -20,13 +20,15 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
-@Autowired
-private UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Autowired
     private StudentRepository studentRepository;
-    @Autowired
-private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // ================= CREATE =================
     @PostMapping
@@ -52,56 +54,64 @@ private PasswordEncoder passwordEncoder;
         }
 
         student.setStatus("Pending"); // default status
+        student.setHide("0"); // default visible
         return ResponseEntity.ok(studentService.saveStudent(student));
     }
 
     // ================= READ =================
     @GetMapping
     public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+        // Only visible students
+        return studentRepository.findByHide("0");
     }
 
     // ================= UPDATE STATUS =================
     @PutMapping("/{id}/status")
-public ResponseEntity<?> updateStatus(
-        @PathVariable Long id,
-        @RequestBody Map<String, String> body) {
+    public ResponseEntity<?> updateStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
 
-    Student student = studentRepository.findById(id).orElse(null);
-    if (student == null) {
-        return ResponseEntity.notFound().build();
+        Student student = studentRepository.findById(id).orElse(null);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String status = body.get("status");
+        if (status == null || (!status.equalsIgnoreCase("Active") && !status.equalsIgnoreCase("Pending"))) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid status value"));
+        }
+
+        // Update student status
+        student.setStatus(status);
+        studentRepository.save(student);
+
+        // Sync Users table
+        User user = userRepository.findByUsername(student.getUsername()).orElse(null);
+
+        if ("Active".equalsIgnoreCase(status)) {
+            if (user == null) {
+                // Pending → Active
+                user = new User();
+                user.setUsername(student.getUsername());
+                user.setEmail(student.getEmail());
+                user.setPassword(passwordEncoder.encode(student.getPassword()));
+                user.setRole("STUDENT");
+                user.setStatus("Active");
+                userRepository.save(user);
+            } else {
+                user.setStatus("Active");
+                userRepository.save(user);
+            }
+        } else {
+            if (user != null) {
+                // Active → Pending (deactivate user)
+                user.setStatus("Inactive");
+                userRepository.save(user);
+            }
+        }
+
+        return ResponseEntity.ok(student);
     }
-
-    String status = body.get("status");
-    if (status == null || (!status.equalsIgnoreCase("Active") && !status.equalsIgnoreCase("Pending"))) {
-        return ResponseEntity.badRequest().body(Map.of("message", "Invalid status value"));
-    }
-
-    student.setStatus(status);
-    studentRepository.save(student);
-
-    // ---- Sync with Users table ----
-    User user = userRepository.findByUsername(student.getUsername()).orElse(null);
-
-    if ("Active".equalsIgnoreCase(status)) {
-    if (user == null) {
-        user = new User();
-        user.setUsername(student.getUsername());
-        user.setEmail(student.getEmail());
-        user.setPassword(passwordEncoder.encode(student.getPassword())); // 🔐 hash here
-        user.setRole("STUDENT");
-        user.setStatus("Active");
-        userRepository.save(user);
-    } else {
-        user.setStatus("Active");
-        userRepository.save(user);
-    }
-}
-
-
-    return ResponseEntity.ok(student);
-}
-
 
     // ================= UPDATE =================
     @PutMapping("/{id}")
@@ -115,11 +125,30 @@ public ResponseEntity<?> updateStatus(
                 : ResponseEntity.notFound().build();
     }
 
-    // ================= DELETE =================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStudent(@PathVariable Long id) {
-        studentService.deleteStudent(id);
-        return ResponseEntity.ok().build();
+    // ================= HIDE (Soft Delete) =================
+    @PutMapping("/{id}/hide")
+    public ResponseEntity<?> hideStudent(@PathVariable Long id) {
+        Student student = studentRepository.findById(id).orElse(null);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if ("1".equals(student.getHide())) {
+            return ResponseEntity.ok(Map.of("message", "Student already hidden"));
+        }
+
+        student.setHide("1"); // one-way hide
+        student.setStatus("Pending"); // optional safety
+        studentRepository.save(student);
+
+        // Optional: deactivate user if exists
+    User user = userRepository.findByEmail(student.getEmail()).orElse(null);
+        if (user != null) {
+            user.setStatus("Inactive");
+            userRepository.save(user);
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Student hidden successfully"));
     }
 
     // ================= STATS =================
