@@ -19,33 +19,33 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         this.userRepository = userRepository;
     }
 
-   @Override
-public void onAuthenticationSuccess(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    Authentication authentication) throws IOException {
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                       HttpServletResponse response,
+                                       Authentication authentication) throws IOException {
 
-    System.out.println("=== CustomLoginSuccessHandler ===");
-    System.out.println("Username: " + authentication.getName());
-    
-    String username = authentication.getName();
-    User user = userRepository.findByUsername(username).orElse(null);
+        System.out.println("=== CustomLoginSuccessHandler ===");
+        System.out.println("Username: " + authentication.getName());
+        
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
 
-    if (user == null) {
-        System.out.println("ERROR: User not found in database!");
-        response.sendRedirect("/login?error=user_not_found");
-        return;
-    }
+        if (user == null) {
+            System.out.println("ERROR: User not found in database!");
+            response.sendRedirect("/login?error=user_not_found");
+            return;
+        }
 
-    System.out.println("User ID: " + user.getId());
-    System.out.println("First login: " + user.isFirstLogin());
-    System.out.println("Status: " + user.getStatus());
+        System.out.println("User ID: " + user.getId());
+        System.out.println("First login: " + user.isFirstLogin());
+        System.out.println("Status: " + user.getStatus());
 
-    if (user.isFirstLogin()) {
-        String redirectUrl = "/change-password?userId=" + user.getId();
-        System.out.println("Redirecting to: " + redirectUrl);
-        response.sendRedirect(redirectUrl);
-        return;
-    }
+        if (user.isFirstLogin()) {
+            // Redirect to login page with parameters to show modal
+            System.out.println("First login detected - showing password change modal");
+            response.sendRedirect("/login?firstLogin=true&userId=" + user.getId());
+            return;
+        }
 
         // Redirect by role
         switch (user.getRole()) {
@@ -59,7 +59,7 @@ public void onAuthenticationSuccess(HttpServletRequest request,
                 response.sendRedirect("/dashboard");
                 break;
             default:
-                response.sendRedirect("/login");
+                response.sendRedirect("/dashboard");
         }
     }
 }

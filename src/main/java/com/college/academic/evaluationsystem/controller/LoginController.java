@@ -5,6 +5,7 @@ import com.college.academic.evaluationsystem.model.Student;
 import com.college.academic.evaluationsystem.repository.UserRepository;
 import com.college.academic.evaluationsystem.repository.StudentRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -25,14 +26,30 @@ public class LoginController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
-    public String showLoginPage() {
+    public String showLoginPage(@RequestParam(required = false) Boolean firstLogin,
+                                @RequestParam(required = false) Long userId,
+                                @RequestParam(required = false) String error,
+                                @RequestParam(required = false) String passwordChanged,
+                                HttpServletRequest request,
+                                Model model) {
+        
+        // Check if this is a first login redirect
+        if (Boolean.TRUE.equals(firstLogin) && userId != null) {
+            model.addAttribute("forcePasswordChange", true);
+            model.addAttribute("userId", userId);
+            
+            // Also add error from redirect if present
+            if (error != null) {
+                model.addAttribute("error", error);
+            }
+        }
+        
+        // Check for success message
+        if (passwordChanged != null) {
+            model.addAttribute("passwordChanged", true);
+        }
+        
         return "login";
-    }
-
-    @GetMapping("/change-password")
-    public String showChangePassword(@RequestParam Long userId, Model model) {
-        model.addAttribute("userId", userId);
-        return "change-password";
     }
 
     @PostMapping("/change-password")
@@ -43,27 +60,30 @@ public class LoginController {
             @RequestParam String confirmPassword,
             Model model) {
 
-        // Debug logging
         System.out.println("Processing password change for userId: " + userId);
 
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             model.addAttribute("error", "User not found");
-            return "change-password";
+            model.addAttribute("forcePasswordChange", true);
+            model.addAttribute("userId", userId);
+            return "login";
         }
 
         // Check if passwords match
         if (!newPassword.equals(confirmPassword)) {
             model.addAttribute("error", "Passwords do not match");
+            model.addAttribute("forcePasswordChange", true);
             model.addAttribute("userId", userId);
-            return "change-password";
+            return "login";
         }
 
         // Check password strength
         if (newPassword.length() < 6) {
             model.addAttribute("error", "Password must be at least 6 characters");
+            model.addAttribute("forcePasswordChange", true);
             model.addAttribute("userId", userId);
-            return "change-password";
+            return "login";
         }
 
         // Update password in User table (encoded for Spring Security)
@@ -96,8 +116,8 @@ public class LoginController {
             }
         }
 
-        model.addAttribute("message", "Password changed successfully. Please login with your new password.");
-        return "login";
+        // Redirect back to login with success message
+        return "redirect:/login?passwordChanged=true";
     }
 
     @GetMapping("/debug-redirect")

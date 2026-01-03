@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -8,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/change-password-modal.css">
 </head>
 
 <body>
@@ -43,8 +43,8 @@
     <section class="hero fade-in">
         <div class="text-area">
             <h1>Empower Education with 
-    <span class="typing"><span class="smarteach-color">SmarTeach</span></span>
-</h1>
+                <span class="typing"><span class="smarteach-color">SmarTeach</span></span>
+            </h1>
 
             <p class="tagline">Transforming Feedback Into Better Teaching.<br>
                 <span class="rotating-text">Plan Better Sessions • Evaluate Smarter • Improve Outcomes</span>
@@ -59,41 +59,188 @@
 
                 <p th:if="${param.error}" class="error-msg">Invalid username or password!</p>
                 <p th:if="${param.logout}" class="success-msg">Logged out successfully.</p>
+                <p th:if="${param.passwordChanged}" class="success-msg">Password changed successfully! Please login with your new password.</p>
 
-                <form action="/do-login" method="POST">
+                <form action="/do-login" method="POST" id="loginForm">
                     <div class="input-wrapper">
                         <i class="fa fa-user icon"></i>
-                        <input type="text" name="username" placeholder="Username" required>
+                        <input type="text" name="username" placeholder="Username" required id="usernameInput">
                     </div>
 
                     <div class="password-wrapper input-wrapper">
                         <i class="fa fa-lock icon"></i>
-                        <input type="password" id="login-pass" name="password" placeholder="Password" required>
-                        <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
-                    </div> <button class="login-btn" type="submit">Login</button>
-            
+<input type="password" id="login-pass" name="password" placeholder="Password" required> 
+<i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
+                    </div>
+                    <button class="login-btn" type="submit" id="loginButton">Login</button>
                 </form>
 
-              <hr class="login-divider">
-<p class="role-hint">For Students, Faculty, and Staff</p>
-      
+                <hr class="login-divider">
+                <p class="role-hint">For Students, Faculty, and Staff</p>
+            </div>
+        </div>
     </section>
 
-    <script src="/js/script.js"></script>
-    <!-- FOOTER -->
-<footer class="footer">
-    <div class="footer-social">
-        <a href="#"><i class="fab fa-facebook"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-google"></i></a>
+    <!-- Force Change Password Modal -->
+    <div class="password-modal-overlay" th:classappend="${forcePasswordChange} ? 'show' : ''" id="changePasswordModal">
+        <div class="password-modal-container">
+            <div class="password-modal-header">
+                <div class="password-modal-logo">
+                    <i class="fa-solid fa-key"></i>
+                    <h2>Change Password Required</h2>
+                </div>
+                <p class="password-modal-subtitle">Welcome! This is your first login. Please set a new password to continue.</p>
+            </div>
+            
+            <div class="password-modal-body">
+                <form method="post" action="/change-password" id="changePasswordForm">
+                    <input type="hidden" name="userId" th:value="${userId}" id="modalUserId">
+                    
+                    <div class="form-group">
+                        <label for="newPassword">
+                            <i class="fa-solid fa-lock"></i> New Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="newPassword" name="newPassword" required 
+                                   placeholder="Enter new password" class="password-modal-input">
+                            <i class="fa-solid fa-eye toggle-modal-password" data-target="newPassword"></i>
+                        </div>
+                        <div class="password-hint">
+                            <i class="fa-solid fa-info-circle"></i> Password must be at least 6 characters long
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fa-solid fa-lock"></i> Confirm Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required 
+                                   placeholder="Confirm new password" class="password-modal-input">
+                            <i class="fa-solid fa-eye toggle-modal-password" data-target="confirmPassword"></i>
+                        </div>
+                        <div id="passwordMatchMessage" class="password-match"></div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="password-modal-btn" id="submitBtn">
+                            <i class="fa-solid fa-key"></i> Change Password
+                        </button>
+                    </div>
+                    
+                    <div th:if="${error}" class="alert alert-error">
+                        <i class="fa-solid fa-exclamation-circle"></i>
+                        <span th:text="${error}"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div class="footer-bottom">
-        <p>&copy; 2025 SmarTeach. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a></p>
-    </div>
-</footer>
+    <script src="/js/script.js"></script>
+    <script th:if="${forcePasswordChange}">
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('changePasswordModal');
+            if (modal && modal.classList.contains('show')) {
+                // Disable login form
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.style.opacity = '0.5';
+                    loginForm.style.pointerEvents = 'none';
+                }
+                
+                // Add password toggle functionality for modal
+                document.querySelectorAll('.toggle-modal-password').forEach(toggle => {
+                    toggle.addEventListener('click', function() {
+                        const targetId = this.getAttribute('data-target');
+                        const passwordInput = document.getElementById(targetId);
+                        if (passwordInput.type === 'password') {
+                            passwordInput.type = 'text';
+                            this.classList.remove('fa-eye');
+                            this.classList.add('fa-eye-slash');
+                        } else {
+                            passwordInput.type = 'password';
+                            this.classList.remove('fa-eye-slash');
+                            this.classList.add('fa-eye');
+                        }
+                    });
+                });
+                
+                // Real-time password validation
+                const newPassword = document.getElementById('newPassword');
+                const confirmPassword = document.getElementById('confirmPassword');
+                const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                function validatePasswords() {
+                    const password = newPassword.value;
+                    const confirm = confirmPassword.value;
+                    
+                    passwordMatchMessage.textContent = '';
+                    passwordMatchMessage.className = 'password-match';
+                    
+                    if (password && confirm) {
+                        if (password !== confirm) {
+                            passwordMatchMessage.textContent = 'Passwords do not match';
+                            passwordMatchMessage.classList.add('error');
+                            newPassword.classList.add('error');
+                            confirmPassword.classList.add('error');
+                            submitBtn.disabled = true;
+                            submitBtn.style.opacity = '0.6';
+                            return false;
+                        } else {
+                            passwordMatchMessage.textContent = 'Passwords match';
+                            passwordMatchMessage.classList.add('success');
+                            newPassword.classList.remove('error');
+                            confirmPassword.classList.remove('error');
+                            submitBtn.disabled = false;
+                            submitBtn.style.opacity = '1';
+                            return true;
+                        }
+                    }
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.6';
+                    return false;
+                }
+                
+                newPassword.addEventListener('input', validatePasswords);
+                confirmPassword.addEventListener('input', validatePasswords);
+                
+                // Form submission validation
+                const changePasswordForm = document.getElementById('changePasswordForm');
+                changePasswordForm.addEventListener('submit', function(e) {
+                    if (!validatePasswords()) {
+                        e.preventDefault();
+                        alert('Please make sure passwords match.');
+                    }
+                    
+                    if (newPassword.value.length < 6) {
+                        e.preventDefault();
+                        alert('Password must be at least 6 characters long.');
+                    }
+                });
+                
+                // Focus on first input
+                setTimeout(() => {
+                    newPassword.focus();
+                }, 300);
+            }
+        });
+    </script>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-social">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-google"></i></a>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025 SmarTeach. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a></p>
+        </div>
+    </footer>
 
 </body>
 </html>
-
