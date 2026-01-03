@@ -105,9 +105,9 @@
                                    placeholder="Enter new password" class="password-modal-input">
                             <i class="fa-solid fa-eye toggle-modal-password" data-target="newPassword"></i>
                         </div>
-                        <div class="password-hint">
+<!--                        <div class="password-hint">
                             <i class="fa-solid fa-info-circle"></i> Password must be at least 6 characters long
-                        </div>
+                        </div>-->
                     </div>
                     
                     <div class="form-group">
@@ -138,95 +138,92 @@
     </div>
 
     <script src="/js/script.js"></script>
-    <script th:if="${forcePasswordChange}">
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('changePasswordModal');
-            if (modal && modal.classList.contains('show')) {
-                // Disable login form
-                const loginForm = document.getElementById('loginForm');
-                if (loginForm) {
-                    loginForm.style.opacity = '0.5';
-                    loginForm.style.pointerEvents = 'none';
-                }
-                
-                // Add password toggle functionality for modal
-                document.querySelectorAll('.toggle-modal-password').forEach(toggle => {
-                    toggle.addEventListener('click', function() {
-                        const targetId = this.getAttribute('data-target');
-                        const passwordInput = document.getElementById(targetId);
-                        if (passwordInput.type === 'password') {
-                            passwordInput.type = 'text';
-                            this.classList.remove('fa-eye');
-                            this.classList.add('fa-eye-slash');
-                        } else {
-                            passwordInput.type = 'password';
-                            this.classList.remove('fa-eye-slash');
-                            this.classList.add('fa-eye');
-                        }
-                    });
-                });
-                
-                // Real-time password validation
-                const newPassword = document.getElementById('newPassword');
-                const confirmPassword = document.getElementById('confirmPassword');
-                const passwordMatchMessage = document.getElementById('passwordMatchMessage');
-                const submitBtn = document.getElementById('submitBtn');
-                
-                function validatePasswords() {
-                    const password = newPassword.value;
-                    const confirm = confirmPassword.value;
-                    
-                    passwordMatchMessage.textContent = '';
-                    passwordMatchMessage.className = 'password-match';
-                    
-                    if (password && confirm) {
-                        if (password !== confirm) {
-                            passwordMatchMessage.textContent = 'Passwords do not match';
-                            passwordMatchMessage.classList.add('error');
-                            newPassword.classList.add('error');
-                            confirmPassword.classList.add('error');
-                            submitBtn.disabled = true;
-                            submitBtn.style.opacity = '0.6';
-                            return false;
-                        } else {
-                            passwordMatchMessage.textContent = 'Passwords match';
-                            passwordMatchMessage.classList.add('success');
-                            newPassword.classList.remove('error');
-                            confirmPassword.classList.remove('error');
-                            submitBtn.disabled = false;
-                            submitBtn.style.opacity = '1';
-                            return true;
-                        }
-                    }
-                    submitBtn.disabled = true;
-                    submitBtn.style.opacity = '0.6';
-                    return false;
-                }
-                
-                newPassword.addEventListener('input', validatePasswords);
-                confirmPassword.addEventListener('input', validatePasswords);
-                
-                // Form submission validation
-                const changePasswordForm = document.getElementById('changePasswordForm');
-                changePasswordForm.addEventListener('submit', function(e) {
-                    if (!validatePasswords()) {
-                        e.preventDefault();
-                        alert('Please make sure passwords match.');
-                    }
-                    
-                    if (newPassword.value.length < 6) {
-                        e.preventDefault();
-                        alert('Password must be at least 6 characters long.');
-                    }
-                });
-                
-                // Focus on first input
-                setTimeout(() => {
-                    newPassword.focus();
-                }, 300);
+ <script th:if="${forcePasswordChange}">
+document.addEventListener('DOMContentLoaded', function () {
+
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // 🔒 SAME regex as backend
+    const strongPasswordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    // 👁 Eye toggle (modal passwords)
+    document.querySelectorAll('.toggle-modal-password').forEach(toggle => {
+        toggle.addEventListener('click', function () {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
             }
         });
-    </script>
+    });
+
+    function validatePasswords() {
+        const password = newPassword.value;
+        const confirm = confirmPassword.value;
+
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        passwordMatchMessage.textContent = '';
+        passwordMatchMessage.className = 'password-match';
+
+        newPassword.classList.remove('error');
+        confirmPassword.classList.remove('error');
+
+        if (!password || !confirm) return;
+
+        // 🔐 Strong password check
+        if (!strongPasswordRegex.test(password)) {
+            passwordMatchMessage.textContent =
+                'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.';
+            passwordMatchMessage.classList.add('error');
+            newPassword.classList.add('error');
+            return;
+        }
+
+        // 🔁 Match check
+        if (password !== confirm) {
+            passwordMatchMessage.textContent = 'Passwords do not match';
+            passwordMatchMessage.classList.add('error');
+            confirmPassword.classList.add('error');
+            return;
+        }
+
+        // ✅ Success
+        passwordMatchMessage.textContent = 'Strong password ✔';
+        passwordMatchMessage.classList.add('success');
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+    }
+
+    newPassword.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+
+    // 🚫 Block submit if invalid
+    document.getElementById('changePasswordForm')
+        .addEventListener('submit', function (e) {
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                alert('Please fix password requirements before submitting.');
+            }
+        });
+
+    // Focus UX
+    setTimeout(() => newPassword.focus(), 300);
+});
+</script>
+
+
 
     <!-- FOOTER -->
     <footer class="footer">
