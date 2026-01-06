@@ -13,22 +13,25 @@ public class Student {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "student_id")
+    @Column(name = "student_id", unique = true)
     private String studentId;
-    private String username;
+
     private String address;
     private String contact;
     private String faculty;
     private String semester;
     private String batch;
-    private String email;
     
-@Column(name = "hide", nullable = false)
-private String hide = "0";   // 0 = visible, 1 = hidden
+    @Column(name = "hide", nullable = false)
+    private String hide = "0";   // 0 = visible, 1 = hidden
     
-    private String password; // Add this field
-
+    @Column(nullable = false)
     private String status = "Pending";
+
+    // Foreign key to User table - Change to EAGER fetching to avoid LazyInitializationException
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
+    private User user;
 
     // ===== Getters and Setters =====
 
@@ -54,14 +57,6 @@ private String hide = "0";   // 0 = visible, 1 = hidden
 
     public void setStudentId(String studentId) {
         this.studentId = studentId;
-    }
-
-     public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
     
     public String getAddress() {
@@ -104,20 +99,37 @@ private String hide = "0";   // 0 = visible, 1 = hidden
         this.batch = batch;
     }
 
+    // Convenience methods to get user properties
     public String getEmail() {
-        return email;
+        return user != null ? user.getEmail() : null;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getUsername() {
+        return user != null ? user.getUsername() : null;
     }
 
-    public String getPassword() { // Add getter
-        return password;
+    public String getPassword() {
+        return user != null ? user.getPassword() : null;
     }
 
-    public void setPassword(String password) { // Add setter
-        this.password = password;
+    // Set user with username, email, and password
+    public void setUserCredentials(String username, String email, String password) {
+        if (this.user == null) {
+            this.user = new User();
+        }
+        this.user.setUsername(username);
+        this.user.setEmail(email);
+        this.user.setPassword(password);
+        this.user.setRole("STUDENT");
+        this.user.setStatus(this.status); // Sync status
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getStatus() {
@@ -126,13 +138,17 @@ private String hide = "0";   // 0 = visible, 1 = hidden
 
     public void setStatus(String status) {
         this.status = status;
+        // Sync status with user if user exists
+        if (this.user != null) {
+            this.user.setStatus(status);
+        }
     }
-     public String getHide() {
-    return hide;
-}
 
-public void setHide(String hide) {
-    this.hide = hide;
-}
+    public String getHide() {
+        return hide;
+    }
 
+    public void setHide(String hide) {
+        this.hide = hide;
+    }
 }

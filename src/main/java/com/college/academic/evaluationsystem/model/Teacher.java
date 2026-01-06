@@ -13,18 +13,25 @@ public class Teacher {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "teacher_id")
+    @Column(name = "teacher_id", unique = true)
     private String teacherId;
     
-    private String username;
     private String address;
     private String contact;
     private String department;
     private String qualification;
     private Integer experience;
-    private String email;
-    private String password;
+    
+    @Column(name = "hide", nullable = false)
+    private String hide = "0";   // 0 = visible, 1 = hidden
+    
+    @Column(nullable = false)
     private String status = "Pending";
+
+    // Foreign key to User table
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
+    private User user;
 
     // ===== Getters and Setters =====
 
@@ -50,14 +57,6 @@ public class Teacher {
 
     public void setTeacherId(String teacherId) {
         this.teacherId = teacherId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getAddress() {
@@ -100,20 +99,37 @@ public class Teacher {
         this.experience = experience;
     }
 
+    // Convenience methods to get user properties
     public String getEmail() {
-        return email;
+        return user != null ? user.getEmail() : null;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getUsername() {
+        return user != null ? user.getUsername() : null;
     }
 
     public String getPassword() {
-        return password;
+        return user != null ? user.getPassword() : null;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    // Set user with username, email, and password
+    public void setUserCredentials(String username, String email, String password) {
+        if (this.user == null) {
+            this.user = new User();
+        }
+        this.user.setUsername(username);
+        this.user.setEmail(email);
+        this.user.setPassword(password);
+        this.user.setRole("TEACHER");
+        this.user.setStatus(this.status); // Sync status
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getStatus() {
@@ -122,5 +138,17 @@ public class Teacher {
 
     public void setStatus(String status) {
         this.status = status;
+        // Sync status with user if user exists
+        if (this.user != null) {
+            this.user.setStatus(status);
+        }
+    }
+
+    public String getHide() {
+        return hide;
+    }
+
+    public void setHide(String hide) {
+        this.hide = hide;
     }
 }

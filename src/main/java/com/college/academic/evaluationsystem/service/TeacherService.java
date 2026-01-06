@@ -1,9 +1,13 @@
 package com.college.academic.evaluationsystem.service;
 
 import com.college.academic.evaluationsystem.model.Teacher;
+import com.college.academic.evaluationsystem.model.User;
 import com.college.academic.evaluationsystem.repository.TeacherRepository;
+import com.college.academic.evaluationsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,54 +17,134 @@ public class TeacherService {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Transactional
     public Teacher saveTeacher(Teacher teacher) {
         if (teacher.getStatus() == null) {
             teacher.setStatus("Pending");
         }
+        
+        // Check if username already exists in User table
+        if (userRepository.existsByUsername(teacher.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+        
+        // Check if email already exists in User table
+        if (userRepository.existsByEmail(teacher.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+        
+        // Create and save User first
+        User user = new User();
+        user.setUsername(teacher.getUsername());
+        user.setEmail(teacher.getEmail());
+        user.setPassword(passwordEncoder.encode(teacher.getPassword()));
+        user.setRole("TEACHER");
+        user.setStatus(teacher.getStatus());
+        user.setFirstLogin(true);
+        
+        User savedUser = userRepository.save(user);
+        teacher.setUser(savedUser);
+        
         return teacherRepository.save(teacher);
     }
 
     public List<Teacher> getAllTeachers() {
-        return teacherRepository.findAll();
+        // Get only visible teachers
+        return teacherRepository.findByHide("0");
     }
 
     public Teacher getTeacherById(Long id) {
+        // This will fetch the user relationship properly
         return teacherRepository.findById(id).orElse(null);
     }
 
+    // Get teacher by username (for profile page)
+    public Teacher getTeacherByUsername(String username) {
+        return teacherRepository.findByUsername(username).orElse(null);
+    }
+
+    // Get teacher by email
+    public Teacher getTeacherByEmail(String email) {
+        return teacherRepository.findByUserEmail(email).orElse(null);
+    }
+
+    // ✅ UPDATE TEACHER
+    @Transactional
     public Teacher updateTeacher(Long id, Teacher data) {
         Teacher teacher = teacherRepository.findById(id).orElse(null);
         if (teacher == null) return null;
 
         teacher.setFullName(data.getFullName());
-        teacher.setUsername(data.getUsername());
         teacher.setAddress(data.getAddress());
         teacher.setContact(data.getContact());
         teacher.setDepartment(data.getDepartment());
         teacher.setQualification(data.getQualification());
         teacher.setExperience(data.getExperience());
-        teacher.setEmail(data.getEmail());
+
+        // Update user credentials if provided
+        if (data.getUsername() != null && !data.getUsername().isEmpty()) {
+            teacher.getUser().setUsername(data.getUsername());
+        }
+        if (data.getEmail() != null && !data.getEmail().isEmpty()) {
+            teacher.getUser().setEmail(data.getEmail());
+        }
 
         return teacherRepository.save(teacher);
     }
 
+    // ✅ HIDE TEACHER (SOFT DELETE)
+    @Transactional
+    public Teacher hideTeacher(Long id) {
+        Teacher teacher = teacherRepository.findById(id).orElse(null);
+        if (teacher != null) {
+            teacher.setHide("1");
+            teacher.setStatus("Pending");
+            if (teacher.getUser() != null) {
+                teacher.getUser().setStatus("Inactive");
+            }
+            return teacherRepository.save(teacher);
+        }
+        return null;
+    }
+
+    // ✅ DELETE TEACHER
+    @Transactional
     public void deleteTeacher(Long id) {
-        teacherRepository.deleteById(id);
+        Teacher teacher = teacherRepository.findById(id).orElse(null);
+        if (teacher != null && teacher.getUser() != null) {
+            // Delete both teacher and user
+            teacherRepository.delete(teacher);
+            userRepository.delete(teacher.getUser());
+        }
+    }
+
+    // ✅ APPROVE TEACHER
+    @Transactional
+    public Teacher approveTeacher(Long id) {
+        Teacher teacher = teacherRepository.findById(id).orElse(null);
+        if (teacher != null && teacher.getUser() != null) {
+            teacher.setStatus("Active");
+            teacher.getUser().setStatus("Active");
+            return teacherRepository.save(teacher);
+        }
+        return null;
     }
 
     public long getTotalTeachers() {
-        return teacherRepository.count();
+        return teacherRepository.countVisibleTeachers();
     }
 
     public long getActiveTeachersCount() {
-        return teacherRepository.findAll().stream()
-                .filter(t -> "Active".equalsIgnoreCase(t.getStatus()))
-                .count();
+        return teacherRepository.countByStatus("Active");
     }
 
     public long getPendingTeachersCount() {
-        return teacherRepository.findAll().stream()
-                .filter(t -> "Pending".equalsIgnoreCase(t.getStatus()))
-                .count();
+        return teacherRepository.countByStatus("Pending");
     }
 }

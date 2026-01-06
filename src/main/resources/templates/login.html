@@ -72,7 +72,10 @@
 <input type="password" id="login-pass" name="password" placeholder="Password" required> 
 <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
                     </div>
-                    <button class="login-btn" type="submit" id="loginButton">Login</button>
+                     <button class="login-btn" type="submit" id="loginButton">Login</button>
+                      <div class="forgot-wrapper">
+    <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+</div>
                 </form>
 
                 <hr class="login-divider">
@@ -80,20 +83,94 @@
             </div>
         </div>
     </section>
+    <!-- Forgot Password Modal -->
+<div class="forgot-modal-overlay" id="forgotPasswordModal">
+    <div class="forgot-modal-container">
+        <div class="forgot-modal-header">
+            <i class="fa-solid fa-unlock-keyhole"></i>
+            <h2>Forgot Password</h2>
+            <p>Enter your registered email to receive reset instructions.</p>
+        </div>
 
+        <form action="/forgot-password" method="post">
+            <div class="input-wrapper">
+                <i class="fa fa-envelope icon"></i>
+                <input type="email" name="email" placeholder="Registered Email" required>
+            </div>
+
+            <button type="submit" class="forgot-btn">
+                <i class="fa-solid fa-paper-plane"></i> Send OTP 
+            </button>
+
+            <div class="forgot-close" id="closeForgotModal">
+                Cancel
+            </div>
+        </form>
+    </div>
+</div>
+<!-- OTP Verification Modal -->
+<div class="otp-modal-overlay" th:classappend="${otpSent} ? 'show' : ''" id="otpVerificationModal">
+    <div class="otp-modal-container">
+        <div class="otp-modal-header">
+            <i class="fa-solid fa-shield-check"></i>
+            <h2>Verify OTP</h2>
+            <p>Enter the 6-digit OTP sent to your email</p>
+        </div>
+
+        <form action="/verify-otp" method="post">
+            <input type="hidden" name="email" th:value="${email}" id="otpEmail">
+            
+            <div class="input-wrapper">
+                <i class="fa-solid fa-key icon"></i>
+                <input type="text" name="otp" placeholder="Enter 6-digit OTP" 
+                       maxlength="6" pattern="\d{6}" required>
+            </div>
+            
+            <div th:if="${otpError}" class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <span th:text="${otpError}"></span>
+            </div>
+            
+            <div th:if="${emailError}" class="alert alert-error">
+                <i class="fa-solid fa-exclamation-circle"></i>
+                <span th:text="${emailError}"></span>
+            </div>
+            
+            <button type="submit" class="otp-verify-btn">
+                <i class="fa-solid fa-check"></i> Verify OTP
+            </button>
+            
+            <div class="otp-resend">
+                Didn't receive OTP? 
+                <a href="#" onclick="resendOtp()">Resend</a>
+            </div>
+            
+            <div class="otp-close" onclick="closeOtpModal()">
+                Cancel
+            </div>
+        </form>
+    </div>
+</div>
     <!-- Force Change Password Modal -->
-    <div class="password-modal-overlay" th:classappend="${forcePasswordChange} ? 'show' : ''" id="changePasswordModal">
+<div class="password-modal-overlay"
+     th:classappend="(${forcePasswordChange} == true or ${otpVerified} == true) ? 'show' : ''"
+     id="changePasswordModal">
+
         <div class="password-modal-container">
             <div class="password-modal-header">
                 <div class="password-modal-logo">
                     <i class="fa-solid fa-key"></i>
                     <h2>Change Password Required</h2>
                 </div>
-                <p class="password-modal-subtitle">Welcome! This is your first login. Please set a new password to continue.</p>
+                <p class="password-modal-subtitle">Welcome! , Please set a new password to continue.</p>
             </div>
             
             <div class="password-modal-body">
-                <form method="post" action="/change-password" id="changePasswordForm">
+<form id="changePasswordForm"
+      method="post"
+      th:action="${otpVerified} ? '/reset-password-otp' : '/change-password'">
+
+
                     <input type="hidden" name="userId" th:value="${userId}" id="modalUserId">
                     
                     <div class="form-group">
@@ -136,9 +213,10 @@
             </div>
         </div>
     </div>
+    
 
     <script src="/js/script.js"></script>
- <script th:if="${forcePasswordChange}">
+<script th:if="${forcePasswordChange} or ${otpVerified}">
 document.addEventListener('DOMContentLoaded', function () {
 
     const newPassword = document.getElementById('newPassword');

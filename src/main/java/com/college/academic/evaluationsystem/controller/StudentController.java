@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @RestController
 @RequestMapping("/api/students")
@@ -27,42 +26,92 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // ================= CREATE =================
+    // ================= CREATE STUDENT =================
     @PostMapping
-    public ResponseEntity<?> createStudent(@RequestBody Student student) {
+    public ResponseEntity<?> createStudent(@RequestBody Map<String, String> requestData) {
+        try {
+            // Extract data from request
+            String fullName = requestData.get("fullName");
+            String studentId = requestData.get("studentId");
+            String username = requestData.get("username");
+            String email = requestData.get("email");
+            String password = requestData.get("password");
+            String address = requestData.get("address");
+            String contact = requestData.get("contact");
+            String faculty = requestData.get("faculty");
+            String semester = requestData.get("semester");
+            String batch = requestData.get("batch");
 
-        if (student.getFullName() == null || student.getFullName().isBlank()
-                || student.getStudentId() == null || student.getStudentId().isBlank()
-                || student.getEmail() == null || student.getEmail().isBlank()
-                || student.getPassword() == null || student.getPassword().isBlank()) {
+            // Validate required fields
+            if (fullName == null || fullName.isBlank()
+                    || studentId == null || studentId.isBlank()
+                    || username == null || username.isBlank()
+                    || email == null || email.isBlank()
+                    || password == null || password.isBlank()) {
 
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Required fields empty"));
+            }
+
+            // Check if student ID already exists
+            if (studentRepository.existsByStudentId(studentId)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Student ID already exists"));
+            }
+
+            // Check if email already exists in User table
+            if (userRepository.existsByEmail(email)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Email already exists"));
+            }
+
+            // Check if username already exists in User table
+            if (userRepository.existsByUsername(username)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Username already exists"));
+            }
+
+            // Create new Student object
+            Student student = new Student();
+            student.setFullName(fullName);
+            student.setStudentId(studentId);
+            student.setAddress(address);
+            student.setContact(contact);
+            student.setFaculty(faculty);
+            student.setSemester(semester);
+            student.setBatch(batch);
+            student.setStatus("Pending");
+            student.setHide("0");
+            
+            // Set user credentials using the convenience method
+            student.setUserCredentials(username, email, password);
+
+            // Save student (will also create User record)
+            Student savedStudent = studentService.saveStudent(student);
+            return ResponseEntity.ok(savedStudent);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // Add logging for debugging
             return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Required fields empty"));
+                    .body(Map.of("message", e.getMessage()));
         }
-
-        if (studentRepository.existsByStudentId(student.getStudentId())) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Student ID already exists"));
-        }
-
-        if (studentRepository.existsByEmail(student.getEmail())) {
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "Email already exists"));
-        }
-
-        student.setStatus("Pending"); // default status
-        student.setHide("0"); // default visible
-        return ResponseEntity.ok(studentService.saveStudent(student));
     }
 
-    // ================= READ =================
+    // ================= GET ALL STUDENTS =================
     @GetMapping
     public List<Student> getAllStudents() {
         // Only visible students
-        return studentRepository.findByHide("0");
+        return studentService.getAllStudents();
+    }
+
+    // ================= GET STUDENT BY USERNAME (For Profile) =================
+    @GetMapping("/profile/{username}")
+    public ResponseEntity<?> getStudentProfile(@PathVariable String username) {
+        Student student = studentService.getStudentByUsername(username);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(student);
     }
 
     // ================= UPDATE STATUS =================
@@ -81,73 +130,78 @@ public class StudentController {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid status value"));
         }
 
-        // Update student status
+        // Update student and user status
         student.setStatus(status);
         studentRepository.save(student);
-
-        // Sync Users table
-        User user = userRepository.findByUsername(student.getUsername()).orElse(null);
-
-        if ("Active".equalsIgnoreCase(status)) {
-            if (user == null) {
-                // Pending → Active
-                user = new User();
-                user.setUsername(student.getUsername());
-                user.setEmail(student.getEmail());
-                user.setPassword(passwordEncoder.encode(student.getPassword()));
-                user.setRole("STUDENT");
-                user.setStatus("Active");
-                userRepository.save(user);
-            } else {
-                user.setStatus("Active");
-                userRepository.save(user);
-            }
-        } else {
-            if (user != null) {
-                // Active → Pending (deactivate user)
-                user.setStatus("Inactive");
-                userRepository.save(user);
-            }
-        }
 
         return ResponseEntity.ok(student);
     }
 
-    // ================= UPDATE =================
+    // ================= UPDATE STUDENT =================
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStudent(
             @PathVariable Long id,
-            @RequestBody Student student) {
+            @RequestBody Map<String, String> data) {
 
-        Student updated = studentService.updateStudent(id, student);
-        return updated != null
-                ? ResponseEntity.ok(updated)
-                : ResponseEntity.notFound().build();
-    }
-
-    // ================= HIDE (Soft Delete) =================
-    @PutMapping("/{id}/hide")
-    public ResponseEntity<?> hideStudent(@PathVariable Long id) {
         Student student = studentRepository.findById(id).orElse(null);
         if (student == null) {
             return ResponseEntity.notFound().build();
         }
 
-        if ("1".equals(student.getHide())) {
-            return ResponseEntity.ok(Map.of("message", "Student already hidden"));
+        // Update student fields
+        if (data.containsKey("fullName")) {
+            student.setFullName(data.get("fullName"));
+        }
+        if (data.containsKey("address")) {
+            student.setAddress(data.get("address"));
+        }
+        if (data.containsKey("contact")) {
+            student.setContact(data.get("contact"));
+        }
+        if (data.containsKey("faculty")) {
+            student.setFaculty(data.get("faculty"));
+        }
+        if (data.containsKey("semester")) {
+            student.setSemester(data.get("semester"));
+        }
+        if (data.containsKey("batch")) {
+            student.setBatch(data.get("batch"));
         }
 
-        student.setHide("1"); // one-way hide
-        student.setStatus("Pending"); // optional safety
-        studentRepository.save(student);
-
-        // Optional: deactivate user if exists
-    User user = userRepository.findByEmail(student.getEmail()).orElse(null);
-        if (user != null) {
-            user.setStatus("Inactive");
-            userRepository.save(user);
+        // Update user credentials if provided
+        if (data.containsKey("username")) {
+            String newUsername = data.get("username");
+            if (!newUsername.equals(student.getUsername())) {
+                if (userRepository.existsByUsername(newUsername)) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "Username already exists"));
+                }
+                student.getUser().setUsername(newUsername);
+            }
         }
 
+        if (data.containsKey("email")) {
+            String newEmail = data.get("email");
+            if (!newEmail.equals(student.getEmail())) {
+                if (userRepository.existsByEmail(newEmail)) {
+                    return ResponseEntity.badRequest()
+                            .body(Map.of("message", "Email already exists"));
+                }
+                student.getUser().setEmail(newEmail);
+            }
+        }
+
+        Student updated = studentRepository.save(student);
+        return ResponseEntity.ok(updated);
+    }
+
+    // ================= HIDE (Soft Delete) =================
+    @PutMapping("/{id}/hide")
+    public ResponseEntity<?> hideStudent(@PathVariable Long id) {
+        Student student = studentService.hideStudent(id);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(Map.of("message", "Student hidden successfully"));
     }
 

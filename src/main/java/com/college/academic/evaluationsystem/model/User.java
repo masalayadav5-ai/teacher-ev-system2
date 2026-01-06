@@ -1,6 +1,7 @@
 package com.college.academic.evaluationsystem.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +28,9 @@ public class User {
 
     @Column(nullable = false)
     private String status = "Pending"; // Pending / Active
+    
+    private String otp;
+    private LocalDateTime otpExpiry;
 
      public boolean isActive() {
         return "Active".equals(this.status);
@@ -45,4 +49,20 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+public String getOtp() {
+    return otp;
 }
+
+public void setOtp(String otp) {
+    this.otp = otp;
+}
+
+public LocalDateTime getOtpExpiry() {
+    return otpExpiry;
+}
+
+public void setOtpExpiry(LocalDateTime otpExpiry) {
+    this.otpExpiry = otpExpiry;
+}
+
+}   
