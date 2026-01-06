@@ -199,28 +199,28 @@ students.slice().reverse().forEach(s => {
 }
 // ================= HIDE (SOFT DELETE) =================
 async function hidestudent(id) {
-    if (!confirm("Are you sure you want to delete this student?")) return;
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This student will be deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!"
+    });
 
-    try {
-        const response = await fetch(`${STUDENT_API_BASE_URL}/students/${id}/hide`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" }
-        });
+    if (!result.isConfirmed) return;
 
-        const result = await response.json();
+    const response = await fetch(
+      `${STUDENT_API_BASE_URL}/students/${id}/hide`,
+      { method: "PUT" }
+    );
 
-        if (response.ok) {
-            showMessage(result.message || "Student hidden successfully!", "success");
-            loadStudents(); // Refresh table
-            loadStatistics();
-        } else {
-            showMessage(result.message || "Failed to hide student!", "error");
-        }
-    } catch (error) {
-        console.error("Error hiding student:", error);
-        showMessage("Server error! Could not hide student.", "error");
-    }
+    const data = await response.json();
+
+    Swal.fire("Done!", data.message, "success");
+    loadStudents();
+    loadStatistics();
 }
+
 
  async function toggleStatus(id, currentStatus) {
     const newStatus = currentStatus === "Pending" ? "Active" : "Pending";

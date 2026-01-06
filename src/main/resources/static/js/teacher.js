@@ -203,19 +203,20 @@ async function loadTeachers() {
                 <td>${teacher.fullName || ''}</td>
                 <td>${teacher.email || ''}</td>
                 <td>${teacher.department || ''}</td>
+               <td>
+    <button 
+        class="status-btn ${teacher.status === 'Pending' ? 'pending-btn' : 'approve-btn'}"
+        onclick="toggleTeacherStatus(${teacher.id}, '${teacher.status}')">
+        ${teacher.status === 'Pending' ? 'Pending' : 'Active'}
+    </button>
+</td>
+
                 <td>
-                    <span class="badge ${teacher.status === 'Active' ? 'active' : 'pending'}">
-                        ${teacher.status || 'Pending'}
-                    </span>
-                </td>
-                <td>
-                    <button class="action-btn ${teacher.status === 'Pending' ? 'approve-btn' : 'pending-btn'}" 
-                            onclick="toggleTeacherStatus(${teacher.id}, '${teacher.status}')">
-                        ${teacher.status === 'Pending' ? 'Approve' : 'Set Pending'}
-                    </button>
-                    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
-                    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
-                </td>
+    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
+    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
+    <button class="action-btn hide" onclick="hideTeacher(${teacher.id})">Delete</button>
+</td>
+
             `;
             tbody.appendChild(row);
         });
@@ -245,8 +246,7 @@ function setText(id, value) {
 
 // ================= TOGGLE STATUS =================
 async function toggleTeacherStatus(id, currentStatus) {
-    if (!confirm(`Change status to ${currentStatus === 'Pending' ? 'Active' : 'Pending'}?`)) return;
-    
+     
     const newStatus = currentStatus === "Pending" ? "Active" : "Pending";
     
     try {
@@ -395,6 +395,29 @@ Address: ${teacher.address || 'N/A'}`);
     } catch (error) {
         alert("Error loading details!");
     }
+}
+ 
+async function hideTeacher(id) {
+    const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "This teacher will be deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!"
+    });
+
+    if (!result.isConfirmed) return;
+
+    const response = await fetch(
+      `${STUDENT_API_BASE_URL}/teachers/${id}/hide`,
+      { method: "PUT" }
+    );
+
+    const data = await response.json();
+
+    Swal.fire("Done!", data.message, "success");
+    loadTeachers();
+    loadTeacherStatistics();
 }
 
 // ================= CLOSE MODAL =================
