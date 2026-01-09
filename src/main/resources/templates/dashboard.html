@@ -194,42 +194,102 @@
 
 function loadPage(pageUrl) {
     const area = document.getElementById("content-area");
-    initSessionPlan();
-
     area.classList.remove("loaded");
 
     fetch(pageUrl)
         .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
         .then(html => {
-
             // Remove scripts from loaded pages
-            html = html.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
-
-            area.innerHTML = html;
-
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            
+            // Remove script tags but keep their content
+            const scripts = tempDiv.querySelectorAll('script');
+            scripts.forEach(script => {
+                script.remove();
+                // If it's a script with src, we might need to load it
+                if (script.src) {
+                    console.log('External script found:', script.src);
+                }
+            });
+            
+            area.innerHTML = tempDiv.innerHTML;
 
             requestAnimationFrame(() => {
                 area.classList.add("loaded");
             });
 
-           // const topTitle = document.querySelector(".top-title");
-           // topTitle.style.display = pageUrl.includes("dashboard-content.html") ? "block" : "none";
+            // Handle specific pages
+// In your current loadPage function, update the page-specific handlers:
 
-            // Rebind modals for loaded page
-            initModals();
+// Handle specific pages
+if (pageUrl.includes("sessionplan.html")) {
+    // Only try to initialize if we're on the session plan page
+    setTimeout(() => {
+        if (typeof initSessionPlan === 'function') {
             initSessionPlan();
-            if (pageUrl.includes("student.html")) {
-    initStudentPage();
+        } else {
+            console.log('initSessionPlan not available on this page');
+        }
+    }, 100);
 }
-         if (pageUrl.includes("teacher.html")) {
-    initTeacherPage();
+
+if (pageUrl.includes("student.html")) {
+    setTimeout(() => {
+        if (typeof initStudentPage === 'function') {
+            initStudentPage();
+        } else {
+            console.log('initStudentPage not available on this page');
+        }
+    }, 100);
 }
- if (pageUrl.includes("StudentProfile.html")) {
-                // Initialize profile if student data exists
-                if (localStorage.getItem('currentStudentProfile')) {
-                    initStudentProfile();
-                }
+
+if (pageUrl.includes("teacher.html")) {
+    setTimeout(() => {
+        if (typeof initTeacherPage === 'function') {
+            initTeacherPage();
+        } else {
+            console.log('initTeacherPage not available on this page');
+        }
+    }, 100);
+}
+
+// SPECIAL HANDLING FOR SESSION DETAILS
+if (pageUrl.includes("session-details.html")) {
+    const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
+    const sessionId = urlParams.get('id');
+    
+    if (sessionId) {
+        setTimeout(() => {
+            // First try loadSessionDetails
+            if (typeof loadSessionDetails === 'function') {
+                loadSessionDetails(sessionId);
+            } 
+            // Then try initSessionDetails
+            else if (typeof initSessionDetails === 'function') {
+                initSessionDetails();
             }
+            else {
+                console.error('No session details functions found');
+                // Try to fetch and display manually
+                fetch(`/api/session-plans/${sessionId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log('Manual fetch:', data);
+                        // Basic display
+                        document.getElementById('courseTitle').textContent = data.course || 'No Course';
+                        document.getElementById('sessionId').textContent = data.id || 'N/A';
+                    });
+            }
+        }, 200);
+    }
+}
+            
+            initModals();
+        })
+        .catch(err => {
+            console.error('Error loading page:', err);
+            area.innerHTML = `<h3 class='text-danger'>Error loading page</h3>`;
         });
 }
 
@@ -383,8 +443,10 @@ function filterTable() {
 <script src="js/sessionplan.js"></script>
 <script src="js/student.js"></script>
 <script src="js/teacher.js"></script>
+<script src="/js/session-details.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="/js/topbar.js"></script>
+
 </body>
 </html>

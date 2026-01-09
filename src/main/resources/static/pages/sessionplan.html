@@ -25,43 +25,53 @@
                 <div class="form-group">
                     <label>Faculty</label>
                     <select id="faculty">
-                        <option value="">Select Faculty</option>
-                        <option>Prof. Mahesh Singh</option>
-                        <option>Dr. Anjali Sharma</option>
+                        <option value="">-- Select Faculty --</option>
+                        <option value="BE Computer">BE Computer</option>
+                        <option value="BE Civil">BE Civil</option>
+                        <option value="BBA">BBA</option>
+                        <option value="BCA">BCA</option>
                     </select>
                 </div>
-
-                <div class="form-group">
-                    <label>Course</label>
-                    <select id="course">
-                        <option value="">Select Course</option>
-                        <option>Computer Networks</option>
-                        <option>Software Engineering</option>
-                        <option>Data Structures</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
+ <div class="form-group">
                     <label>Semester</label>
                     <select id="semester">
                         <option value="">Select Semester</option>
                         <option>Semester I</option>
                         <option>Semester II</option>
                         <option>Semester III</option>
-                    </select>
+                         <option>Semester IV</option>
+                        <option>Semester V</option>
+                        <option>Semester VI</option>
+                         <option>Semester VII</option>
+                        <option>Semester VIII</option>
+                     </select>
                 </div>
+               <div class="form-group">
+    <label>Course</label>
+    <input type="text" id="course" placeholder="Enter Course" class="form-control">
+</div>
+              
             </div>
 
             <!-- Day-wise Session Plan -->
             <h4 class="day-title">Day-wise Session Plan</h4>
 
             <div id="dayContainer">
-    <div class="day-card">
-        <h5 id="dayLabel">Day 1</h5>
-        <input type="text" id="dayTopic" placeholder="Topic / Lesson Title">
-        <textarea id="dayDesc" rows="3"
-            placeholder="Session description for Day 1"></textarea>
-    </div>
+   <div id="dayContainer">
+  <div class="day-card">
+      <h5 class="day-label">Day 1</h5>
+      <input type="text" class="day-topic" placeholder="Topic / Lesson Title">
+      <textarea class="day-desc" rows="3" placeholder="Session description for Day 1"></textarea>
+      
+      <!-- New Method Select -->
+      <select class="day-method">
+          <option value="Lecture">Lecture</option>
+          <option value="Tutorial">Tutorial</option>
+          <option value="Practical">Practical</option>
+      </select>
+  </div>
+</div>
+
 </div>
 
 <div class="day-nav">
@@ -96,21 +106,9 @@
                      <th>Method</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>Data Structures</td>
-                    <td>Semester III</td>
-                    <td>2025-01-10</td>
-                     <td>Lecture + Demo</td>
-                </tr>
-                <tr>
-                    <td>Software Engineering</td>
-                    <td>Semester II</td>
-                    <td>2025-01-12</td>
-                     <td>Lecture</td>
-                </tr>
-            </tbody>
+                 <tbody></tbody>
+
         </table>
     </div>
 
-             
+    
