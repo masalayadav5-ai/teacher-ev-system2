@@ -51,7 +51,13 @@
                             <span>Dashboard</span>
                         </a>
                     </li>
-
+<!-- In your sidebar navigation (dashboard.html) -->
+<li class="nav-item">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/admin-management.html')">
+        <i class="fas fa-cogs"></i>
+        <span>Academic Management</span>
+    </a>
+</li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
                             <i class="bi bi-people"></i>
@@ -243,6 +249,15 @@ if (pageUrl.includes("student.html")) {
         }
     }, 100);
 }
+if (pageUrl.includes("admin-management.html")) {
+    setTimeout(() => {
+        if (typeof initAdminManagement === 'function') {
+            initAdminManagement();
+        } else {
+            console.log('initAdminManagement not available on this page');
+        }
+    }, 100);
+}
 
 if (pageUrl.includes("teacher.html")) {
     setTimeout(() => {
@@ -314,11 +329,18 @@ function initModals() {
     const viewparaPanel = document.getElementById("viewparaPanel");
     const sessionModal = document.getElementById("sessionModal");
     const settingsModal = document.getElementById("settingsModal");
+    const programModal = document.getElementById("programModal");
+    const semesterModal = document.getElementById("semesterModal");
+    const courseModal = document.getElementById("courseModal");
+ 
+
+    
+ 
 
 
 
     // If neither modal exists on page, do nothing
-    if (!studentPanel && !teacherPanel && !viewparaPanel && !sessionModal && !settingsModal) return;
+    if (!studentPanel && !teacherPanel && !viewparaPanel && !sessionModal && !settingsModal && !programModal && !semesterModal && !courseModal) return;
 
     // Add only ONE click listener for all pages
     if (!modalListenerAdded) {
@@ -334,6 +356,14 @@ function modalHandler(e) {
     const viewparaPanel = document.getElementById("viewparaPanel");
     const sessionModal = document.getElementById("sessionModal");
     const settingsModal = document.getElementById("settingsModal");
+    const programModal = document.getElementById("programModal");
+    const semesterModal = document.getElementById("semesterModal");
+    const courseModal = document.getElementById("courseModal");
+ 
+
+
+
+    
 
 
 
@@ -363,6 +393,19 @@ if (e.target.closest("#settingsLink") && settingsModal) {
     e.preventDefault();
     settingsModal.classList.add("show");
 }
+//addprogram
+if (e.target.closest(".programAdd") ) {
+        programModal.classList.add("show");
+    }
+    //addsemester
+    if (e.target.closest(".semesterAdd") ) {
+        semesterModal.classList.add("show");
+    }
+    //addcourse
+     if (e.target.closest(".courseAdd") ) {
+        courseModal.classList.add("show");
+    }
+    
 
     /* ----------------------------
        CLOSE MODALS
@@ -374,6 +417,12 @@ if (e.target.closest("#settingsLink") && settingsModal) {
         if (viewparaPanel) viewparaPanel.classList.remove("show");
         if (sessionModal) sessionModal.classList.remove("show");
         if (settingsModal) settingsModal.classList.remove("show");
+        if (programModal) programModal.classList.remove("show");
+        if (semesterModal) semesterModal.classList.remove("show");
+        if (courseModal) courseModal.classList.remove("show");
+ 
+
+
 
 
     }
@@ -384,6 +433,13 @@ if (e.target.closest("#settingsLink") && settingsModal) {
     if (e.target === viewparaPanel) viewparaPanel.classList.remove("show");
     if (e.target === sessionModal) sessionModal.classList.remove("show");
     if (e.target === settingsModal) settingsModal.classList.remove("show");
+    if (e.target === programModal) programModal.classList.remove("show");
+    if (e.target === semesterModal) semesterModal.classList.remove("show");
+     if (e.target === courseModal) courseModal.classList.remove("show");
+ 
+
+
+
 
 }
 
@@ -444,6 +500,8 @@ function filterTable() {
 <script src="js/student.js"></script>
 <script src="js/teacher.js"></script>
 <script src="/js/session-details.js"></script>
+<script src="/js/admin-management.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="/js/topbar.js"></script>

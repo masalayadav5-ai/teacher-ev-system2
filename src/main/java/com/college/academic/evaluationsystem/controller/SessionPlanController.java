@@ -30,4 +30,28 @@ public class SessionPlanController {
     public SessionPlan getById(@PathVariable Long id) {
         return service.findById(id);
     }
+    
+    // NEW: Get session plans by program
+    @GetMapping("/program/{programId}")
+    public List<SessionPlan> getByProgram(@PathVariable Long programId) {
+        return service.findByProgram(programId);
+    }
+    
+    // NEW: Get session plans by program and semester
+    @GetMapping("/program/{programId}/semester/{semesterId}")
+    public List<SessionPlan> getByProgramAndSemester(@PathVariable Long programId, @PathVariable Long semesterId) {
+        return service.findByProgramAndSemester(programId, semesterId);
+    }
+    
+    // NEW: Get session plans by teacher
+    @GetMapping("/teacher/{teacherId}")
+    public List<SessionPlan> getByTeacher(@PathVariable Long teacherId) {
+        return service.findByTeacher(teacherId);
+    }
+    
+    // NEW: Get session plans by course
+    @GetMapping("/course/{courseId}")
+    public List<SessionPlan> getByCourse(@PathVariable Long courseId) {
+        return service.findByCourse(courseId);
+    }
 }

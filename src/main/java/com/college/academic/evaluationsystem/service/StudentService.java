@@ -1,9 +1,7 @@
 package com.college.academic.evaluationsystem.service;
 
-import com.college.academic.evaluationsystem.model.Student;
-import com.college.academic.evaluationsystem.model.User;
-import com.college.academic.evaluationsystem.repository.StudentRepository;
-import com.college.academic.evaluationsystem.repository.UserRepository;
+import com.college.academic.evaluationsystem.model.*;
+import com.college.academic.evaluationsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,12 @@ public class StudentService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProgramRepository programRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,11 +55,13 @@ public class StudentService {
         User savedUser = userRepository.save(user);
         student.setUser(savedUser);
         
+        // NOTE: Program and Semester should be set before saving
+        // You'll need to pass programId/semesterId and fetch them
         return studentRepository.save(student);
     }
 
     public List<Student> getAllStudents() {
-        // Use the method that fetches user eagerly
+        // Get only visible students
         return studentRepository.findByHide("0");
     }
 
@@ -64,7 +70,6 @@ public class StudentService {
     }
 
     public Student getStudentById(Long id) {
-        // This will fetch the user relationship properly
         return studentRepository.findById(id).orElse(null);
     }
 
@@ -90,7 +95,7 @@ public class StudentService {
         return null;
     }
 
-    // ✅ UPDATE STUDENT
+    // ✅ UPDATE STUDENT WITH PROGRAM & SEMESTER
     @Transactional
     public Student updateStudent(Long id, Student data) {
         Student student = studentRepository.findById(id).orElse(null);
@@ -99,9 +104,17 @@ public class StudentService {
         student.setFullName(data.getFullName());
         student.setAddress(data.getAddress());
         student.setContact(data.getContact());
-        student.setFaculty(data.getFaculty());
-        student.setSemester(data.getSemester());
         student.setBatch(data.getBatch());
+
+        // Update program if provided
+        if (data.getProgram() != null) {
+            student.setProgram(data.getProgram());
+        }
+        
+        // Update semester if provided
+        if (data.getSemester() != null) {
+            student.setSemester(data.getSemester());
+        }
 
         // Update user credentials if provided
         if (data.getUsername() != null && !data.getUsername().isEmpty()) {
@@ -114,6 +127,21 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
+    // ✅ Assign Student to Program and Semester
+    @Transactional
+    public Student assignToProgramAndSemester(Long studentId, Long programId, Long semesterId) {
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+        Program program = programRepository.findById(programId)
+            .orElseThrow(() -> new RuntimeException("Program not found"));
+        Semester semester = semesterRepository.findById(semesterId)
+            .orElseThrow(() -> new RuntimeException("Semester not found"));
+        
+        student.setProgram(program);
+        student.setSemester(semester);
+        return studentRepository.save(student);
+    }
+
     // ✅ DELETE STUDENT
     @Transactional
     public void deleteStudent(Long id) {
@@ -123,6 +151,16 @@ public class StudentService {
             studentRepository.delete(student);
             userRepository.delete(student.getUser());
         }
+    }
+
+    // ✅ Get students by program
+    public List<Student> getStudentsByProgram(Long programId) {
+        return studentRepository.findByProgramId(programId);
+    }
+
+    // ✅ Get students by program and semester
+    public List<Student> getStudentsByProgramAndSemester(Long programId, Long semesterId) {
+        return studentRepository.findByProgramIdAndSemesterId(programId, semesterId);
     }
 
     public long getTotalStudents() {

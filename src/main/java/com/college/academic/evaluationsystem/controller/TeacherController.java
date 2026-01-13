@@ -1,9 +1,7 @@
 package com.college.academic.evaluationsystem.controller;
 
-import com.college.academic.evaluationsystem.model.Teacher;
-import com.college.academic.evaluationsystem.model.User;
-import com.college.academic.evaluationsystem.repository.TeacherRepository;
-import com.college.academic.evaluationsystem.repository.UserRepository;
+import com.college.academic.evaluationsystem.model.*;
+import com.college.academic.evaluationsystem.repository.*;
 import com.college.academic.evaluationsystem.service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,23 +26,37 @@ public class TeacherController {
     private UserRepository userRepository;
 
     @Autowired
+    private ProgramRepository programRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ================= CREATE =================
+    // ================= CREATE TEACHER =================
     @PostMapping
-    public ResponseEntity<?> createTeacher(@RequestBody Map<String, String> requestData) {
+    public ResponseEntity<?> createTeacher(@RequestBody Map<String, Object> requestData) {
         try {
             // Extract data from request
-            String fullName = requestData.get("fullName");
-            String teacherId = requestData.get("teacherId");
-            String username = requestData.get("username");
-            String email = requestData.get("email");
-            String password = requestData.get("password");
-            String address = requestData.get("address");
-            String contact = requestData.get("contact");
-            String department = requestData.get("department");
-            String qualification = requestData.get("qualification");
-            String experienceStr = requestData.get("experience");
+            String fullName = (String) requestData.get("fullName");
+            String teacherId = (String) requestData.get("teacherId");
+            String username = (String) requestData.get("username");
+            String email = (String) requestData.get("email");
+            String password = (String) requestData.get("password");
+            String address = (String) requestData.get("address");
+            String contact = (String) requestData.get("contact");
+            String qualification = (String) requestData.get("qualification");
+            String experienceStr = (String) requestData.get("experience");
+            
+            // NEW: Extract programId (as Long or Integer)
+            Long programId = null;
+            if (requestData.get("programId") != null) {
+                if (requestData.get("programId") instanceof Integer) {
+                    programId = ((Integer) requestData.get("programId")).longValue();
+                } else if (requestData.get("programId") instanceof Long) {
+                    programId = (Long) requestData.get("programId");
+                } else if (requestData.get("programId") instanceof String) {
+                    programId = Long.parseLong((String) requestData.get("programId"));
+                }
+            }
 
             // Validate required fields
             if (fullName == null || fullName.isBlank()
@@ -81,9 +93,15 @@ public class TeacherController {
             teacher.setTeacherId(teacherId);
             teacher.setAddress(address);
             teacher.setContact(contact);
-            teacher.setDepartment(department);
             teacher.setQualification(qualification);
             teacher.setHide("0"); // Default visible
+            
+            // NEW: Set program relationship
+            if (programId != null) {
+                Program program = programRepository.findById(programId)
+                    .orElseThrow(() -> new RuntimeException("Program not found"));
+                teacher.setProgram(program);
+            }
             
             // Parse experience
             try {
@@ -112,10 +130,16 @@ public class TeacherController {
         }
     }
 
-    // ================= READ =================
+    // ================= GET ALL TEACHERS =================
     @GetMapping
     public List<Teacher> getAllTeachers() {
         return teacherService.getAllTeachers();
+    }
+    
+    // NEW: Get teachers by program
+    @GetMapping("/program/{programId}")
+    public List<Teacher> getTeachersByProgram(@PathVariable Long programId) {
+        return teacherService.getTeachersByProgram(programId);
     }
 
     // ================= GET TEACHER BY USERNAME (For Profile) =================
@@ -164,11 +188,11 @@ public class TeacherController {
         return ResponseEntity.ok(Map.of("message", "Teacher hidden successfully"));
     }
 
-    // ================= UPDATE =================
+    // ================= UPDATE TEACHER =================
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTeacher(
             @PathVariable Long id,
-            @RequestBody Map<String, String> data) {
+            @RequestBody Map<String, Object> data) {
 
         Teacher teacher = teacherRepository.findById(id).orElse(null);
         if (teacher == null) {
@@ -177,31 +201,47 @@ public class TeacherController {
 
         // Update teacher fields
         if (data.containsKey("fullName")) {
-            teacher.setFullName(data.get("fullName"));
+            teacher.setFullName((String) data.get("fullName"));
         }
         if (data.containsKey("address")) {
-            teacher.setAddress(data.get("address"));
+            teacher.setAddress((String) data.get("address"));
         }
         if (data.containsKey("contact")) {
-            teacher.setContact(data.get("contact"));
-        }
-        if (data.containsKey("department")) {
-            teacher.setDepartment(data.get("department"));
+            teacher.setContact((String) data.get("contact"));
         }
         if (data.containsKey("qualification")) {
-            teacher.setQualification(data.get("qualification"));
+            teacher.setQualification((String) data.get("qualification"));
         }
         if (data.containsKey("experience")) {
             try {
-                teacher.setExperience(Integer.parseInt(data.get("experience")));
+                teacher.setExperience(Integer.parseInt((String) data.get("experience")));
             } catch (NumberFormatException e) {
                 // Keep existing value if invalid
+            }
+        }
+        
+        // NEW: Update program relationship
+        if (data.containsKey("programId")) {
+            Long programId = null;
+            Object programIdObj = data.get("programId");
+            if (programIdObj instanceof Integer) {
+                programId = ((Integer) programIdObj).longValue();
+            } else if (programIdObj instanceof Long) {
+                programId = (Long) programIdObj;
+            } else if (programIdObj instanceof String) {
+                programId = Long.parseLong((String) programIdObj);
+            }
+            
+            if (programId != null) {
+                Program program = programRepository.findById(programId)
+                    .orElseThrow(() -> new RuntimeException("Program not found"));
+                teacher.setProgram(program);
             }
         }
 
         // Update user credentials if provided
         if (data.containsKey("username")) {
-            String newUsername = data.get("username");
+            String newUsername = (String) data.get("username");
             if (!newUsername.equals(teacher.getUsername())) {
                 if (userRepository.existsByUsername(newUsername)) {
                     return ResponseEntity.badRequest()
@@ -212,7 +252,7 @@ public class TeacherController {
         }
 
         if (data.containsKey("email")) {
-            String newEmail = data.get("email");
+            String newEmail = (String) data.get("email");
             if (!newEmail.equals(teacher.getEmail())) {
                 if (userRepository.existsByEmail(newEmail)) {
                     return ResponseEntity.badRequest()
@@ -241,6 +281,24 @@ public class TeacherController {
     public ResponseEntity<?> deleteTeacher(@PathVariable Long id) {
         teacherService.deleteTeacher(id);
         return ResponseEntity.ok().build();
+    }
+
+    // ================= ASSIGN TO PROGRAM =================
+    @PutMapping("/{id}/assign-program")
+    public ResponseEntity<?> assignToProgram(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> data) {
+        
+        Long programId = data.get("programId");
+        if (programId == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Program ID required"));
+        }
+        
+        Teacher teacher = teacherService.assignToProgram(id, programId);
+        if (teacher == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(teacher);
     }
 
     // ================= STATS =================

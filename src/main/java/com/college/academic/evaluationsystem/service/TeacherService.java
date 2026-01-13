@@ -1,9 +1,7 @@
 package com.college.academic.evaluationsystem.service;
 
-import com.college.academic.evaluationsystem.model.Teacher;
-import com.college.academic.evaluationsystem.model.User;
-import com.college.academic.evaluationsystem.repository.TeacherRepository;
-import com.college.academic.evaluationsystem.repository.UserRepository;
+import com.college.academic.evaluationsystem.model.*;
+import com.college.academic.evaluationsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +17,9 @@ public class TeacherService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ProgramRepository programRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -51,6 +52,8 @@ public class TeacherService {
         User savedUser = userRepository.save(user);
         teacher.setUser(savedUser);
         
+        // NOTE: Program should be set before saving
+        // You'll need to pass programId and fetch program from repository
         return teacherRepository.save(teacher);
     }
 
@@ -74,7 +77,7 @@ public class TeacherService {
         return teacherRepository.findByUserEmail(email).orElse(null);
     }
 
-    // ✅ UPDATE TEACHER
+    // ✅ UPDATE TEACHER WITH PROGRAM
     @Transactional
     public Teacher updateTeacher(Long id, Teacher data) {
         Teacher teacher = teacherRepository.findById(id).orElse(null);
@@ -83,9 +86,13 @@ public class TeacherService {
         teacher.setFullName(data.getFullName());
         teacher.setAddress(data.getAddress());
         teacher.setContact(data.getContact());
-        teacher.setDepartment(data.getDepartment());
         teacher.setQualification(data.getQualification());
         teacher.setExperience(data.getExperience());
+        
+        // Update program if provided
+        if (data.getProgram() != null) {
+            teacher.setProgram(data.getProgram());
+        }
 
         // Update user credentials if provided
         if (data.getUsername() != null && !data.getUsername().isEmpty()) {
@@ -95,6 +102,18 @@ public class TeacherService {
             teacher.getUser().setEmail(data.getEmail());
         }
 
+        return teacherRepository.save(teacher);
+    }
+
+    // ✅ Assign Teacher to Program
+    @Transactional
+    public Teacher assignToProgram(Long teacherId, Long programId) {
+        Teacher teacher = teacherRepository.findById(teacherId)
+            .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        Program program = programRepository.findById(programId)
+            .orElseThrow(() -> new RuntimeException("Program not found"));
+        
+        teacher.setProgram(program);
         return teacherRepository.save(teacher);
     }
 
@@ -134,6 +153,11 @@ public class TeacherService {
             return teacherRepository.save(teacher);
         }
         return null;
+    }
+
+    // ✅ Get teachers by program
+    public List<Teacher> getTeachersByProgram(Long programId) {
+        return teacherRepository.findByProgramId(programId);
     }
 
     public long getTotalTeachers() {

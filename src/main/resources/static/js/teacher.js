@@ -51,52 +51,42 @@ function initTeacherPage() {
 
 // ================= HANDLE SUBMIT =================
 async function handleTeacherSubmit(e) {
-    console.log("Submit clicked!");
     e.preventDefault();
-    
-    // Get form values
+
     const formData = {
         fullName: getValue("fullName"),
         teacherId: getValue("teacherId"),
-        username: getValue("username"),
+        username: getValue("username") || getValue("teacherId"),
         address: getValue("address"),
         contact: getValue("contact"),
-        department: getValue("department"),
+        programId: parseInt(getValue("programId")),
         qualification: getValue("qualification"),
         experience: parseInt(getValue("experience")),
         email: getValue("email"),
         password: getValue("password"),
         confirmPassword: getValue("confirmPassword")
     };
-    
-    // Validation
-    if (!validateTeacherForm(formData)) {
-        return;
-    }
-    
-    // Prepare data for API
-    const teacherData = {
-        fullName: formData.fullName,
-        teacherId: formData.teacherId,
-        username: formData.username || formData.teacherId,
-        address: formData.address,
-        contact: formData.contact,
-        department: formData.department,
-        qualification: formData.qualification,
-        experience: formData.experience,
-        email: formData.email,
-        password: formData.password,
-        status: "Pending"
-    };
-    
-    // Remove password if editing
-    if (editingTeacherId) {
-        delete teacherData.password;
-    }
-    
-    // Send request
+
+    if (!validateTeacherForm(formData)) return;
+
+    // Build nested payload
+   const teacherData = {
+    fullName: getValue("fullName"),
+    teacherId: getValue("teacherId"),
+    username: getValue("username") || getValue("teacherId"),
+    email: getValue("email"),
+    password: getValue("password"),
+    address: getValue("address"),
+    contact: getValue("contact"),
+    qualification: getValue("qualification"),
+    experience: getValue("experience").toString(), // send as string
+    programId: getValue("programId") // string is fine, controller parses
+};
+
     await saveTeacher(teacherData);
 }
+
+
 
 // ================= HELPER FUNCTIONS =================
 function getValue(id) {
@@ -106,7 +96,7 @@ function getValue(id) {
 
 function validateTeacherForm(data) {
     // Required fields
-    const required = ['fullName', 'teacherId', 'contact', 'department', 'email'];
+    const required = ['fullName', 'teacherId', 'contact', 'programId', 'email'];
     for (const field of required) {
         if (!data[field]) {
             showTeacherMessage(`${field.replace(/([A-Z])/g, ' $1')} is required!`, "error");
@@ -145,40 +135,33 @@ async function saveTeacher(teacherData) {
     const url = editingTeacherId
         ? `${TEACHER_API_BASE_URL}/teachers/${editingTeacherId}`
         : `${TEACHER_API_BASE_URL}/teachers`;
-    
+
     const method = editingTeacherId ? "PUT" : "POST";
-    
+
     try {
         const response = await fetch(url, {
             method,
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(teacherData)
         });
-        
+
+        const result = await response.json();
         if (response.ok) {
-            showTeacherMessage(
-                editingTeacherId ? "Teacher updated!" : "Teacher registered!",
-                "success"
-            );
-            
-            // Reset and close
-            const teacherForm = document.getElementById("teacherForm");
-            if (teacherForm) teacherForm.reset();
+            showTeacherMessage(editingTeacherId ? "Teacher updated!" : "Teacher registered!", "success");
             editingTeacherId = null;
             closeTeacherPanel();
-            
-            // Reload data
             loadTeachers();
             loadTeacherStatistics();
         } else {
-            const error = await response.json();
-            showTeacherMessage(error.message || "Operation failed!", "error");
+            console.error("Backend error:", result);
+            showTeacherMessage(result.message || "Operation failed!", "error");
         }
     } catch (error) {
         console.error("Save error:", error);
         showTeacherMessage("Server error!", "error");
     }
 }
+
 
 // ================= LOAD TEACHERS =================
 async function loadTeachers() {
@@ -202,7 +185,7 @@ async function loadTeachers() {
                 <td>${teacher.teacherId || ''}</td>
                 <td>${teacher.fullName || ''}</td>
                 <td>${teacher.email || ''}</td>
-                <td>${teacher.department || ''}</td>
+                <td>${teacher.program ? teacher.program.name : ''}</td>
                <td>
     <button 
         class="status-btn ${teacher.status === 'Pending' ? 'pending-btn' : 'approve-btn'}"
@@ -321,7 +304,6 @@ async function editTeacher(id) {
         setValue("username", teacher.username);
         setValue("address", teacher.address);
         setValue("contact", teacher.contact);
-        setValue("department", teacher.department);
         setValue("qualification", teacher.qualification);
         setValue("experience", teacher.experience);
         setValue("email", teacher.email);
@@ -385,7 +367,6 @@ async function viewTeacher(id) {
 Name: ${teacher.fullName}
 ID: ${teacher.teacherId}
 Username: ${teacher.username}
-Department: ${teacher.department}
 Qualification: ${teacher.qualification}
 Experience: ${teacher.experience} years
 Email: ${teacher.email}
@@ -409,7 +390,7 @@ async function hideTeacher(id) {
     if (!result.isConfirmed) return;
 
     const response = await fetch(
-      `${STUDENT_API_BASE_URL}/teachers/${id}/hide`,
+      `${Teacher_API_BASE_URL}/teachers/${id}/hide`,
       { method: "PUT" }
     );
 

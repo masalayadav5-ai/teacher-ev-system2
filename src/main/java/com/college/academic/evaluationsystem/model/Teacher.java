@@ -1,6 +1,8 @@
 package com.college.academic.evaluationsystem.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "teacher")
@@ -18,7 +20,6 @@ public class Teacher {
     
     private String address;
     private String contact;
-    private String department;
     private String qualification;
     private Integer experience;
     
@@ -33,8 +34,25 @@ public class Teacher {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
 
-    // ===== Getters and Setters =====
+    // NEW: Relationship with Program
+    @ManyToOne
+    @JoinColumn(name = "program_id")
+    private Program program;
 
+    // NEW: Relationship with Courses (Many-to-Many) - TEACHER IS OWNER
+    @ManyToMany
+    @JoinTable(
+        name = "teacher_course",
+        joinColumns = @JoinColumn(name = "teacher_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses = new ArrayList<>();
+
+    // NEW: Relationship with SessionPlans
+    @OneToMany(mappedBy = "teacher")
+    private List<SessionPlan> sessionPlans = new ArrayList<>();
+
+    // ===== Getters and Setters =====
     public Long getId() {
         return id;
     }
@@ -73,14 +91,6 @@ public class Teacher {
 
     public void setContact(String contact) {
         this.contact = contact;
-    }
-
-    public String getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(String department) {
-        this.department = department;
     }
 
     public String getQualification() {
@@ -150,5 +160,75 @@ public class Teacher {
 
     public void setHide(String hide) {
         this.hide = hide;
+    }
+
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Course> courses) {
+        this.courses = courses;
+    }
+
+    public List<SessionPlan> getSessionPlans() {
+        return sessionPlans;
+    }
+
+    public void setSessionPlans(List<SessionPlan> sessionPlans) {
+        this.sessionPlans = sessionPlans;
+    }
+
+    // ===== HELPER METHODS FOR BIDIRECTIONAL RELATIONSHIP =====
+    
+    /**
+     * Add a course to this teacher and maintain bidirectional relationship
+     * @param course
+     */
+    public void addCourse(Course course) {
+        if (this.courses == null) {
+            this.courses = new ArrayList<>();
+        }
+        
+        // Check if course is already in the list
+        if (!this.courses.contains(course)) {
+            this.courses.add(course);
+            
+            // Also add this teacher to the course's teacher list
+            if (course.getTeachers() != null && !course.getTeachers().contains(this)) {
+                course.getTeachers().add(this);
+            }
+        }
+    }
+    
+    /**
+     * Remove a course from this teacher and maintain bidirectional relationship
+     * @param course
+     */
+    public void removeCourse(Course course) {
+        if (this.courses != null) {
+            this.courses.remove(course);
+            
+            // Also remove this teacher from the course's teacher list
+            if (course.getTeachers() != null) {
+                course.getTeachers().remove(this);
+            }
+        }
+    }
+    
+    /**
+     * Check if teacher teaches a specific course
+     * @param course
+     * @return 
+     */
+    public boolean teachesCourse(Course course) {
+        return this.courses != null && this.courses.contains(course);
     }
 }

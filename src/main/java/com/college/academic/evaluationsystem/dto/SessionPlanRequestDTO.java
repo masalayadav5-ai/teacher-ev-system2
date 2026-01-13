@@ -3,44 +3,25 @@ package com.college.academic.evaluationsystem.dto;
 import java.util.List;
 
 public class SessionPlanRequestDTO {
-
-    private String faculty;
-    private String course;
-    private String semester;
-        
-
+    private Long programId;
+    private Long semesterId;
+    private Long courseId;
+    private Long teacherId;
     private List<DayDTO> days;
 
-    public String getFaculty() {
-        return faculty;
-    }
-
-    public void setFaculty(String faculty) {
-        this.faculty = faculty;
-    }
-
-    public String getCourse() {
-        return course;
-    }
-
-    public void setCourse(String course) {
-        this.course = course;
-    }
-
-    public String getSemester() {
-        return semester;
-    }
-
-    public void setSemester(String semester) {
-        this.semester = semester;
-    }
-
+    // Getters and Setters
+    public Long getProgramId() { return programId; }
+    public void setProgramId(Long programId) { this.programId = programId; }
     
-    public List<DayDTO> getDays() {
-        return days;
-    }
-
-    public void setDays(List<DayDTO> days) {
-        this.days = days;
-    }
+    public Long getSemesterId() { return semesterId; }
+    public void setSemesterId(Long semesterId) { this.semesterId = semesterId; }
+    
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
+    
+    public Long getTeacherId() { return teacherId; }
+    public void setTeacherId(Long teacherId) { this.teacherId = teacherId; }
+    
+    public List<DayDTO> getDays() { return days; }
+    public void setDays(List<DayDTO> days) { this.days = days; }
 }

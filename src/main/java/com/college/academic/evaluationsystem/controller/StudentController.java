@@ -1,9 +1,7 @@
 package com.college.academic.evaluationsystem.controller;
 
-import com.college.academic.evaluationsystem.model.Student;
-import com.college.academic.evaluationsystem.model.User;
-import com.college.academic.evaluationsystem.repository.StudentRepository;
-import com.college.academic.evaluationsystem.repository.UserRepository;
+import com.college.academic.evaluationsystem.model.*;
+import com.college.academic.evaluationsystem.repository.*;
 import com.college.academic.evaluationsystem.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,21 +24,49 @@ public class StudentController {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+    private ProgramRepository programRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
+
     // ================= CREATE STUDENT =================
     @PostMapping
-    public ResponseEntity<?> createStudent(@RequestBody Map<String, String> requestData) {
+    public ResponseEntity<?> createStudent(@RequestBody Map<String, Object> requestData) {
         try {
             // Extract data from request
-            String fullName = requestData.get("fullName");
-            String studentId = requestData.get("studentId");
-            String username = requestData.get("username");
-            String email = requestData.get("email");
-            String password = requestData.get("password");
-            String address = requestData.get("address");
-            String contact = requestData.get("contact");
-            String faculty = requestData.get("faculty");
-            String semester = requestData.get("semester");
-            String batch = requestData.get("batch");
+            String fullName = (String) requestData.get("fullName");
+            String studentId = (String) requestData.get("studentId");
+            String username = (String) requestData.get("username");
+            String email = (String) requestData.get("email");
+            String password = (String) requestData.get("password");
+            String address = (String) requestData.get("address");
+            String contact = (String) requestData.get("contact");
+            String batch = (String) requestData.get("batch");
+            
+            // NEW: Extract programId and semesterId (as Long or Integer)
+            Long programId = null;
+            Long semesterId = null;
+            
+            if (requestData.get("programId") != null) {
+                if (requestData.get("programId") instanceof Integer) {
+                    programId = ((Integer) requestData.get("programId")).longValue();
+                } else if (requestData.get("programId") instanceof Long) {
+                    programId = (Long) requestData.get("programId");
+                } else if (requestData.get("programId") instanceof String) {
+                    programId = Long.parseLong((String) requestData.get("programId"));
+                }
+            }
+            
+            if (requestData.get("semesterId") != null) {
+                if (requestData.get("semesterId") instanceof Integer) {
+                    semesterId = ((Integer) requestData.get("semesterId")).longValue();
+                } else if (requestData.get("semesterId") instanceof Long) {
+                    semesterId = (Long) requestData.get("semesterId");
+                } else if (requestData.get("semesterId") instanceof String) {
+                    semesterId = Long.parseLong((String) requestData.get("semesterId"));
+                }
+            }
 
             // Validate required fields
             if (fullName == null || fullName.isBlank()
@@ -77,11 +103,22 @@ public class StudentController {
             student.setStudentId(studentId);
             student.setAddress(address);
             student.setContact(contact);
-            student.setFaculty(faculty);
-            student.setSemester(semester);
             student.setBatch(batch);
             student.setStatus("Pending");
             student.setHide("0");
+            
+            // NEW: Set program and semester relationships
+            if (programId != null) {
+                Program program = programRepository.findById(programId)
+                    .orElseThrow(() -> new RuntimeException("Program not found"));
+                student.setProgram(program);
+            }
+            
+            if (semesterId != null) {
+                Semester semester = semesterRepository.findById(semesterId)
+                    .orElseThrow(() -> new RuntimeException("Semester not found"));
+                student.setSemester(semester);
+            }
             
             // Set user credentials using the convenience method
             student.setUserCredentials(username, email, password);
@@ -91,7 +128,7 @@ public class StudentController {
             return ResponseEntity.ok(savedStudent);
 
         } catch (Exception e) {
-            e.printStackTrace(); // Add logging for debugging
+            e.printStackTrace();
             return ResponseEntity.badRequest()
                     .body(Map.of("message", e.getMessage()));
         }
@@ -102,6 +139,18 @@ public class StudentController {
     public List<Student> getAllStudents() {
         // Only visible students
         return studentService.getAllStudents();
+    }
+    
+    // NEW: Get students by program
+    @GetMapping("/program/{programId}")
+    public List<Student> getStudentsByProgram(@PathVariable Long programId) {
+        return studentService.getStudentsByProgram(programId);
+    }
+    
+    // NEW: Get students by program and semester
+    @GetMapping("/program/{programId}/semester/{semesterId}")
+    public List<Student> getStudentsByProgramAndSemester(@PathVariable Long programId, @PathVariable Long semesterId) {
+        return studentService.getStudentsByProgramAndSemester(programId, semesterId);
     }
 
     // ================= GET STUDENT BY USERNAME (For Profile) =================
@@ -141,7 +190,7 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStudent(
             @PathVariable Long id,
-            @RequestBody Map<String, String> data) {
+            @RequestBody Map<String, Object> data) {
 
         Student student = studentRepository.findById(id).orElse(null);
         if (student == null) {
@@ -150,27 +199,59 @@ public class StudentController {
 
         // Update student fields
         if (data.containsKey("fullName")) {
-            student.setFullName(data.get("fullName"));
+            student.setFullName((String) data.get("fullName"));
         }
         if (data.containsKey("address")) {
-            student.setAddress(data.get("address"));
+            student.setAddress((String) data.get("address"));
         }
         if (data.containsKey("contact")) {
-            student.setContact(data.get("contact"));
-        }
-        if (data.containsKey("faculty")) {
-            student.setFaculty(data.get("faculty"));
-        }
-        if (data.containsKey("semester")) {
-            student.setSemester(data.get("semester"));
+            student.setContact((String) data.get("contact"));
         }
         if (data.containsKey("batch")) {
-            student.setBatch(data.get("batch"));
+            student.setBatch((String) data.get("batch"));
+        }
+        
+        // NEW: Update program relationship
+        if (data.containsKey("programId")) {
+            Long programId = null;
+            Object programIdObj = data.get("programId");
+            if (programIdObj instanceof Integer) {
+                programId = ((Integer) programIdObj).longValue();
+            } else if (programIdObj instanceof Long) {
+                programId = (Long) programIdObj;
+            } else if (programIdObj instanceof String) {
+                programId = Long.parseLong((String) programIdObj);
+            }
+            
+            if (programId != null) {
+                Program program = programRepository.findById(programId)
+                    .orElseThrow(() -> new RuntimeException("Program not found"));
+                student.setProgram(program);
+            }
+        }
+        
+        // NEW: Update semester relationship
+        if (data.containsKey("semesterId")) {
+            Long semesterId = null;
+            Object semesterIdObj = data.get("semesterId");
+            if (semesterIdObj instanceof Integer) {
+                semesterId = ((Integer) semesterIdObj).longValue();
+            } else if (semesterIdObj instanceof Long) {
+                semesterId = (Long) semesterIdObj;
+            } else if (semesterIdObj instanceof String) {
+                semesterId = Long.parseLong((String) semesterIdObj);
+            }
+            
+            if (semesterId != null) {
+                Semester semester = semesterRepository.findById(semesterId)
+                    .orElseThrow(() -> new RuntimeException("Semester not found"));
+                student.setSemester(semester);
+            }
         }
 
         // Update user credentials if provided
         if (data.containsKey("username")) {
-            String newUsername = data.get("username");
+            String newUsername = (String) data.get("username");
             if (!newUsername.equals(student.getUsername())) {
                 if (userRepository.existsByUsername(newUsername)) {
                     return ResponseEntity.badRequest()
@@ -181,7 +262,7 @@ public class StudentController {
         }
 
         if (data.containsKey("email")) {
-            String newEmail = data.get("email");
+            String newEmail = (String) data.get("email");
             if (!newEmail.equals(student.getEmail())) {
                 if (userRepository.existsByEmail(newEmail)) {
                     return ResponseEntity.badRequest()
@@ -203,6 +284,16 @@ public class StudentController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(Map.of("message", "Student hidden successfully"));
+    }
+
+    // ================= APPROVE STUDENT =================
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<?> approveStudent(@PathVariable Long id) {
+        Student student = studentService.approveStudent(id);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(student);
     }
 
     // ================= STATS =================

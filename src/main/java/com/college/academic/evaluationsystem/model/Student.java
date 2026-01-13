@@ -18,9 +18,7 @@ public class Student {
 
     private String address;
     private String contact;
-    private String faculty;
-    private String semester;
-    private String batch;
+    private String batch; // Keep batch as string
     
     @Column(name = "hide", nullable = false)
     private String hide = "0";   // 0 = visible, 1 = hidden
@@ -28,13 +26,22 @@ public class Student {
     @Column(nullable = false)
     private String status = "Pending";
 
-    // Foreign key to User table - Change to EAGER fetching to avoid LazyInitializationException
+    // Foreign key to User table
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
 
-    // ===== Getters and Setters =====
+    // NEW: Relationship with Program (replaces faculty string)
+    @ManyToOne
+    @JoinColumn(name = "program_id")
+    private Program program;
 
+    // NEW: Relationship with Semester (replaces semester string)
+    @ManyToOne
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
+
+    // ===== Getters and Setters =====
     public Long getId() {
         return id;
     }
@@ -73,22 +80,6 @@ public class Student {
 
     public void setContact(String contact) {
         this.contact = contact;
-    }
-
-    public String getFaculty() {
-        return faculty;
-    }
-
-    public void setFaculty(String faculty) {
-        this.faculty = faculty;
-    }
-
-    public String getSemester() {
-        return semester;
-    }
-
-    public void setSemester(String semester) {
-        this.semester = semester;
     }
 
     public String getBatch() {
@@ -150,5 +141,22 @@ public class Student {
 
     public void setHide(String hide) {
         this.hide = hide;
+    }
+
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    // ===== MISSING GETTER/SETTER FOR SEMESTER =====
+    public Semester getSemester() {
+        return semester;
+    }
+
+    public void setSemester(Semester semester) {
+        this.semester = semester;
     }
 }
