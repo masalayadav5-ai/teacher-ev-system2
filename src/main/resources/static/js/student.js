@@ -19,7 +19,12 @@ function initStudentPage() {
 
     loadStudents();
     loadStatistics();
-
+    loadPrograms(); 
+    
+     document.getElementById("faculty").addEventListener('change', function() {
+        console.log('Program changed to:', this.value);
+         loadSemestersForStudent();
+    });
     // ================= SUBMIT (ADD / UPDATE) =================
     submitStudentBtn.onclick = async (e) => {
         e.preventDefault();
@@ -85,18 +90,19 @@ function initStudentPage() {
         }
 
         // ===== DATA OBJECT =====
-        const studentData = {
-            fullName: fullName.value.trim(),
-            studentId: studentId.value.trim(),
-            username: username.value.trim(),
-            address: address.value.trim(),
-            contact: contact.value.trim(),
-            faculty: faculty.value.trim(),
-            semester: semester.value.trim(),
-            batch: batch.value.trim(),
-            email: email.value.trim(),
-            status: "Pending"
-        };
+       const studentData = {
+    fullName: fullName.value.trim(),
+    studentId: studentId.value.trim(),
+    username: username.value.trim(),
+    address: address.value.trim(),
+    contact: contact.value.trim(),
+    // CHANGE THESE FROM STRINGS TO IDs:
+    programId: parseInt(faculty.value.trim()),  // Now expecting program ID
+    semesterId: parseInt(semester.value.trim()), // Now expecting semester ID
+    batch: batch.value.trim(),
+    email: email.value.trim(),
+    status: "Pending"
+};
 
         if (!editingStudentId && password.value) {
             studentData.password = password.value;
@@ -173,10 +179,10 @@ students.slice().reverse().forEach(s => {
 
     studentTableBody.innerHTML += `
     <tr>
-        <td>${s.studentId}</td>
+       <td>${s.studentId}</td>
         <td>${s.fullName}</td>
-        <td>${s.faculty}</td>
-        <td>${s.semester}</td>
+        <td>${s.program ? (s.program.code + " - " + s.program.name) : 'N/A'}</td>
+        <td>${s.semester ? s.semester.name : 'N/A'}</td>
 
         <!-- STATUS COLUMN -->
         <td>
@@ -271,7 +277,7 @@ async function loadStatistics() {
 function openAddStudent() {
     editingStudentId = null;
     const studentForm = document.getElementById("studentForm");
-    studentForm.reset();
+    resetStudentForm();
 
     const studentIdInput = document.getElementById("studentId");
     studentIdInput.disabled = false;
@@ -287,37 +293,85 @@ function openAddStudent() {
 }
 
 // ================= EDIT STUDENT =================
+// ================= EDIT STUDENT =================
 async function editStudent(id) {
-    const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
-    const students = await res.json();
-    const s = students.find(st => st.id === id);
-    if (!s) return;
+    console.log('=== START editStudent for ID:', id, '===');
+    
+    try {
+        const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
+        const students = await res.json();
+        
+        const s = students.find(st => st.id === id);
+        
+        if (!s) {
+            showMessage("Student not found!", "error");
+            return;
+        }
 
-    editingStudentId = id;
-    document.querySelector(".modal-header h2").textContent = "Edit Student";
-    document.getElementById("submitStudentBtn").textContent = "Update";
+        editingStudentId = id;
+        document.querySelector(".modal-header h2").textContent = "Edit Student";
+        document.getElementById("submitStudentBtn").textContent = "Update";
 
-    document.getElementById("fullName").value = s.fullName;
-    document.getElementById("studentId").value = s.studentId;
+        // Fill basic fields
+        document.getElementById("fullName").value = s.fullName;
+        document.getElementById("studentId").value = s.studentId;
 
-    const studentIdInput = document.getElementById("studentId");
-    studentIdInput.disabled = true;
-    studentIdInput.style.backgroundColor = "#f3f3f3";
+        const studentIdInput = document.getElementById("studentId");
+        studentIdInput.disabled = true;
+        studentIdInput.style.backgroundColor = "#f3f3f3";
 
-    document.getElementById("username").value = s.username;
-    document.getElementById("address").value = s.address || "";
-    document.getElementById("contact").value = s.contact;
-    document.getElementById("faculty").value = s.faculty;
-    document.getElementById("semester").value = s.semester;
-    document.getElementById("batch").value = s.batch;
-    document.getElementById("email").value = s.email;
+        document.getElementById("username").value = s.username;
+        document.getElementById("address").value = s.address || "";
+        document.getElementById("contact").value = s.contact;
+        document.getElementById("batch").value = s.batch;
+        document.getElementById("email").value = s.email;
 
-    document.getElementById("passwordRow").style.display = "none";
-    document.getElementById("confirmPasswordRow").style.display = "none";
+        // Hide password fields
+        document.getElementById("passwordRow").style.display = "none";
+        document.getElementById("confirmPasswordRow").style.display = "none";
 
-    document.getElementById("studentPanel").classList.add("show");
+        // Get dropdowns
+        const facultySelect = document.getElementById("faculty");
+        const semesterSelect = document.getElementById("semester");
+        
+        // Show modal first
+        document.getElementById("studentPanel").classList.add("show");
+        
+        // Clear dropdowns
+        facultySelect.innerHTML = '<option value="">-- Select Program --</option>';
+        semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+        semesterSelect.disabled = true;
+        
+        // Load programs first
+        await loadPrograms();
+        
+        // If student has program, wait a bit then select it
+        if (s.program && s.program.id) {
+            // Use setTimeout to ensure DOM is ready
+            setTimeout(() => {
+                facultySelect.value = s.program.id;
+                console.log('Program selected:', s.program.id);
+                
+                // Now load semesters
+                loadSemestersForStudent(s.program.id).then(() => {
+                    // After semesters are loaded, select the semester
+                    setTimeout(() => {
+                        if (s.semester && s.semester.id) {
+                            semesterSelect.value = s.semester.id;
+                            console.log('Semester selected:', s.semester.id);
+                        }
+                    }, 300);
+                });
+            }, 300);
+        }
+        
+        console.log('=== END editStudent ===');
+        
+    } catch (error) {
+        console.error('Error in editStudent:', error);
+        showMessage("Error loading student details", "error");
+    }
 }
-
 // ================= VIEW STUDENT =================
 async function viewStudent(id) {
     console.log("viewStudent called with ID:", id);
@@ -425,6 +479,139 @@ function loadStudentProfilePage() {
             console.error("Error loading profile page:", error);
         });
 }
+// ================= LOAD PROGRAMS DYNAMICALLY =================
+async function loadPrograms(selectedProgramId = null) {
+    try {
+        console.log('=== START loadPrograms ===');
+        const response = await fetch(`${STUDENT_API_BASE_URL}/admin/programs`);
+        if (!response.ok) throw new Error('Failed to load programs');
+        
+        const programs = await response.json();
+        console.log('Programs API returned:', programs.length, 'programs');
+        
+        // Filter only active programs
+        const activePrograms = programs.filter(p => p.active === true);
+        console.log('Active programs:', activePrograms.length);
+        
+        const facultySelect = document.getElementById("faculty");
+        
+        // Save the current value
+        const currentValue = facultySelect.value;
+        
+        // Clear all options
+        facultySelect.innerHTML = '<option value="">-- Select Program --</option>';
+        
+        // Add program options
+        activePrograms.forEach(program => {
+            const option = document.createElement('option');
+            option.value = program.id;
+            option.textContent = `${program.code} - ${program.name}`;
+            facultySelect.appendChild(option);
+        });
+        
+        // If a program ID is provided, select it
+        if (selectedProgramId) {
+            console.log('Selecting program:', selectedProgramId);
+            facultySelect.value = selectedProgramId;
+        } else if (currentValue) {
+            // Restore previous value if any
+            facultySelect.value = currentValue;
+        }
+        
+        console.log('Program dropdown populated with', activePrograms.length, 'options');
+        
+        console.log('=== END loadPrograms ===');
+        
+    } catch (error) {
+        console.error("Error loading programs:", error);
+        showMessage("Failed to load programs. Please refresh the page.", "error");
+    }
+}
+// Reset the modal when opening for new student
+function resetStudentForm() {
+    const form = document.getElementById("studentForm");
+    form.reset();
+    
+    // Reset program and semester dropdowns
+    const facultySelect = document.getElementById("faculty");
+    const semesterSelect = document.getElementById("semester");
+    
+    facultySelect.innerHTML = '<option value="">-- Select Program --</option>';
+    semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+    semesterSelect.disabled = true;
+    
+    // Load programs
+    loadPrograms();
+    
+    // Enable student ID field
+    const studentIdInput = document.getElementById("studentId");
+    studentIdInput.disabled = false;
+    studentIdInput.style.backgroundColor = "";
+    
+    // Show password fields
+    document.getElementById("passwordRow").style.display = "block";
+    document.getElementById("confirmPasswordRow").style.display = "block";
+}
+// ================= LOAD SEMESTERS BY PROGRAM =================
+async function loadSemestersForStudent(programId = null) {
+    console.log('loadSemestersByProgram called with programId:', programId);
+    
+    // If programId is not provided, get it from dropdown
+    if (!programId) {
+        programId = document.getElementById("faculty").value;
+        console.log('Got programId from dropdown:', programId);
+    }
+    
+    const semesterSelect = document.getElementById("semester");
+    console.log('Semester select element:', semesterSelect);
+    
+    // Reset semester dropdown
+    semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+    semesterSelect.disabled = true;
+    
+    if (!programId) {
+        console.log('No programId provided, enabling semester select');
+        semesterSelect.disabled = false;
+        return [];
+    }
+    
+    try {
+        console.log('Fetching semesters for program ID:', programId);
+        const response = await fetch(`${STUDENT_API_BASE_URL}/admin/programs/${programId}/semesters`);
+        
+        if (!response.ok) {
+            console.error('Failed to load semesters. Status:', response.status);
+            throw new Error('Failed to load semesters');
+        }
+        
+        const semesters = await response.json();
+        console.log('Semesters API response:', semesters);
+        
+        // Filter only active semesters
+        const activeSemesters = semesters.filter(s => s.active === true);
+        console.log('Active semesters:', activeSemesters);
+        
+        // Populate dropdown
+        activeSemesters.forEach(semester => {
+            const option = document.createElement('option');
+            option.value = semester.id;
+            option.textContent = semester.name;
+            semesterSelect.appendChild(option);
+        });
+        
+        semesterSelect.disabled = false;
+        console.log('Semester dropdown populated with', activeSemesters.length, 'options');
+        
+        return activeSemesters; // Return the semesters
+        
+    } catch (error) {
+        console.error("Error loading semesters:", error);
+        showMessage("Failed to load semesters for this program.", "error");
+        semesterSelect.disabled = false;
+        return [];
+    }
+}
+
 // ================= MESSAGE =================
 function showMessage(msg, type) {
     const box = document.getElementById("formMessage");
@@ -437,9 +624,11 @@ function showMessage(msg, type) {
 // ================= CLOSE MODAL =================
 document.querySelector(".modal-close").onclick = () => {
     document.getElementById("studentPanel").classList.remove("show");
-    document.getElementById("studentForm").reset();
     editingStudentId = null;
+    resetStudentForm();
 };
 
 // ================= RUN INIT =================
 document.addEventListener("DOMContentLoaded", initStudentPage);
+// Add this test function at the bottom of your file
+

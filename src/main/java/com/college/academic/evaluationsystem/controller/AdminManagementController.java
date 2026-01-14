@@ -3,6 +3,7 @@ package com.college.academic.evaluationsystem.controller;
 import com.college.academic.evaluationsystem.model.*;
 import com.college.academic.evaluationsystem.repository.*;
 import com.college.academic.evaluationsystem.service.AdminManagementService;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -50,7 +52,41 @@ public class AdminManagementController {
     public Program createProgram(@RequestBody Program program) {
         return programRepository.save(program);
     }
+@GetMapping("/programs/overview")
+public List<Map<String, Object>> getProgramsOverview() {
+    List<Object[]> rows = programRepository.fetchProgramOverview();
 
+    return rows.stream().map(r -> {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", r[0]);               // id
+        m.put("code", r[1]);             // code
+        m.put("name", r[2]);             // name
+        m.put("description", r[3]);      // description
+        m.put("totalStudents", r[4]);    // total students
+        m.put("totalTeachers", r[5]);    // total teachers
+        m.put("activeTeachers", r[6]);   // active teachers
+        m.put("totalSemesters", r[7]);   // total semesters
+        m.put("active", r[8]);           // program active status
+        return m;
+    }).toList();
+}
+    
+
+@GetMapping("/programs/{programId}/semesters/stats")
+public List<Map<String, Object>> getSemesterStatsByProgram(@PathVariable Long programId) {
+    List<Object[]> rows = semesterRepository.findBasicSemesterStats(programId);
+    
+    return rows.stream().map(row -> {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", row[0]);                 // semester.id
+        map.put("name", row[1]);               // semester.name
+        map.put("programName", row[2]);        // program.name
+        map.put("courseCount", row[3]);        // course count
+        map.put("studentCount", row[4]);       // student count  <-- THIS IS ACTIVE STUDENTS
+        map.put("active", row[5]);             // semester.isActive
+        return map;
+    }).collect(Collectors.toList());
+}
     @PutMapping("/programs/{id}")
     public ResponseEntity<Program> updateProgram(@PathVariable Long id, @RequestBody Program programDetails) {
         Optional<Program> programOptional = programRepository.findById(id);
@@ -84,10 +120,11 @@ public class AdminManagementController {
 
     // ================= SEMESTERS =================
     
-    @GetMapping("/programs/{programId}/semesters")
-    public List<Semester> getSemestersByProgram(@PathVariable Long programId) {
-        return semesterRepository.findByProgramId(programId);
-    }
+  @GetMapping("/programs/{programId}/semesters")
+public List<Semester> getSemestersByProgram(@PathVariable Long programId) {
+    // Start with the simplest method
+    return semesterRepository.findByProgramId(programId);
+}
 
     @GetMapping("/semesters")
     public List<Semester> getAllSemesters() {
@@ -106,22 +143,21 @@ public class AdminManagementController {
         return semesterRepository.save(semester);
     }
 
-    @PutMapping("/semesters/{id}")
-    public ResponseEntity<Semester> updateSemester(@PathVariable Long id, @RequestBody Semester semesterDetails) {
-        Optional<Semester> semesterOptional = semesterRepository.findById(id);
-        if (semesterOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Semester semester = semesterOptional.get();
-        semester.setName(semesterDetails.getName());
-        semester.setOrderNumber(semesterDetails.getOrderNumber());
-        semester.setActive(semesterDetails.isActive());
-        semester.setProgram(semesterDetails.getProgram());
-
-        Semester updatedSemester = semesterRepository.save(semester);
-        return ResponseEntity.ok(updatedSemester);
+   @PutMapping("/semesters/{id}")
+public ResponseEntity<Semester> updateSemester(@PathVariable Long id, @RequestBody Semester semesterDetails) {
+    Optional<Semester> semesterOptional = semesterRepository.findById(id);
+    if (semesterOptional.isEmpty()) {
+        return ResponseEntity.notFound().build();
     }
+
+    Semester semester = semesterOptional.get();
+    semester.setName(semesterDetails.getName());
+    semester.setActive(semesterDetails.isActive());
+    semester.setProgram(semesterDetails.getProgram());
+
+    Semester updatedSemester = semesterRepository.save(semester);
+    return ResponseEntity.ok(updatedSemester);
+}
 
     @DeleteMapping("/semesters/{id}")
     public ResponseEntity<?> deleteSemester(@PathVariable Long id) {
@@ -138,6 +174,8 @@ public class AdminManagementController {
     }
 
     // ================= COURSES =================
+    // In AdminManagementController.java
+
     
     @GetMapping("/semesters/{semesterId}/courses")
     public List<Course> getCoursesBySemester(@PathVariable Long semesterId) {
@@ -198,7 +236,7 @@ public class AdminManagementController {
     
     @GetMapping("/programs/{programId}/teachers")
     public List<Teacher> getTeachersByProgram(@PathVariable Long programId) {
-        return teacherRepository.findByProgramId(programId);
+        return teacherRepository.findActiveTeachersByProgram(programId);
     }
 
     @GetMapping("/teachers/{teacherId}/courses")
@@ -258,10 +296,48 @@ public class AdminManagementController {
     }
 
     @GetMapping("/structure-tree")
-    public List<Program> getStructureTree() {
-        return programRepository.findAll();
-    }
-
+public List<Map<String, Object>> getStructureTree() {
+    List<Program> programs = programRepository.findAll();
+    
+    return programs.stream().map(program -> {
+        Map<String, Object> programMap = new HashMap<>();
+        programMap.put("id", program.getId());
+        programMap.put("name", program.getName());
+        programMap.put("code", program.getCode());
+        programMap.put("active", program.isActive());
+        
+        // Load semesters for this program
+        List<Semester> semesters = semesterRepository.findByProgramId(program.getId());
+        List<Map<String, Object>> semesterList = semesters.stream().map(semester -> {
+            Map<String, Object> semesterMap = new HashMap<>();
+            semesterMap.put("id", semester.getId());
+            semesterMap.put("name", semester.getName());
+            semesterMap.put("active", semester.isActive());
+            
+            // Load courses for this semester
+            List<Course> courses = courseRepository.findBySemesterId(semester.getId());
+            List<Map<String, Object>> courseList = courses.stream().map(course -> {
+                Map<String, Object> courseMap = new HashMap<>();
+                courseMap.put("id", course.getId());
+                courseMap.put("code", course.getCode());
+                courseMap.put("name", course.getName());
+                courseMap.put("active", course.isActive());
+                
+                // Get teacher count for this course
+                long teacherCount = course.getTeachers() != null ? course.getTeachers().size() : 0;
+                courseMap.put("teacherCount", teacherCount);
+                
+                return courseMap;
+            }).collect(Collectors.toList());
+            
+            semesterMap.put("courses", courseList);
+            return semesterMap;
+        }).collect(Collectors.toList());
+        
+        programMap.put("semesters", semesterList);
+        return programMap;
+    }).collect(Collectors.toList());
+}
     @GetMapping("/programs/{programId}/all-courses")
     public List<Course> getAllCoursesByProgram(@PathVariable Long programId) {
         return courseRepository.findByProgramId(programId);

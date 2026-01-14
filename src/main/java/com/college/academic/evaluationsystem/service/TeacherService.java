@@ -57,10 +57,11 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    public List<Teacher> getAllTeachers() {
-        // Get only visible teachers
-        return teacherRepository.findByHide("0");
-    }
+    // In TeacherService.java, update this method:
+public List<Teacher> getAllTeachers() {
+    // Use the new method that fetches relationships
+    return teacherRepository.findAllVisibleWithRelations();
+}
 
     public Teacher getTeacherById(Long id) {
         // This will fetch the user relationship properly

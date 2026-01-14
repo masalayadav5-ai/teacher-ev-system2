@@ -60,10 +60,10 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    public List<Student> getAllStudents() {
-        // Get only visible students
-        return studentRepository.findByHide("0");
-    }
+   public List<Student> getAllStudents() {
+    // Use the new method that fetches relationships
+    return studentRepository.findAllVisibleWithRelations();
+}
 
     public List<Student> getAllStudentsWithUser() {
         return studentRepository.findAllWithUser();

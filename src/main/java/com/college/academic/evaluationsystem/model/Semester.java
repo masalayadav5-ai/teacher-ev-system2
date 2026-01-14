@@ -9,7 +9,8 @@ import java.util.List;
 @JsonIgnoreProperties(
     value = {"program", "students"},
     allowSetters = true
-)@Table(name = "semester")
+)
+@Table(name = "semester")
 public class Semester {
     
     @Id
@@ -18,8 +19,6 @@ public class Semester {
     
     @Column(nullable = false)
     private String name; // e.g., "Semester 1", "Fall 2024"
-    
-    private int orderNumber; // For ordering semesters
     
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
@@ -38,9 +37,8 @@ public class Semester {
     // Constructors
     public Semester() {}
     
-    public Semester(String name, int orderNumber, Program program) {
+    public Semester(String name, Program program) {
         this.name = name;
-        this.orderNumber = orderNumber;
         this.program = program;
     }
     
@@ -50,9 +48,6 @@ public class Semester {
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
-    public int getOrderNumber() { return orderNumber; }
-    public void setOrderNumber(int orderNumber) { this.orderNumber = orderNumber; }
     
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }

@@ -47,8 +47,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     List<Teacher> findByCourseId(@Param("courseId") Long courseId);
     
     // NEW: Find active teachers by program
-    @Query("SELECT t FROM Teacher t WHERE t.program.id = :programId AND t.status = 'Active'")
-    List<Teacher> findActiveTeachersByProgram(@Param("programId") Long programId);
+    @Query("SELECT t FROM Teacher t WHERE t.program.id = :programId AND t.status = 'Active' AND t.hide = '0'")
+List<Teacher> findActiveTeachersByProgram(@Param("programId") Long programId);
     
     // Find teacher by user ID
     @Query("SELECT t FROM Teacher t WHERE t.user.id = :userId")
@@ -57,4 +57,10 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     // Find teachers with courses (for eager loading)
     @Query("SELECT DISTINCT t FROM Teacher t LEFT JOIN FETCH t.courses")
     List<Teacher> findAllWithCourses();
+    // In TeacherRepository.java, add this method:
+@Query("SELECT DISTINCT t FROM Teacher t " +
+       "JOIN FETCH t.user " +
+       "LEFT JOIN FETCH t.program " +
+       "WHERE t.hide = '0'")
+List<Teacher> findAllVisibleWithRelations();
 }

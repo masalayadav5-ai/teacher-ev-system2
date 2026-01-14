@@ -61,7 +61,7 @@ public class AdminManagementService {
                 .orElseThrow(() -> new RuntimeException("Semester not found"));
         
         semester.setName(semesterDetails.getName());
-        semester.setOrderNumber(semesterDetails.getOrderNumber());
+
         semester.setActive(semesterDetails.isActive());
         semester.setProgram(semesterDetails.getProgram());
         

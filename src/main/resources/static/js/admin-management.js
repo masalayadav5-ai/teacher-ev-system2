@@ -15,6 +15,7 @@ function initAdminManagement() {
     // Set up event listeners
     setupEventListeners();
 }
+
 function confirmAction(title, text, onConfirm) {
     Swal.fire({
         title: title,
@@ -33,7 +34,7 @@ function confirmAction(title, text, onConfirm) {
 }
 
 // Setup event listeners
- function setupEventListeners() {
+function setupEventListeners() {
     // Close modals when clicking outside
     document.addEventListener('click', function(e) {
         const modals = ['programModal', 'semesterModal', 'courseModal'];
@@ -61,7 +62,11 @@ function showTab(tabName, event) {
         case 'programs': loadAllPrograms(); break;
         case 'semesters': loadSemestersByProgram(); break;
         case 'courses': loadCoursesBySemester(); break;
-        case 'teacher-assignments': loadTeachersByProgram(); break;
+        case 'teacher-assignments': 
+            loadTeachersByProgram(); 
+            // Initialize course program filter with programs
+            loadProgramsForTeacherAssignmentFilter();
+            break;
         case 'overview':
             loadOverviewStats();
             loadStructureTree();
@@ -77,14 +82,14 @@ async function loadAllPrograms() {
     try {
         showLoading('programsTable');
         
-        const response = await fetch('/api/admin/programs');
+        const response = await fetch('/api/admin/programs/overview');
         if (!response.ok) throw new Error('Failed to load programs');
         
         const programs = await response.json();
-// ✅ FILTER ONLY ACTIVE PROGRAMS
-const activePrograms = programs.filter(p => p.active === true);
+        // ✅ FILTER ONLY ACTIVE PROGRAMS
+        const activePrograms = programs.filter(p => p.active === true);
 
-renderProgramsTable(activePrograms);
+        renderProgramsTable(activePrograms);
     } catch (error) {
         console.error('Error loading programs:', error);
         showError('programsTable', 'Failed to load programs');
@@ -115,9 +120,9 @@ function renderProgramsTable(programs) {
             <td class="text-truncate" style="max-width: 200px;" title="${program.description || ''}">
                 ${program.description || 'No description'}
             </td>
-            <td><span class="badge bg-info">${program.semesters ? program.semesters.length : 0}</span></td>
-            <td><span class="badge bg-primary">${program.students ? program.students.length : 0}</span></td>
-            <td><span class="badge bg-warning">${program.teachers ? program.teachers.length : 0}</span></td>
+            <td><span class="badge bg-info">${program.totalSemesters}</span></td>
+            <td><span class="badge bg-primary">${program.totalStudents || 0}</span></td>
+            <td><span class="badge bg-warning">${program.activeTeachers || 0}</span></td>
             <td>
                 <span class="status-badge ${program.active ? 'status-active' : 'status-inactive'}">
                     ${program.active ? 'Active' : 'Inactive'}
@@ -168,10 +173,11 @@ function openAddProgramModal(program = null) {
     // USE THIS:
     modal.classList.add('show');
 }
+
 // Close Program Modal
 function closeProgramModal() {
    document.getElementById('programModal').classList.remove('show');
-   }
+}
 
 // Save Program
 async function saveProgram() {
@@ -270,7 +276,6 @@ async function editProgram(programId) {
     }
 }
 
-
 // Confirm Delete Program
 function confirmDeleteProgram(programId, programName) {
     confirmAction(
@@ -279,7 +284,6 @@ function confirmDeleteProgram(programId, programName) {
         () => deleteProgram(programId)
     );
 }
-
 
 // Delete Program
 async function deleteProgram(programId) {
@@ -291,7 +295,7 @@ async function deleteProgram(programId) {
         if (!response.ok) throw new Error('Failed to delete program');
         
         showSuccess('Program deleted successfully!');
-         loadAllPrograms();
+        loadAllPrograms();
         loadProgramsForFilter();
         loadOverviewStats();
         
@@ -324,14 +328,44 @@ async function loadProgramsForFilter() {
     }
 }
 
+// Load programs for teacher assignment filter
+async function loadProgramsForTeacherAssignmentFilter() {
+    try {
+        const response = await fetch('/api/admin/programs');
+        if (!response.ok) throw new Error('Failed to load programs');
+        
+        const programs = await response.json();
+        const courseProgramForAssignFilter = document.getElementById('courseProgramForAssignFilter');
+        
+        if (courseProgramForAssignFilter) {
+            // Clear existing options except the first one
+            while (courseProgramForAssignFilter.options.length > 1) {
+                courseProgramForAssignFilter.remove(1);
+            }
+            
+            // Add program options
+            programs.forEach(program => {
+                const option = document.createElement('option');
+                option.value = program.id;
+                option.textContent = `${program.code} - ${program.name}`;
+                courseProgramForAssignFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading programs for teacher assignment filter:', error);
+    }
+}
+
 function renderProgramFilterOptions(programs) {
     const programFilter = document.getElementById('programFilter');
     const semesterProgram = document.getElementById('semesterProgram');
     const courseProgramFilter = document.getElementById('courseProgramFilter');
     const teacherProgramFilter = document.getElementById('teacherProgramFilter');
     const courseProgram = document.getElementById('courseProgram');
+    const courseProgramForAssignFilter = document.getElementById('courseProgramForAssignFilter');
     
-    const filters = [programFilter, semesterProgram, courseProgramFilter, teacherProgramFilter, courseProgram];
+    const filters = [programFilter, semesterProgram, courseProgramFilter, 
+                    teacherProgramFilter, courseProgram, courseProgramForAssignFilter];
     
     filters.forEach(filter => {
         if (filter) {
@@ -356,10 +390,9 @@ async function loadSemestersByProgram() {
     const programId = document.getElementById('programFilter').value;
     
     if (!programId) {
-        // Show all semesters or empty state
         document.getElementById('semestersTable').innerHTML = `
             <tr>
-                <td colspan="8" class="empty-state">
+                <td colspan="7" class="empty-state">
                     <i class="fas fa-calendar-alt"></i>
                     <p>Please select a program to view semesters</p>
                 </td>
@@ -371,27 +404,43 @@ async function loadSemestersByProgram() {
     try {
         showLoading('semestersTable');
         
-        const response = await fetch(`/api/admin/programs/${programId}/semesters`);
+        const response = await fetch(`/api/admin/programs/${programId}/semesters/stats`);
         if (!response.ok) throw new Error('Failed to load semesters');
         
         const semesters = await response.json();
-// ✅ FILTER ACTIVE SEMESTERS
-const activeSemesters = semesters.filter(s => s.active === true);
-
-renderSemestersTable(activeSemesters);    } catch (error) {
+        
+        // DEBUG: Log what's actually in the response
+        console.log('API Response:', semesters);
+        if (semesters.length > 0) {
+            console.log('First semester data:', semesters[0]);
+            console.log('Available keys:', Object.keys(semesters[0]));
+        }
+        
+        renderSemestersTableFromStats(semesters);
+        
+    } catch (error) {
         console.error('Error loading semesters:', error);
-        showError('semestersTable', 'Failed to load semesters');
+        // Fall back to regular endpoint
+        try {
+            const fallbackResponse = await fetch(`/api/admin/programs/${programId}/semesters`);
+            if (!fallbackResponse.ok) throw new Error('Failed to load semesters');
+            
+            const semesters = await fallbackResponse.json();
+            renderSemestersTable(semesters);
+        } catch (fallbackError) {
+            showError('semestersTable', 'Failed to load semesters');
+        }
     }
 }
 
-// Render semesters table
-function renderSemestersTable(semesters) {
+// Render semesters table from stats data
+function renderSemestersTableFromStats(semesters) {
     const tableBody = document.getElementById('semestersTable');
     
     if (!semesters || semesters.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-state">
+                <td colspan="7" class="empty-state">
                     <i class="fas fa-calendar-alt"></i>
                     <p>No semesters found for this program. Add your first semester!</p>
                 </td>
@@ -404,10 +453,9 @@ function renderSemestersTable(semesters) {
         <tr>
             <td>${semester.id}</td>
             <td><strong>${semester.name}</strong></td>
-            <td>${semester.program ? semester.program.name : 'N/A'}</td>
-            <td>${semester.orderNumber}</td>
-            <td><span class="badge bg-info">${semester.courses ? semester.courses.length : 0}</span></td>
-            <td><span class="badge bg-primary">${semester.students ? semester.students.length : 0}</span></td>
+            <td>${semester.programName || 'N/A'}</td>
+            <td><span class="badge bg-info">${semester.courseCount || 0}</span></td>
+            <td><span class="badge bg-primary">${semester.studentCount || 0}</span></td> <!-- Changed from activeStudentCount to studentCount -->
             <td>
                 <span class="status-badge ${semester.active ? 'status-active' : 'status-inactive'}">
                     ${semester.active ? 'Active' : 'Inactive'}
@@ -430,6 +478,58 @@ function renderSemestersTable(semesters) {
     `).join('');
 }
 
+// Render semesters table
+function renderSemestersTable(semesters) {
+    const tableBody = document.getElementById('semestersTable');
+    
+    if (!semesters || semesters.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    <i class="fas fa-calendar-alt"></i>
+                    <p>No semesters found for this program. Add your first semester!</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tableBody.innerHTML = semesters.map(semester => {
+        // Filter active students (status = 'Active')
+        const activeStudents = semester.students ? 
+            semester.students.filter(student => student.status === 'Active') : 
+            [];
+        
+        return `
+        <tr>
+            <td>${semester.id}</td>
+            <td><strong>${semester.name}</strong></td>
+            <td>${semester.program ? semester.program.name : 'N/A'}</td>
+            <td><span class="badge bg-info">${semester.courses ? semester.courses.length : 0}</span></td>
+            <td><span class="badge bg-primary">${activeStudents.length}</span></td>
+            <td>
+                <span class="status-badge ${semester.active ? 'status-active' : 'status-inactive'}">
+                    ${semester.active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn btn-edit" onclick="editSemester(${semester.id})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn btn-assign" onclick="viewCourses(${semester.id})" title="View Courses">
+                        <i class="fas fa-book"></i>
+                    </button>
+                    <button class="action-btn btn-delete" onclick="confirmDeleteSemester(${semester.id}, '${semester.name}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        `;
+    }).join('');
+}
+
 // Open Add Semester Modal
 function openAddSemesterModal(semester = null) {
     const modal = document.getElementById('semesterModal');
@@ -441,7 +541,6 @@ function openAddSemesterModal(semester = null) {
         document.getElementById('semesterId').value = semester.id;
         document.getElementById('semesterProgram').value = semester.program ? semester.program.id : '';
         document.getElementById('semesterName').value = semester.name;
-        document.getElementById('semesterOrder').value = semester.orderNumber;
         document.getElementById('semesterStatus').value = semester.active ? 'true' : 'false';
     } else {
         // Add mode
@@ -464,7 +563,6 @@ async function saveSemester() {
     const semesterId = document.getElementById('semesterId').value;
     const semesterData = {
         name: document.getElementById('semesterName').value.trim(),
-        orderNumber: parseInt(document.getElementById('semesterOrder').value),
         active: document.getElementById('semesterStatus').value === 'true',
         program: {
             id: parseInt(document.getElementById('semesterProgram').value)
@@ -472,7 +570,7 @@ async function saveSemester() {
     };
     
     // Validation
-    if (!semesterData.name || !semesterData.orderNumber || !semesterData.program.id) {
+    if (!semesterData.name || !semesterData.program.id) {
         alert('Please fill in all required fields');
         return;
     }
@@ -527,7 +625,7 @@ async function deleteSemester(semesterId) {
         if (!response.ok) throw new Error('Failed to delete semester');
         
         showSuccess('Semester deleted successfully!');
-         loadSemestersByProgram();
+        loadSemestersByProgram();
         loadOverviewStats();
         
     } catch (error) {
@@ -535,6 +633,7 @@ async function deleteSemester(semesterId) {
         showError('confirmModal', 'Failed to delete semester');
     }
 }
+
 function confirmDeleteSemester(semesterId, semesterName) {
     confirmAction(
         'Delete Semester?',
@@ -622,10 +721,11 @@ async function loadCoursesBySemester() {
         if (!response.ok) throw new Error('Failed to load courses');
         
         const courses = await response.json();
-// ✅ FILTER ACTIVE COURSES
-const activeCourses = courses.filter(c => c.active === true);
+        // ✅ FILTER ACTIVE COURSES
+        const activeCourses = courses.filter(c => c.active === true);
 
-renderCoursesTable(activeCourses);    } catch (error) {
+        renderCoursesTable(activeCourses);
+    } catch (error) {
         console.error('Error loading courses:', error);
         showError('coursesTable', 'Failed to load courses');
     }
@@ -826,7 +926,7 @@ async function deleteCourse(courseId) {
         if (!response.ok) throw new Error('Failed to delete course');
         
         showSuccess('Course deleted successfully!');
-         loadCoursesBySemester();
+        loadCoursesBySemester();
         loadOverviewStats();
         
     } catch (error) {
@@ -834,6 +934,7 @@ async function deleteCourse(courseId) {
         showError('confirmModal', 'Failed to delete course');
     }
 }
+
 function confirmDeleteCourse(courseId, courseCode) {
     confirmAction(
         'Delete Course?',
@@ -855,6 +956,14 @@ async function loadTeachersByProgram() {
                 <p>Please select a program to view teachers</p>
             </div>
         `;
+        // Clear teacher selection
+        selectedTeacherId = null;
+        document.getElementById('selectedTeacherName').textContent = 'Select Teacher';
+        document.getElementById('assignedCourses').innerHTML = `
+            <div class="empty-state">
+                <p>No assigned courses</p>
+            </div>
+        `;
         return;
     }
     
@@ -865,8 +974,15 @@ async function loadTeachersByProgram() {
         const teachers = await response.json();
         renderTeachersList(teachers);
         
-        // Also load teacher filter options
-        loadTeacherFilterOptions(teachers);
+        // Clear teacher selection when loading new teachers
+        selectedTeacherId = null;
+        document.getElementById('selectedTeacherName').textContent = 'Select Teacher';
+        document.getElementById('assignedCourses').innerHTML = `
+            <div class="empty-state">
+                <p>No assigned courses</p>
+            </div>
+        `;
+        
     } catch (error) {
         console.error('Error loading teachers:', error);
         showError('teachersList', 'Failed to load teachers');
@@ -920,56 +1036,119 @@ function selectTeacher(el, teacherId, teacherName) {
 
     el.classList.add('active');
     document.getElementById('selectedTeacherName').textContent = teacherName;
-
-    loadTeacherCourses();
+    
+    // Load assigned courses for this teacher
+    loadAssignedCourses();
 }
 
-
-// Load teacher courses
-async function loadTeacherCourses() {
-    const teacherId = document.getElementById('teacherFilter').value || selectedTeacherId;
+// Load semesters for course assignment filter
+async function loadSemestersForCourseAssignments() {
+    const programId = document.getElementById('courseProgramForAssignFilter').value;
     
-    if (!teacherId) {
+    if (!programId) {
+        document.getElementById('courseSemesterForAssignFilter').innerHTML = '<option value="">Select Semester</option>';
         document.getElementById('availableCourses').innerHTML = `
             <div class="empty-state">
-                <p>Please select a teacher</p>
-            </div>
-        `;
-        document.getElementById('assignedCourses').innerHTML = `
-            <div class="empty-state">
-                <p>No assigned courses</p>
+                <p>Please select a program to view courses</p>
             </div>
         `;
         return;
     }
     
     try {
-        // Load assigned courses
-        const assignedResponse = await fetch(`/api/admin/teachers/${teacherId}/courses`);
-        if (!assignedResponse.ok) throw new Error('Failed to load assigned courses');
-        const assignedCourses = await assignedResponse.json();
+        const response = await fetch(`/api/admin/programs/${programId}/semesters`);
+        if (!response.ok) throw new Error('Failed to load semesters');
         
-        // Load all courses from the selected program
-        const programId = document.getElementById('teacherProgramFilter').value;
-        let allCourses = [];
+        const semesters = await response.json();
+        const semesterSelect = document.getElementById('courseSemesterForAssignFilter');
         
-        if (programId) {
-            const allResponse = await fetch(`/api/admin/programs/${programId}/all-courses`);
-            if (allResponse.ok) {
-                allCourses = await allResponse.json();
+        semesterSelect.innerHTML = '<option value="">Select Semester</option>';
+        semesters.forEach(semester => {
+            const option = document.createElement('option');
+            option.value = semester.id;
+            option.textContent = semester.name;
+            semesterSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading semesters for course assignments:', error);
+    }
+}
+
+// Load available courses based on selected program and semester
+async function loadAvailableCourses() {
+    const programId = document.getElementById('courseProgramForAssignFilter').value;
+    const semesterId = document.getElementById('courseSemesterForAssignFilter').value;
+    
+    if (!programId || !semesterId) {
+        document.getElementById('availableCourses').innerHTML = `
+            <div class="empty-state">
+                <p>Please select both program and semester</p>
+            </div>
+        `;
+        return;
+    }
+    
+    try {
+        // Get courses for the selected semester
+        const response = await fetch(`/api/admin/semesters/${semesterId}/courses`);
+        if (!response.ok) throw new Error('Failed to load courses');
+        
+        const allCourses = await response.json();
+        
+        // Filter to show only active courses
+        const activeCourses = allCourses.filter(course => course.active === true);
+        
+        // If a teacher is selected, filter out already assigned courses
+        if (selectedTeacherId) {
+            const assignedResponse = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
+            if (assignedResponse.ok) {
+                const assignedCourses = await assignedResponse.json();
+                const assignedCourseIds = assignedCourses.map(course => course.id);
+                
+                // Remove already assigned courses
+                const availableCourses = activeCourses.filter(course => 
+                    !assignedCourseIds.includes(course.id)
+                );
+                renderAvailableCourses(availableCourses);
+            } else {
+                renderAvailableCourses(activeCourses);
             }
+        } else {
+            // If no teacher selected, show all courses
+            renderAvailableCourses(activeCourses);
         }
         
-        // Filter available courses (all courses - assigned courses)
-        const assignedCourseIds = assignedCourses.map(course => course.id);
-        const availableCourses = allCourses.filter(course => !assignedCourseIds.includes(course.id));
+    } catch (error) {
+        console.error('Error loading available courses:', error);
+        showError('availableCourses', 'Failed to load courses');
+    }
+}
+
+// Load assigned courses for selected teacher
+async function loadAssignedCourses() {
+    if (!selectedTeacherId) {
+        document.getElementById('assignedCourses').innerHTML = `
+            <div class="empty-state">
+                <p>No assigned courses</p>
+            </div>
+        `;
+        document.getElementById('selectedTeacherName').textContent = 'Select Teacher';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
+        if (!response.ok) throw new Error('Failed to load assigned courses');
         
-        renderAvailableCourses(availableCourses);
+        const assignedCourses = await response.json();
         renderAssignedCourses(assignedCourses);
         
+        // Reload available courses to filter out newly assigned ones
+        loadAvailableCourses();
+        
     } catch (error) {
-        console.error('Error loading teacher courses:', error);
-        showError('availableCourses', 'Failed to load courses');
+        console.error('Error loading assigned courses:', error);
+        showError('assignedCourses', 'Failed to load assigned courses');
     }
 }
 
@@ -1030,7 +1209,7 @@ function renderAssignedCourses(courses) {
 // Assign course to teacher
 async function assignCourseToTeacher(courseId) {
     if (!selectedTeacherId) {
-        alert('Please select a teacher first');
+        alert('Please select a teacher from the list first');
         return;
     }
     
@@ -1042,7 +1221,10 @@ async function assignCourseToTeacher(courseId) {
         if (!response.ok) throw new Error('Failed to assign course');
         
         showSuccess('Course assigned successfully!');
-        loadTeacherCourses();
+        
+        // Reload both assigned and available courses
+        loadAssignedCourses();
+        loadAvailableCourses();
         loadOverviewStats();
         
     } catch (error) {
@@ -1054,7 +1236,7 @@ async function assignCourseToTeacher(courseId) {
 // Remove course from teacher
 async function removeCourseFromTeacher(courseId) {
     if (!selectedTeacherId) {
-        alert('Please select a teacher first');
+        alert('Please select a teacher from the list first');
         return;
     }
     
@@ -1066,7 +1248,10 @@ async function removeCourseFromTeacher(courseId) {
         if (!response.ok) throw new Error('Failed to remove course');
         
         showSuccess('Course removed successfully!');
-        loadTeacherCourses();
+        
+        // Reload both assigned and available courses
+        loadAssignedCourses();
+        loadAvailableCourses();
         loadOverviewStats();
         
     } catch (error) {
@@ -1099,15 +1284,14 @@ async function loadOverviewStats() {
         }
         
         // Update UI
-const activePrograms = programs.filter(p => p.active);
-const activeSemesters = semesters.filter(s => s.active);
-const activeCourses = courses.filter(c => c.active);
+        const activePrograms = programs.filter(p => p.active);
+        const activeSemesters = semesters.filter(s => s.active);
+        const activeCourses = courses.filter(c => c.active);
 
-document.getElementById('totalPrograms').textContent = activePrograms.length;
-document.getElementById('totalSemesters').textContent = activeSemesters.length;
-document.getElementById('totalCourses').textContent = activeCourses.length;
-document.getElementById('totalAssignments').textContent = assignmentsCount;
-
+        document.getElementById('totalPrograms').textContent = activePrograms.length;
+        document.getElementById('totalSemesters').textContent = activeSemesters.length;
+        document.getElementById('totalCourses').textContent = activeCourses.length;
+        document.getElementById('totalAssignments').textContent = assignmentsCount;
         
     } catch (error) {
         console.error('Error loading overview stats:', error);
@@ -1153,27 +1337,33 @@ function renderStructureTree(structure) {
                 <span class="badge bg-secondary ms-2">${program.semesters ? program.semesters.length : 0} semesters</span>
             </div>
             <div class="tree-children" style="display: none;">
-                ${program.semesters ? program.semesters.map(semester => `
-                    <div class="tree-node">
-                        <div class="tree-header" onclick="toggleTreeChildren(this)">
-                            <i class="fas fa-caret-right"></i>
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>${semester.name}</span>
-                            <span class="badge bg-info ms-2">${semester.courses ? semester.courses.length : 0} courses</span>
+                ${program.semesters && program.semesters.length > 0 ? 
+                    program.semesters.map(semester => `
+                        <div class="tree-node">
+                            <div class="tree-header" onclick="toggleTreeChildren(this)">
+                                <i class="fas fa-caret-right"></i>
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${semester.name}</span>
+                                <span class="badge bg-info ms-2">${semester.courses ? semester.courses.length : 0} courses</span>
+                            </div>
+                            <div class="tree-children" style="display: none;">
+                                ${semester.courses && semester.courses.length > 0 ? 
+                                    semester.courses.map(course => `
+                                        <div class="tree-node">
+                                            <div class="tree-header">
+                                                <i class="fas fa-book"></i>
+                                                <span>${course.code} - ${course.name}</span>
+                                                <span class="badge bg-warning ms-2">${course.teacherCount || 0} teachers</span>
+                                            </div>
+                                        </div>
+                                    `).join('') : 
+                                    '<div class="text-muted p-2">No courses</div>'
+                                }
+                            </div>
                         </div>
-                        <div class="tree-children" style="display: none;">
-                            ${semester.courses ? semester.courses.map(course => `
-                                <div class="tree-node">
-                                    <div class="tree-header">
-                                        <i class="fas fa-book"></i>
-                                        <span>${course.code} - ${course.name}</span>
-                                        <span class="badge bg-warning ms-2">${course.teachers ? course.teachers.length : 0} teachers</span>
-                                    </div>
-                                </div>
-                            `).join('') : '<div class="text-muted p-2">No courses</div>'}
-                        </div>
-                    </div>
-                `).join('') : '<div class="text-muted p-2">No semesters</div>'}
+                    `).join('') : 
+                    '<div class="text-muted p-2">No semesters</div>'
+                }
             </div>
         </div>
     `).join('');
@@ -1240,10 +1430,7 @@ function showSuccess(message) {
     });
 }
 
-
 // Close modal
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('show');
 }
-
- 

@@ -9,7 +9,6 @@ function initTeacherPage() {
     console.log("Initializing teacher page...");
     
     const submitTeacherBtn = document.getElementById("submitTeacherBtn");
-    const teacherForm = document.getElementById("teacherForm");
     const searchTeacher = document.getElementById("searchTeacher");
     const teacherPanel = document.getElementById("teacherPanel");
     
@@ -45,211 +44,74 @@ function initTeacherPage() {
     // ===== Load Data =====
     loadTeachers();
     loadTeacherStatistics();
+    loadTeacherPrograms(); // Load programs on page initialization
     
     console.log("Teacher page initialized");
 }
 
-// ================= HANDLE SUBMIT =================
-async function handleTeacherSubmit(e) {
-    e.preventDefault();
-
-    const formData = {
-        fullName: getValue("fullName"),
-        teacherId: getValue("teacherId"),
-        username: getValue("username") || getValue("teacherId"),
-        address: getValue("address"),
-        contact: getValue("contact"),
-        programId: parseInt(getValue("programId")),
-        qualification: getValue("qualification"),
-        experience: parseInt(getValue("experience")),
-        email: getValue("email"),
-        password: getValue("password"),
-        confirmPassword: getValue("confirmPassword")
-    };
-
-    if (!validateTeacherForm(formData)) return;
-
-    // Build nested payload
-   const teacherData = {
-    fullName: getValue("fullName"),
-    teacherId: getValue("teacherId"),
-    username: getValue("username") || getValue("teacherId"),
-    email: getValue("email"),
-    password: getValue("password"),
-    address: getValue("address"),
-    contact: getValue("contact"),
-    qualification: getValue("qualification"),
-    experience: getValue("experience").toString(), // send as string
-    programId: getValue("programId") // string is fine, controller parses
-};
-
-    await saveTeacher(teacherData);
-}
-
-
-
-// ================= HELPER FUNCTIONS =================
-function getValue(id) {
-    const element = document.getElementById(id);
-    return element ? element.value.trim() : "";
-}
-
-function validateTeacherForm(data) {
-    // Required fields
-    const required = ['fullName', 'teacherId', 'contact', 'programId', 'email'];
-    for (const field of required) {
-        if (!data[field]) {
-            showTeacherMessage(`${field.replace(/([A-Z])/g, ' $1')} is required!`, "error");
-            return false;
-        }
-    }
-    
-    // Password validation for new teachers
-    if (!editingTeacherId) {
-        if (!data.password) {
-            showTeacherMessage("Password is required!", "error");
-            return false;
-        }
-        if (data.password !== data.confirmPassword) {
-            showTeacherMessage("Passwords do not match!", "error");
-            return false;
-        }
-    }
-    
-    // Contact validation
-    if (!/^\d{10}$/.test(data.contact)) {
-        showTeacherMessage("Contact must be 10 digits!", "error");
-        return false;
-    }
-    
-    // Email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-        showTeacherMessage("Invalid email format!", "error");
-        return false;
-    }
-    
-    return true;
-}
-
-async function saveTeacher(teacherData) {
-    const url = editingTeacherId
-        ? `${TEACHER_API_BASE_URL}/teachers/${editingTeacherId}`
-        : `${TEACHER_API_BASE_URL}/teachers`;
-
-    const method = editingTeacherId ? "PUT" : "POST";
-
+// ================= LOAD PROGRAMS FOR TEACHER =================
+async function loadTeacherPrograms(selectedProgramId = null) {
     try {
-        const response = await fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(teacherData)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-            showTeacherMessage(editingTeacherId ? "Teacher updated!" : "Teacher registered!", "success");
-            editingTeacherId = null;
-            closeTeacherPanel();
-            loadTeachers();
-            loadTeacherStatistics();
-        } else {
-            console.error("Backend error:", result);
-            showTeacherMessage(result.message || "Operation failed!", "error");
-        }
-    } catch (error) {
-        console.error("Save error:", error);
-        showTeacherMessage("Server error!", "error");
-    }
-}
-
-
-// ================= LOAD TEACHERS =================
-async function loadTeachers() {
-    try {
-        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers`);
-        const teachers = await response.json();
+        console.log('Loading programs for teacher registration...');
+        const response = await fetch(`${TEACHER_API_BASE_URL}/admin/programs`);
+        if (!response.ok) throw new Error('Failed to load programs');
         
-        const tbody = document.getElementById("teacherTableBody");
-        if (!tbody) return;
+        const programs = await response.json();
         
-        tbody.innerHTML = "";
+        // Filter only active programs
+        const activePrograms = programs.filter(p => p.active === true);
         
-        if (teachers.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No teachers found</td></tr>`;
+        const programSelect = document.getElementById("programId");
+        if (!programSelect) {
+            console.error('Program select element not found');
             return;
         }
         
-        teachers.slice().reverse().forEach(teacher => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${teacher.teacherId || ''}</td>
-                <td>${teacher.fullName || ''}</td>
-                <td>${teacher.email || ''}</td>
-                <td>${teacher.program ? teacher.program.name : ''}</td>
-               <td>
-    <button 
-        class="status-btn ${teacher.status === 'Pending' ? 'pending-btn' : 'approve-btn'}"
-        onclick="toggleTeacherStatus(${teacher.id}, '${teacher.status}')">
-        ${teacher.status === 'Pending' ? 'Pending' : 'Active'}
-    </button>
-</td>
-
-                <td>
-    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
-    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
-    <button class="action-btn hide" onclick="hideTeacher(${teacher.id})">Delete</button>
-</td>
-
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Load teachers error:", error);
-    }
-}
-
-// ================= LOAD STATS =================
-async function loadTeacherStatistics() {
-    try {
-        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers/stats`);
-        const stats = await response.json();
+        // Clear existing options
+        programSelect.innerHTML = '<option value="">-- Select Program --</option>';
         
-        setText("totalTeachers", stats.total || 0);
-        setText("activeTeachers", stats.active || 0);
-        setText("pendingTeachers", stats.pending || 0);
-    } catch (error) {
-        console.error("Load stats error:", error);
-    }
-}
-
-function setText(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-}
-
-// ================= TOGGLE STATUS =================
-async function toggleTeacherStatus(id, currentStatus) {
-     
-    const newStatus = currentStatus === "Pending" ? "Active" : "Pending";
-    
-    try {
-        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers/${id}/status`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: newStatus })
+        // Add program options
+        activePrograms.forEach(program => {
+            const option = document.createElement('option');
+            option.value = program.id;
+            option.textContent = `${program.code} - ${program.name}`;
+            programSelect.appendChild(option);
         });
         
-        if (response.ok) {
-            showTeacherMessage("Status updated!", "success");
-            loadTeachers();
-            loadTeacherStatistics();
-        } else {
-            showTeacherMessage("Failed to update status!", "error");
+        // If a program ID is provided, select it
+        if (selectedProgramId) {
+            programSelect.value = selectedProgramId;
         }
+        
+        console.log('Loaded programs for teacher:', activePrograms.length);
+        
     } catch (error) {
-        console.error("Toggle status error:", error);
-        showTeacherMessage("Server error!", "error");
+        console.error("Error loading programs for teacher:", error);
+        showTeacherMessage("Failed to load programs. Please refresh the page.", "error");
     }
+}
+
+// ================= RESET TEACHER FORM =================
+function resetTeacherForm() {
+    const form = document.getElementById("teacherForm");
+    if (form) form.reset();
+    
+    // Reset program dropdown
+    const programSelect = document.getElementById("programId");
+    if (programSelect) {
+        programSelect.innerHTML = '<option value="">-- Select Program --</option>';
+    }
+    
+    // Enable teacher ID field
+    const teacherIdInput = document.getElementById("teacherId");
+    if (teacherIdInput) {
+        teacherIdInput.disabled = false;
+        teacherIdInput.style.backgroundColor = "";
+    }
+    
+    // Show password fields
+    showElement("passwordRow", true);
+    showElement("confirmPasswordRow", true);
 }
 
 // ================= OPEN ADD TEACHER =================
@@ -258,23 +120,14 @@ function openAddTeacher() {
     editingTeacherId = null;
     
     // Reset form
-    const form = document.getElementById("teacherForm");
-    if (form) form.reset();
+    resetTeacherForm();
     
-    // Enable teacher ID
-    const teacherIdInput = document.getElementById("teacherId");
-    if (teacherIdInput) {
-        teacherIdInput.disabled = false;
-        teacherIdInput.style.backgroundColor = "";
-    }
+    // Load programs for dropdown
+    loadTeacherPrograms();
     
     // Update UI
     setTextContent("#teacherPanel .modal-header h2", "Add Teacher");
     setTextContent("#submitTeacherBtn", "Submit");
-    
-    // Show password fields
-    showElement("passwordRow", true);
-    showElement("confirmPasswordRow", true);
     
     // Show modal
     const panel = document.getElementById("teacherPanel");
@@ -315,6 +168,16 @@ async function editTeacher(id) {
             teacherIdInput.style.backgroundColor = "#f3f3f3";
         }
         
+        // Load programs and select the current one
+        await loadTeacherPrograms();
+        
+        // Set program after loading (use setTimeout to ensure dropdown is populated)
+        if (teacher.program && teacher.program.id) {
+            setTimeout(() => {
+                setValue("programId", teacher.program.id);
+            }, 100);
+        }
+        
         // Update UI
         setTextContent("#teacherPanel .modal-header h2", "Edit Teacher");
         setTextContent("#submitTeacherBtn", "Update");
@@ -335,19 +198,195 @@ async function editTeacher(id) {
     }
 }
 
-function setValue(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.value = value || "";
+// ================= HANDLE SUBMIT =================
+async function handleTeacherSubmit(e) {
+    e.preventDefault();
+
+    const formData = {
+        fullName: getValue("fullName"),
+        teacherId: getValue("teacherId"),
+        username: getValue("username") || getValue("teacherId"),
+        address: getValue("address"),
+        contact: getValue("contact"),
+        programId: getValue("programId"), // This will be the selected program ID
+        qualification: getValue("qualification"),
+        experience: getValue("experience"),
+        email: getValue("email"),
+        password: getValue("password"),
+        confirmPassword: getValue("confirmPassword")
+    };
+
+    if (!validateTeacherForm(formData)) return;
+
+    // Build payload - make sure programId is parsed as integer
+    const teacherData = {
+        fullName: formData.fullName,
+        teacherId: formData.teacherId,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        address: formData.address,
+        contact: formData.contact,
+        qualification: formData.qualification,
+        experience: formData.experience.toString(), // send as string
+        programId: parseInt(formData.programId) // parse as integer
+    };
+
+    await saveTeacher(teacherData);
 }
 
-function setTextContent(selector, text) {
-    const element = document.querySelector(selector);
-    if (element) element.textContent = text;
+// ================= VALIDATE TEACHER FORM =================
+function validateTeacherForm(data) {
+    // Required fields - add programId
+    const required = ['fullName', 'teacherId', 'contact', 'programId', 'email', 'qualification', 'experience'];
+    for (const field of required) {
+        if (!data[field]) {
+            const fieldName = field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            showTeacherMessage(`${fieldName} is required!`, "error");
+            return false;
+        }
+    }
+    
+    // Password validation for new teachers
+    if (!editingTeacherId) {
+        if (!data.password) {
+            showTeacherMessage("Password is required!", "error");
+            return false;
+        }
+        if (data.password !== data.confirmPassword) {
+            showTeacherMessage("Passwords do not match!", "error");
+            return false;
+        }
+    }
+    
+    // Contact validation
+    if (!/^\d{10}$/.test(data.contact)) {
+        showTeacherMessage("Contact must be 10 digits!", "error");
+        return false;
+    }
+    
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        showTeacherMessage("Invalid email format!", "error");
+        return false;
+    }
+    
+    return true;
 }
 
-function showElement(id, show) {
-    const element = document.getElementById(id);
-    if (element) element.style.display = show ? "block" : "none";
+// ================= SAVE TEACHER =================
+async function saveTeacher(teacherData) {
+    const url = editingTeacherId
+        ? `${TEACHER_API_BASE_URL}/teachers/${editingTeacherId}`
+        : `${TEACHER_API_BASE_URL}/teachers`;
+
+    const method = editingTeacherId ? "PUT" : "POST";
+
+    try {
+        const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(teacherData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showTeacherMessage(editingTeacherId ? "Teacher updated!" : "Teacher registered!", "success");
+            editingTeacherId = null;
+            closeTeacherPanel();
+            loadTeachers();
+            loadTeacherStatistics();
+        } else {
+            console.error("Backend error:", result);
+            showTeacherMessage(result.message || "Operation failed!", "error");
+        }
+    } catch (error) {
+        console.error("Save error:", error);
+        showTeacherMessage("Server error!", "error");
+    }
+}
+
+// ================= LOAD TEACHERS =================
+async function loadTeachers() {
+    try {
+        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers`);
+        const teachers = await response.json();
+        
+        console.log('Teachers loaded with programs:', teachers);
+        
+        const tbody = document.getElementById("teacherTableBody");
+        if (!tbody) return;
+        
+        tbody.innerHTML = "";
+        
+        if (teachers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">No teachers found</td></tr>`;
+            return;
+        }
+        
+        teachers.slice().reverse().forEach(teacher => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${teacher.teacherId || ''}</td>
+                <td>${teacher.fullName || ''}</td>
+                <td>${teacher.email || ''}</td>
+                <td>${teacher.program ? teacher.program.name : 'No Program Assigned'}</td>
+                <td>
+                    <button 
+                        class="status-btn ${teacher.status === 'Pending' ? 'pending-btn' : 'approve-btn'}"
+                        onclick="toggleTeacherStatus(${teacher.id}, '${teacher.status}')">
+                        ${teacher.status === 'Pending' ? 'Pending' : 'Active'}
+                    </button>
+                </td>
+                <td>
+                    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
+                    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
+                    <button class="action-btn hide" onclick="hideTeacher(${teacher.id})">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Load teachers error:", error);
+    }
+}
+
+// ================= LOAD STATS =================
+async function loadTeacherStatistics() {
+    try {
+        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers/stats`);
+        const stats = await response.json();
+        
+        setText("totalTeachers", stats.total || 0);
+        setText("activeTeachers", stats.active || 0);
+        setText("pendingTeachers", stats.pending || 0);
+    } catch (error) {
+        console.error("Load stats error:", error);
+    }
+}
+
+// ================= TOGGLE STATUS =================
+async function toggleTeacherStatus(id, currentStatus) {
+    const newStatus = currentStatus === "Pending" ? "Active" : "Pending";
+    
+    try {
+        const response = await fetch(`${TEACHER_API_BASE_URL}/teachers/${id}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+        });
+        
+        if (response.ok) {
+            showTeacherMessage("Status updated!", "success");
+            loadTeachers();
+            loadTeacherStatistics();
+        } else {
+            showTeacherMessage("Failed to update status!", "error");
+        }
+    } catch (error) {
+        console.error("Toggle status error:", error);
+        showTeacherMessage("Server error!", "error");
+    }
 }
 
 // ================= VIEW TEACHER =================
@@ -367,6 +406,7 @@ async function viewTeacher(id) {
 Name: ${teacher.fullName}
 ID: ${teacher.teacherId}
 Username: ${teacher.username}
+Program: ${teacher.program ? teacher.program.name : 'Not assigned'}
 Qualification: ${teacher.qualification}
 Experience: ${teacher.experience} years
 Email: ${teacher.email}
@@ -377,7 +417,8 @@ Address: ${teacher.address || 'N/A'}`);
         alert("Error loading details!");
     }
 }
- 
+
+// ================= HIDE TEACHER =================
 async function hideTeacher(id) {
     const result = await Swal.fire({
         title: "Are you sure?",
@@ -390,7 +431,7 @@ async function hideTeacher(id) {
     if (!result.isConfirmed) return;
 
     const response = await fetch(
-      `${Teacher_API_BASE_URL}/teachers/${id}/hide`,
+      `${TEACHER_API_BASE_URL}/teachers/${id}/hide`,
       { method: "PUT" }
     );
 
@@ -409,14 +450,8 @@ function closeTeacherPanel() {
         panel.classList.remove("show");
     }
     
-    const form = document.getElementById("teacherForm");
-    if (form) form.reset();
-    
+    resetTeacherForm();
     editingTeacherId = null;
-    
-    // Reset password fields
-    showElement("passwordRow", true);
-    showElement("confirmPasswordRow", true);
 }
 
 // ================= FILTER TEACHERS =================
@@ -445,15 +480,41 @@ function showTeacherMessage(msg, type) {
     }, 3000);
 }
 
-// ================= INITIALIZE =================
-// Make functions global
+// ================= HELPER FUNCTIONS =================
+function getValue(id) {
+    const element = document.getElementById(id);
+    return element ? element.value.trim() : "";
+}
+
+function setValue(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.value = value || "";
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+}
+
+function setTextContent(selector, text) {
+    const element = document.querySelector(selector);
+    if (element) element.textContent = text;
+}
+
+function showElement(id, show) {
+    const element = document.getElementById(id);
+    if (element) element.style.display = show ? "block" : "none";
+}
+
+// ================= MAKE FUNCTIONS GLOBAL =================
 window.openAddTeacher = openAddTeacher;
 window.toggleTeacherStatus = toggleTeacherStatus;
 window.editTeacher = editTeacher;
 window.viewTeacher = viewTeacher;
+window.hideTeacher = hideTeacher;
 window.closeTeacherPanel = closeTeacherPanel;
 
-// Initialize when DOM is ready
+// ================= INITIALIZE =================
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM ready, initializing teacher page");
     initTeacherPage();

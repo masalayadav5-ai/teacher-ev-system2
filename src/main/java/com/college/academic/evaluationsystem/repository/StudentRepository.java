@@ -58,4 +58,15 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     // Find student by user ID
     @Query("SELECT s FROM Student s WHERE s.user.id = :userId")
     Optional<Student> findByUserId(@Param("userId") Long userId);
+    
+      @Query("SELECT s FROM Student s " +
+           "JOIN FETCH s.user u " +
+           "LEFT JOIN FETCH s.program p " +
+           "LEFT JOIN FETCH s.semester sem " +
+           "WHERE s.hide = '0'")
+    List<Student> findAllVisibleWithRelations();
+    // Add this method to StudentRepository:
+@Query("SELECT COUNT(s) FROM Student s WHERE s.program.id = :programId AND s.hide = '0' AND s.status = 'Active'")
+long countActiveStudentsByProgram(@Param("programId") Long programId);
+
 }

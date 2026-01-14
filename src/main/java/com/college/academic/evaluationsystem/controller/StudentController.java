@@ -108,17 +108,17 @@ public class StudentController {
             student.setHide("0");
             
             // NEW: Set program and semester relationships
-            if (programId != null) {
-                Program program = programRepository.findById(programId)
-                    .orElseThrow(() -> new RuntimeException("Program not found"));
-                student.setProgram(program);
-            }
-            
-            if (semesterId != null) {
-                Semester semester = semesterRepository.findById(semesterId)
-                    .orElseThrow(() -> new RuntimeException("Semester not found"));
-                student.setSemester(semester);
-            }
+          if (programId != null) {
+    Program program = programRepository.findById(programId)
+        .orElseThrow(() -> new RuntimeException("Program not found"));
+    student.setProgram(program);
+}
+
+if (semesterId != null) {
+    Semester semester = semesterRepository.findById(semesterId)
+        .orElseThrow(() -> new RuntimeException("Semester not found"));
+    student.setSemester(semester);
+}
             
             // Set user credentials using the convenience method
             student.setUserCredentials(username, email, password);

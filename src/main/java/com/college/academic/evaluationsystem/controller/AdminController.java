@@ -107,28 +107,37 @@ public class AdminController {
     //------------------------------------
     // NEW: USER INFO ENDPOINT FOR STATIC PAGES
     //------------------------------------
-    @GetMapping("/api/userinfo")
-    @ResponseBody
-    public Map<String, String> getUserInfo(Authentication authentication) {
-        Map<String, String> map = new HashMap<>();
+      @GetMapping("admin/api/userinfo")
+   @ResponseBody
+public Map<String, Object> getUserInfo(Authentication authentication) {
+    Map<String, Object> map = new HashMap<>();
 
-        if (authentication != null) {
-            map.put("username", authentication.getName());
-
-            String role = authentication.getAuthorities()
-                    .stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .findFirst()
-                    .orElse("ROLE_USER");
-
-            map.put("role", role.replace("ROLE_", ""));
-        } else {
-            map.put("username", "Guest");
-            map.put("role", "USER");
+    if (authentication != null) {
+        // Get username and role as before
+        map.put("username", authentication.getName());
+        
+        String role = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("ROLE_USER");
+        map.put("role", role.replace("ROLE_", ""));
+        
+        // NEW: Get user ID and teacher-specific data
+        User user = repo.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            map.put("userId", user.getId());
+            map.put("email", user.getEmail());
+          
         }
-
-        return map;
+    } else {
+        map.put("username", "Guest");
+        map.put("role", "USER");
+        map.put("userId", 0);
     }
+
+    return map;
+}
 }
 
  

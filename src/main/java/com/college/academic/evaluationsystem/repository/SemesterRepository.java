@@ -12,24 +12,44 @@ import java.util.Optional;
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, Long> {
     
-    // Find semesters by program
+    // Basic queries - these should work
     List<Semester> findByProgramId(Long programId);
-    
-    // Find active semesters by program
+    List<Semester> findByIsActive(boolean isActive);
     List<Semester> findByProgramIdAndIsActive(Long programId, boolean isActive);
-    
-    // Find semester by program and name
     Optional<Semester> findByProgramIdAndName(Long programId, String name);
     
-    // Find semesters by program ordered by order number
-    @Query("SELECT s FROM Semester s WHERE s.program.id = :programId ORDER BY s.orderNumber")
-    List<Semester> findByProgramIdOrdered(@Param("programId") Long programId);
+    // Simple fetch with program
+    @Query("SELECT s FROM Semester s JOIN FETCH s.program WHERE s.program.id = :programId")
+    List<Semester> findSemestersWithProgram(@Param("programId") Long programId);
     
-    // Find active semesters by program ordered
-    @Query("SELECT s FROM Semester s WHERE s.program.id = :programId AND s.isActive = true ORDER BY s.orderNumber")
-    List<Semester> findActiveSemestersByProgram(@Param("programId") Long programId);
+    // Find semester by ID with relations
+    @Query("SELECT s FROM Semester s LEFT JOIN FETCH s.program LEFT JOIN FETCH s.courses WHERE s.id = :id")
+    Optional<Semester> findByIdWithRelations(@Param("id") Long id);
     
-    // Find semester with courses count
-    @Query("SELECT s, COUNT(c) as courseCount FROM Semester s LEFT JOIN s.courses c WHERE s.program.id = :programId GROUP BY s")
-    List<Object[]> findSemestersWithCourseCount(@Param("programId") Long programId);
+    // Stats query (FIXED VERSION)
+    @Query("SELECT s.id, s.name, p.name, " +
+           "COUNT(DISTINCT c.id), " +
+           "COUNT(DISTINCT stu.id), " +
+           "s.isActive " +
+           "FROM Semester s " +
+           "LEFT JOIN s.program p " +
+           "LEFT JOIN s.courses c " +
+           "LEFT JOIN s.students stu " +
+           "WHERE stu.status = 'Active' AND stu.hide = '0' " +
+           "AND s.program.id = :programId " +
+           "GROUP BY s.id, s.name, p.name, s.isActive")
+    List<Object[]> findSemesterStatsByProgram(@Param("programId") Long programId);
+    
+    // OR if you want a simpler version without student filter:
+ @Query("SELECT s.id, s.name, p.name, " +
+       "COUNT(DISTINCT c.id), " +
+       "COUNT(DISTINCT CASE WHEN stu.status = 'Active' AND stu.hide = '0' THEN stu.id END), " +
+       "s.isActive " +
+       "FROM Semester s " +
+       "LEFT JOIN s.program p " +
+       "LEFT JOIN s.courses c " +
+       "LEFT JOIN s.students stu ON stu.semester.id = s.id " +
+       "WHERE s.program.id = :programId " +
+       "GROUP BY s.id, s.name, p.name, s.isActive")
+List<Object[]> findBasicSemesterStats(@Param("programId") Long programId);
 }
