@@ -6,6 +6,7 @@ import com.college.academic.evaluationsystem.model.StudentEvaluation;
 import com.college.academic.evaluationsystem.repository.EvaluationParameterRepository;
 import com.college.academic.evaluationsystem.repository.EvaluationResponseRepository;
 import com.college.academic.evaluationsystem.repository.StudentEvaluationRepository;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +44,25 @@ public class EvaluationResponseController {
     }
 
     // ================= GET RESPONSES BY EVALUATION =================
-    @GetMapping("/evaluation/{evaluationId}")
-    public ResponseEntity<List<EvaluationResponse>> getResponsesByEvaluation(@PathVariable Long evaluationId) {
-        return ResponseEntity.ok(responseRepository.findByEvaluationId(evaluationId));
-    }
+   @GetMapping("/evaluation/{evaluationId}")
+public ResponseEntity<List<Map<String, Object>>> getResponsesByEvaluation(
+        @PathVariable Long evaluationId) {
+
+    List<EvaluationResponse> responses =
+            responseRepository.findByEvaluationId(evaluationId);
+
+    List<Map<String, Object>> result = responses.stream()
+            .map(r -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("questionText", r.getParameter().getQuestionText());
+                map.put("responseValue", r.getResponseValue());
+                return map;
+            })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(result);
+}
+
 
     // ================= GET RESPONSES BY PARAMETER =================
     @GetMapping("/parameter/{parameterId}")

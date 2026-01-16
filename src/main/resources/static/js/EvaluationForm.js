@@ -56,10 +56,11 @@ ctx().courseId  = urlParams.get('courseId');
         
         if (statusResponse.ok) {
             const status = await statusResponse.json();
-            if (status.exists && status.isSubmitted) {
-                showAlreadyEvaluated();
-                return;
-            }
+            if (status.exists && status.isSubmitted && status.canEvaluate === false) {
+    showAlreadyEvaluated();
+    return;
+}
+
         }
         
         // Load teacher and course details (you need to implement these endpoints)

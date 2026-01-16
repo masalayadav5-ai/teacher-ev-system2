@@ -421,3 +421,109 @@ nav {
 .avatar-dropdown.show {
   display: flex;
 }
+/* ===== ANALYTICS LAYOUT ===== */
+
+.analytics-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* KPI CARDS */
+.analytics-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.kpi-card.highlight {
+    background: linear-gradient(135deg, #4c6fff, #6b8cff);
+    color: #fff;
+}
+
+.kpi-label {
+    font-size: 14px;
+    color: #777;
+}
+
+.kpi-card.highlight .kpi-label {
+    color: #e0e6ff;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* CHART CARD */
+.analytics-chart-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.analytics-chart-card h4 {
+    margin-bottom: 16px;
+}
+
+/* TABLE CARD */
+.analytics-table-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.analytics-table th {
+    text-align: left;
+    color: #555;
+    font-weight: 600;
+}
+
+.analytics-table td:last-child {
+    font-weight: 700;
+    text-align: center;
+}
+.rating-zero {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.rating-low {
+    color: #ea580c;
+    font-weight: 600;
+}
+
+.rating-mid {
+    color: #ca8a04;
+    font-weight: 600;
+}
+
+.rating-high {
+    color: #16a34a;
+    font-weight: 700;
+}

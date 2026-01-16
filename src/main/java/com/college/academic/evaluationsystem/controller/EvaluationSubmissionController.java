@@ -3,12 +3,14 @@ package com.college.academic.evaluationsystem.controller;
 import com.college.academic.evaluationsystem.model.*;
 import com.college.academic.evaluationsystem.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,9 +31,9 @@ public class EvaluationSubmissionController {
     private EvaluationCategoryRepository categoryRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private LocalDate getCurrentWeekStart() {
+   private LocalDate getCurrentWeekStart() {
     return LocalDate.now()
-            .with(java.time.DayOfWeek.MONDAY);
+            .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
 }
 
     // Get evaluation form structure with categories
@@ -157,17 +159,7 @@ public class EvaluationSubmissionController {
         teacherId, studentId, courseId
     );
 
-if (lastEvalOpt.isPresent() && lastEvalOpt.get().getSubmittedAt() != null) {
-    LocalDateTime nextAllowedAt = lastEvalOpt.get().getSubmittedAt().plusDays(7);
 
-    if (LocalDateTime.now().isBefore(nextAllowedAt)) {
-        return ResponseEntity.badRequest().body(Map.of(
-            "success", false,
-            "message", "You can evaluate again after 7 days.",
-            "nextAllowedAt", nextAllowedAt.toString()
-        ));
-    }
-}
 
             
             // 1. Create evaluation
@@ -243,6 +235,8 @@ public ResponseEntity<Map<String, Object>> checkEvaluationStatus(
         @RequestParam Long studentId,
         @RequestParam Long courseId) {
 
+    Map<String, Object> response = new HashMap<>();
+
     try {
         Optional<StudentEvaluation> lastEvalOpt =
                 evaluationRepository
@@ -250,8 +244,7 @@ public ResponseEntity<Map<String, Object>> checkEvaluationStatus(
                                 teacherId, studentId, courseId
                         );
 
-        Map<String, Object> response = new HashMap<>();
-
+        // ✅ NEVER evaluated before
         if (lastEvalOpt.isEmpty()) {
             response.put("exists", false);
             response.put("canEvaluate", true);
@@ -262,29 +255,39 @@ public ResponseEntity<Map<String, Object>> checkEvaluationStatus(
 
         response.put("exists", true);
         response.put("isSubmitted", Boolean.TRUE.equals(lastEval.getIsSubmitted()));
+        response.put("submittedAt", lastEval.getSubmittedAt());
 
-        LocalDateTime submittedAt = lastEval.getSubmittedAt();
-        response.put("submittedAt", submittedAt);
+        // 🔥 WEEK-BASED LOGIC (Sunday → Saturday)
+        LocalDate lastWeekStart = lastEval.getWeekStart();
 
-        if (submittedAt == null) {
-            response.put("canEvaluate", true);
+        LocalDate currentWeekStart =
+                LocalDate.now().with(
+                        java.time.temporal.TemporalAdjusters
+                                .previousOrSame(java.time.DayOfWeek.SUNDAY)
+                );
+
+        response.put("lastWeekStart", lastWeekStart);
+        response.put("currentWeekStart", currentWeekStart);
+
+        // ❌ SAME WEEK → BLOCK
+        if (lastWeekStart != null && lastWeekStart.equals(currentWeekStart)) {
+            response.put("canEvaluate", false);
+            response.put("reason", "Already evaluated this week");
             return ResponseEntity.ok(response);
         }
 
-        LocalDateTime nextAllowedAt = submittedAt.plusDays(7);
-        response.put("nextAllowedAt", nextAllowedAt);
-        response.put("canEvaluate", LocalDateTime.now().isAfter(nextAllowedAt));
-
+        // ✅ NEW WEEK → ALLOW
+        response.put("canEvaluate", true);
         return ResponseEntity.ok(response);
 
     } catch (Exception e) {
         e.printStackTrace();
-        return ResponseEntity.ok(Map.of(
-                "exists", false,
-                "canEvaluate", true
-        ));
+        response.put("exists", false);
+        response.put("canEvaluate", true);
+        return ResponseEntity.ok(response);
     }
 }
+
 
 
     // Helper method to convert parameter to map

@@ -80,7 +80,12 @@
                             <span>Evaluation</span>
                         </a>
                     </li>
-
+ <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
+                            <i class="bi bi-journal-text"></i>
+                            <span>Admin Evaluation Analytics</span>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
                             <i class="bi bi-calendar-week"></i>
@@ -320,7 +325,9 @@ function handlePageSpecificFunctions(pageUrl) {
         }
     }, 300);
 }
-
+ if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
+        initAdminEvaluationAnalytics();
+    }
     // Handle session plan page
     if (pageUrl.includes("sessionplan.html")) {
         setTimeout(() => {
@@ -343,7 +350,7 @@ function handlePageSpecificFunctions(pageUrl) {
     // Handle evaluation dashboard
 if (pageUrl.includes("evaldashboard.html")) {
     console.log('Eval dashboard loaded');
-    
+   
     // Wait for external script to load and execute
     setTimeout(() => {
         if (typeof initEvalDashboard === 'function') {
@@ -669,14 +676,20 @@ document.addEventListener("click", function (e) {
 if (e.target.closest("#profileBtn")) {
     dropdown.classList.remove("show");
 
-    // Mark that the profile page should show the logged-in user
-    sessionStorage.setItem("profileMode", "SELF");
-    localStorage.removeItem("currentSelectedProfile"); // clear leftover
+    const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
 
-    // Load the same StudentProfile page
+    sessionStorage.setItem("profileMode", "SELF");
+
+    if (user?.role === "TEACHER") {
+        sessionStorage.setItem("profileView", "TEACHER_ANALYTICS");
+    } else {
+        sessionStorage.setItem("profileView", "STUDENT");
+    }
+
     loadStudentProfilePage();
     return;
 }
+
 
 
   // Settings (ONLY ENTRY POINT)
@@ -721,6 +734,7 @@ if (e.target.closest("#profileBtn")) {
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="/js/topbar.js"></script>
 

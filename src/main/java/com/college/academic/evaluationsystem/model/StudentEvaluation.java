@@ -106,5 +106,8 @@ private LocalDate weekStart;
     public void setWeekStart(LocalDate weekStart) {
     this.weekStart = weekStart;
 }
+public LocalDate getWeekStart() {
+    return weekStart;
+}
 
 }

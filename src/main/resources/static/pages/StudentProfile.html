@@ -93,19 +93,12 @@
                     <i class="fas fa-graduation-cap"></i>
                     <span>Academic Info</span>
                 </button>
-                <button class="tab-btn" data-tab="performance">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Performance</span>
-                </button>
-                <button class="tab-btn" data-tab="attendance">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>Attendance</span>
-                </button>
-                <button class="tab-btn" data-tab="documents">
-                    <i class="fas fa-folder"></i>
-                    <span>Documents</span>
-                </button>
-            </div>
+                <button class="tab-btn" data-tab="overview" id="overviewTabBtn">
+  <i class="fas fa-clipboard-list"></i>
+  <span>Overview</span>
+</button>
+
+             </div>
 
             <!-- Tab Content Area -->
             <div class="profile-tabs-content">
@@ -178,229 +171,59 @@
                 </div>
 
                 <!-- Academic Information Tab -->
-                <div id="academic-tab" class="tab-pane">
-                    <div class="info-cards-grid">
-                        <!-- Academic Performance Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-chart-bar"></i> Academic Performance</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="academic-stats">
-                                    <div class="academic-stat-item">
-                                        <div class="stat-value" id="cgpa">0.00</div>
-                                        <div class="stat-label">Current CGPA</div>
-                                    </div>
-                                    <div class="academic-stat-item">
-                                        <div class="stat-value" id="sgpa">0.00</div>
-                                        <div class="stat-label">Current SGPA</div>
-                                    </div>
-                                    <div class="academic-stat-item">
-                                        <div class="stat-value" id="credits">0/0</div>
-                                        <div class="stat-label">Credits Completed</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+             <div id="academic-tab" class="tab-pane">
 
-                        <!-- Current Courses Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-book-open"></i> Current Courses</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="courses-list" id="current-courses">
-                                    <p class="no-data">No courses enrolled for current semester</p>
-                                </div>
-                            </div>
-                        </div>
+  <div class="info-cards-grid">
 
-                        <!-- Academic History Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-history"></i> Academic History</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="info-row">
-                                    <span class="info-label">Enrollment Date</span>
-                                    <span class="info-value" id="enrollment-date">-</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-label">Expected Graduation</span>
-                                    <span class="info-value" id="graduation-date">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Current Courses Card -->
+    <div class="info-card full-width">
+      <div class="info-card-header">
+        <h4><i class="fas fa-book-open"></i> Current Courses</h4>
+      </div>
+      <div class="info-card-body">
+        <div class="courses-list" id="current-courses">
+          <p class="no-data">Loading courses...</p>
+        </div>
+      </div>
+    </div>
 
-                <!-- Performance Tab -->
-                <div id="performance-tab" class="tab-pane">
-                    <div class="info-cards-grid">
-                        <!-- Performance Overview Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-chart-pie"></i> Performance Overview</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="performance-stats">
-                                    <div class="performance-stat-item">
-                                        <div class="performance-icon">
-                                            <i class="fas fa-tasks"></i>
-                                        </div>
-                                        <div class="performance-content">
-                                            <div class="performance-value" id="assignments-count">0</div>
-                                            <div class="performance-label">Assignments</div>
-                                        </div>
-                                    </div>
-                                    <div class="performance-stat-item">
-                                        <div class="performance-icon">
-                                            <i class="fas fa-file-alt"></i>
-                                        </div>
-                                        <div class="performance-content">
-                                            <div class="performance-value" id="exams-count">0</div>
-                                            <div class="performance-label">Exams</div>
-                                        </div>
-                                    </div>
-                                    <div class="performance-stat-item">
-                                        <div class="performance-icon">
-                                            <i class="fas fa-project-diagram"></i>
-                                        </div>
-                                        <div class="performance-content">
-                                            <div class="performance-value" id="projects-count">0</div>
-                                            <div class="performance-label">Projects</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Evaluation History Card -->
+    <div class="info-card full-width">
+      <div class="info-card-header">
+        <h4><i class="fas fa-history"></i> Evaluation History</h4>
+      </div>
+      <div class="info-card-body">
+        <div id="evaluation-history">
+          <p class="no-data">Loading evaluation history...</p>
+        </div>
+      </div>
+    </div>
 
-                        <!-- Performance Chart Card -->
-                        <div class="info-card full-width">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-chart-line"></i> Performance Trend</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="chart-placeholder" id="performance-chart">
-                                    <p>Performance chart will be displayed here</p>
-                                </div>
-                            </div>
-                        </div>
+  </div>
 
-                        <!-- Recent Grades Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-star"></i> Recent Grades</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="grades-list" id="recent-grades">
-                                    <p class="no-data">No grade data available</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+</div>
+<div id="overview-tab" class="tab-pane">
+  <div class="info-card full-width">
+    <div class="info-card-header">
+      <h4><i class="fas fa-clipboard-list"></i> Overview</h4>
+    </div>
 
-                <!-- Attendance Tab -->
-                <div id="attendance-tab" class="tab-pane">
-                    <div class="info-cards-grid">
-                        <!-- Attendance Overview Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-chart-bar"></i> Attendance Overview</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="attendance-stats">
-                                    <div class="attendance-stat-item present">
-                                        <div class="attendance-icon">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                        <div class="attendance-content">
-                                            <div class="attendance-value" id="present-percentage">0%</div>
-                                            <div class="attendance-label">Present</div>
-                                        </div>
-                                    </div>
-                                    <div class="attendance-stat-item absent">
-                                        <div class="attendance-icon">
-                                            <i class="fas fa-times-circle"></i>
-                                        </div>
-                                        <div class="attendance-content">
-                                            <div class="attendance-value" id="absent-percentage">0%</div>
-                                            <div class="attendance-label">Absent</div>
-                                        </div>
-                                    </div>
-                                    <div class="attendance-stat-item late">
-                                        <div class="attendance-icon">
-                                            <i class="fas fa-clock"></i>
-                                        </div>
-                                        <div class="attendance-content">
-                                            <div class="attendance-value" id="late-percentage">0%</div>
-                                            <div class="attendance-label">Late</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="info-card-body">
 
-                        <!-- Attendance Chart Card -->
-                        <div class="info-card full-width">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-chart-area"></i> Attendance Trend</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="chart-placeholder" id="attendance-chart">
-                                    <p>Attendance chart will be displayed here</p>
-                                </div>
-                            </div>
-                        </div>
+      <!-- STUDENT DEFAULT OVERVIEW -->
+      <div id="evaluation-overview-body">
+        <p class="no-data">Select a teacher from Evaluation History.</p>
+      </div>
 
-                        <!-- Recent Attendance Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-history"></i> Recent Attendance</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="attendance-history" id="attendance-history">
-                                    <p class="no-data">No attendance records available</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <!-- 🔥 TEACHER ANALYTICS (HIDDEN BY DEFAULT) -->
+      <div id="teacherAnalyticsContainer" style="display:none"></div>
 
-                <!-- Documents Tab -->
-                <div id="documents-tab" class="tab-pane">
-                    <div class="info-cards-grid">
-                        <!-- Upload Documents Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-upload"></i> Upload Documents</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="upload-area">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <p>Drag & drop files or click to browse</p>
-                                    <input type="file" id="document-upload" multiple style="display: none;">
-                                    <button class="btn btn-secondary upload-btn">
-                                        <i class="fas fa-folder-open"></i> Browse Files
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+    </div>
+  </div>
+</div>
 
-                        <!-- Documents List Card -->
-                        <div class="info-card">
-                            <div class="info-card-header">
-                                <h4><i class="fas fa-folder-open"></i> Student Documents</h4>
-                            </div>
-                            <div class="info-card-body">
-                                <div class="documents-list" id="documents-list">
-                                    <p class="no-data">No documents uploaded yet</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+ 
             </div>
         </div>
     </div>

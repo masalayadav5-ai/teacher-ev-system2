@@ -73,4 +73,12 @@ List<Teacher> findAllVisibleWithRelations();
 List<Object[]> findTeachersWithCoursesByProgramAndSemester(
     @Param("programId") Long programId, 
     @Param("semesterId") Long semesterId);
+  @Query("""
+        SELECT t.id, t.fullName, c.id, c.name
+        FROM Teacher t
+        JOIN t.courses c
+        ORDER BY t.fullName
+    """)
+    List<Object[]> findTeachersWithCourses();
+
 }
