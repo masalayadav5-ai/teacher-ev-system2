@@ -63,4 +63,14 @@ List<Teacher> findActiveTeachersByProgram(@Param("programId") Long programId);
        "LEFT JOIN FETCH t.program " +
        "WHERE t.hide = '0'")
 List<Teacher> findAllVisibleWithRelations();
+// Add this method to TeacherRepository.java
+@Query("SELECT DISTINCT t, c FROM Teacher t " +
+       "JOIN t.courses c " +
+       "JOIN c.semester s " +
+       "WHERE c.semester.program.id = :programId " +
+       "AND c.semester.id = :semesterId " +
+       "ORDER BY t.fullName, c.name")
+List<Object[]> findTeachersWithCoursesByProgramAndSemester(
+    @Param("programId") Long programId, 
+    @Param("semesterId") Long semesterId);
 }

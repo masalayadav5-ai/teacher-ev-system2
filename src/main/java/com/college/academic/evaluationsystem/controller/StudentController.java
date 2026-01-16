@@ -3,6 +3,8 @@ package com.college.academic.evaluationsystem.controller;
 import com.college.academic.evaluationsystem.model.*;
 import com.college.academic.evaluationsystem.repository.*;
 import com.college.academic.evaluationsystem.service.StudentService;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,8 @@ import java.util.Map;
 @RequestMapping("/api/students")
 @CrossOrigin(origins = "*")
 public class StudentController {
+    @Autowired
+private TeacherRepository teacherRepository;
 
     @Autowired
     private StudentService studentService;
@@ -305,4 +309,56 @@ if (semesterId != null) {
                 "pending", studentService.getPendingStudentsCount()
         );
     }
+    
+  // Add this endpoint to StudentController.java
+@GetMapping("/{studentId}/teacher-courses")
+public ResponseEntity<?> getStudentTeacherCourses(@PathVariable Long studentId) {
+    try {
+        Student student = studentRepository.findById(studentId).orElse(null);
+        if (student == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // Get student's program and semester
+        Program program = student.getProgram();
+        Semester semester = student.getSemester();
+        
+        if (program == null || semester == null) {
+            return ResponseEntity.ok(List.of());
+        }
+        
+        // Fetch teachers with their courses for this semester
+        List<Object[]> results = teacherRepository.findTeachersWithCoursesByProgramAndSemester(
+            program.getId(), semester.getId());
+        
+        // Create a list of teacher-course objects
+        List<Map<String, Object>> teacherCourses = new ArrayList<>();
+        for (Object[] result : results) {
+            Teacher teacher = (Teacher) result[0];
+            Course course = (Course) result[1];
+            
+            Map<String, Object> teacherCourse = new HashMap<>();
+            teacherCourse.put("teacherId", teacher.getId());
+            teacherCourse.put("teacherName", teacher.getFullName());
+            teacherCourse.put("teacherEmail", teacher.getEmail());
+            teacherCourse.put("teacherQualification", teacher.getQualification());
+            teacherCourse.put("teacherExperience", teacher.getExperience());
+            teacherCourse.put("courseId", course.getId());
+            teacherCourse.put("courseCode", course.getCode());
+            teacherCourse.put("courseName", course.getName());
+            teacherCourse.put("courseDescription", course.getDescription());
+            teacherCourse.put("courseCredits", course.getCredits());
+            teacherCourse.put("programName", program.getName());
+            
+            teacherCourses.add(teacherCourse);
+        }
+        
+        return ResponseEntity.ok(teacherCourses);
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(
+            Map.of("message", "Error fetching teacher courses"));
+    }
+}
 }

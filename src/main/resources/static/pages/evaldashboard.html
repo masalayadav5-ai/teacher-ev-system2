@@ -1,95 +1,25 @@
- <link rel="stylesheet" href="/css/evaldashboard.css">
- <link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/evaldashboard.css">
+<link rel="stylesheet" href="/css/common.css">
 
 <div class="page-header">
     <h2 class="page-title">Teacher Evaluation</h2>
-
     <div class="header-actions">
-        <button class="add-btn viewpara">+ Add parameter</button>
- <button class="add-btn addpara" onclick="loadPage('/pages/evaluation.html')">
-    + View parameter
-</button>
-
+        
+        <button class="add-btn addpara" onclick="loadPage('/pages/AdminEvaluation.html')">
+            + Add parameter
+        </button>
     </div>
 </div>
 
 <p class="page-subtitle">overview and action</p>
 
- 
-         <div class="card-container">
+<div class="card-container" id="teachersContainer">
+    <div class="loading-state">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Loading teachers...</p>
+    </div>
+</div>
 
-            <!-- Card -->
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Easton Boohan</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Addison Johnson DVM</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Zack Harvey</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Mr. Arne Kris Sr.</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Prof. Jed Trantow</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Nat Hickle</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Delphine Carroll</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Garret tanjan tsk</h4>
-                <button>View Evaluation</button>
-            </div>
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Delphine Carroll</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Garret Winthoiser</h4>
-                <button>View Evaluation</button>
-            </div>
-             <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Delphine Carroll</h4>
-                <button>View Evaluation</button>
-            </div>
-
-            <div class="eval-card">
-                <div class="aavatar">👤</div>
-                <h4>Garret Winthoiser</h4>
-                <button>View Evaluation</button>
-            </div>
-        </div>
- 
 <!-- Modal for view parameter -->
 <div id="viewparaPanel" class="modal-overlay">
     <div class="modal-card">
@@ -97,7 +27,6 @@
             <h2>Register Teacher</h2>
             <span class="modal-close">&times;</span>
         </div>
-
         <div class="modal-body">
             <div class="form-group">
                 <label>Full Name</label>
@@ -140,9 +69,16 @@
                 <input type="password" placeholder="Confirm password">
             </div>
         </div>
-
         <div class="modal-footer">
             <button class="submit-btn">Submit</button>
         </div>
     </div>
 </div>
+<script src="/js/evaldashboard.js"></script>
+<!--<script>
+// Just call the function
+//if (typeof loadStudentTeachers === 'function') {
+//    loadStudentTeachers();
+//}
+</script>-->
+<!--//teacher dynamically profile load is in dashboard.html...-->

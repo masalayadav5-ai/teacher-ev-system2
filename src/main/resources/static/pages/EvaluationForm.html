@@ -1,0 +1,62 @@
+
+
+<title>Evaluate Teacher - College Academic System</title>
+<link rel="stylesheet" href="/css/evaluation.css">
+<link rel="stylesheet" href="/css/global.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="container">
+
+    <!-- Back Button -->
+    <div class="back-container">
+        <button onclick="loadPage('/pages/evaldashboard.html')">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+    </div>
+
+    <!-- ✅ SINGLE STAGE -->
+    <div class="evaluation-stage">
+
+        <!-- Loading -->
+        <div class="loading-container" id="loadingState">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin fa-3x"></i>
+            </div>
+            <p>Loading evaluation form...</p>
+        </div>
+
+        <!-- Error -->
+        <div class="error-container" id="errorState" style="display:none;">
+            <i class="fas fa-exclamation-triangle fa-3x"></i>
+            <h3>Error Loading Form</h3>
+            <p id="errorMessage"></p>
+            <button class="retry-btn" onclick="loadEvaluationForm()">Try Again</button>
+        </div>
+
+        <!-- Already Evaluated -->
+        <div class="already-evaluated" id="alreadyEvaluated" style="display:none;">
+            <i class="fas fa-check-circle fa-3x"></i>
+            <h3>Already Evaluated</h3>
+            <p>You have already submitted an evaluation for this course.</p>
+        </div>
+
+        <!-- ✅ ONLY ONE evaluationContainer -->
+        <div class="evaluation-container" id="evaluationContainer" style="display:none;">
+            <div class="form-header" id="formHeader"></div>
+            <form id="evaluationForm"></form>
+
+            <div class="submit-section" id="submitSection">
+                <button type="button" class="submit-button" onclick="submitEvaluation()" id="submitBtn" disabled>
+                    Submit Evaluation
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="/js/auth.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/EvaluationForm.js"></script>

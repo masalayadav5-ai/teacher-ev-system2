@@ -1,8 +1,9 @@
- 
+/* evaldashboard.css */
 .card-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 25px;
+    margin-top: 20px;
 }
 
 /* Evaluation card */
@@ -12,42 +13,340 @@
     border-radius: 15px;
     text-align: center;
     color: #083b44;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(76, 111, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 240px; /* Increased for more content */
+}
+
+.eval-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(76, 111, 255, 0.15);
+    background: rgba(76, 111, 255, 0.12);
 }
 
 .aavatar {
     width: 60px;
     height: 60px;
-    margin: 0 auto 15px;
-    background: white;
+    margin: 15px auto 15px;
+    background: linear-gradient(135deg, #4c6fff, #3a57de);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 26px;
     color: #fff;
+    box-shadow: 0 4px 8px rgba(76, 111, 255, 0.2);
 }
 
 .eval-card h4 {
-    margin-bottom: 15px;
-    font-size: 15px;
+   
+    font-size: 16px;
     font-weight: 600;
+    min-height: 20px;
+    line-height: 1.3;
+    color: #083b44;
+    padding: 0 5px;
+}
+
+/* Updated teacher-info for multiple lines and left alignment */
+.teacher-info {
+    font-size: 12px;
+    color: #666;
+    margin: 5px 0 5px 0;
+    min-height: 40px; /* Increased for multiple lines */
+    line-height: 1.4;
+    text-align: center; /* Horizontal center */
+    padding: 0 5px;
+    width: 100%;
+    /* Add flexbox for vertical centering */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; /* Ensures multi-line text is properly centered */
+}
+
+.teacher-info strong {
+    color: #083b44;
+    font-weight: 600;
+    /* Removed flex properties */
 }
 
 .eval-card button {
     background: #4c6fff;
     border: none;
-    padding: 8px 18px;
+    padding: 10px 15px; /* Adjusted padding */
     border-radius: 20px;
     cursor: pointer;
-    font-size: 13px;
-    color:white;
-    
+    font-size: 13px; /* Slightly smaller font */
+    color: white;
+    transition: background 0.2s ease, transform 0.2s ease;
+    font-weight: 500;
+    min-width: 140px;
+    margin-top: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90%;
 }
 
 .eval-card button:hover {
     background: #3a57de;
+    transform: scale(1.05);
 }
- .header-actions {
+
+.header-actions {
     display: flex;
-    gap: 10px;   /* space between buttons */
+    gap: 10px;
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(76, 111, 255, 0.05);
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 2px dashed rgba(76, 111, 255, 0.1);
+}
+
+.empty-state.error-state {
+    background: rgba(255, 76, 76, 0.05);
+    border-color: rgba(255, 76, 76, 0.1);
+}
+
+.loading-state i,
+.empty-state i {
+    font-size: 48px;
+    color: #4c6fff;
+    margin-bottom: 20px;
+}
+
+.empty-state.error-state i {
+    color: #ff4c4c;
+}
+
+.loading-state p,
+.empty-state p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.retry-btn {
+    background: #4c6fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.retry-btn:hover {
+    background: #3a57de;
+}
+
+.retry-btn i {
+    font-size: 14px;
+    color: white;
+    margin: 0;
+}
+
+/* Page header styles */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #083b44;
+}
+
+.page-subtitle {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 14px;
+}
+
+/* Modal styles (keep existing) */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-card {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #083b44;
+}
+
+.modal-close {
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modal-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+}
+
+.submit-btn {
+    background: #4c6fff;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .eval-card {
+        padding: 20px 10px;
+        min-height: 220px; /* Adjusted */
+    }
+    
+    .eval-card h4 {
+        font-size: 15px;
+    }
+    
+    .teacher-info {
+        font-size: 11px;
+        min-height: 35px;
+    }
+    
+    .eval-card button {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: 110px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .eval-card {
+        min-height: 200px;
+    }
+    
+    .loading-state,
+    .empty-state {
+        padding: 40px 15px;
+    }
+    
+    .teacher-info {
+        text-align: center; /* Center on mobile */
+    }
+}
+
+/* Additional styles for better course display */
+.course-code {
+    font-weight: 600;
+    color: #4c6fff;
+}
+
+.course-name {
+    display: block;
+    margin-top: 2px;
+    color: #555;
+}
+
+.program-info {
+    display: block;
+    margin-top: 5px;
+    font-style: italic;
+    color: #777;
 }

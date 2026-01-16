@@ -15,6 +15,8 @@
 
  <link rel="stylesheet" href="/css/student.css">
 <link rel="stylesheet" href="/css/register_stu.css">
+<link rel="stylesheet" href="/css/evaldashboard.css">
+<link rel="stylesheet" href="/css/evaluation.css">
 
 </head>
 
@@ -91,18 +93,12 @@
                             <span>Student Profile</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                            <a class="nav-link" id="settingsLink" href="#">
-                         <i class="bi bi-gear"></i>
-                          <span>Settings</span>
-                            </a>
-                          </li>
  
                 </ul>
             </nav>
         </aside>
 
-        <!-- Main Content -->
+    <!-- Main Content -->
         <main class="main">
 
             <!-- Topbar -->
@@ -111,8 +107,26 @@
                 <div class="top-title">Welcome!</div>
 
                 <div class="top-actions">
-                    <div class="avatar">A</div>
-                </div>
+
+  <div class="avatar-wrapper">
+    <div class="avatar" id="avatarBtn">A</div>
+
+    <!-- Avatar Dropdown -->
+    <div class="avatar-dropdown" id="avatarDropdown">
+      <a href="#" id="profileBtn">
+        <i class="bi bi-person"></i> Profile
+      </a>
+      <a href="#" id="settingsBtn">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+      <hr>
+      <a href="#" id="logoutBtn" class="logout">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </a>
+    </div>
+  </div>
+
+</div>
             </div>
 
 
@@ -121,71 +135,102 @@
  <link rel="stylesheet" href="css/setting.css">
 <!-- Settings Modal Overlay -->
 <div class="settings-overlay" id="settingsModal">
+  <div class="settings-modal">
 
-    <div class="settings-modal">
-
-        <!-- Modal Header -->
-        <div class="settings-header">
-            <h2>System Settings</h2>
-                        <span class="modal-close">&times;</span>
-
-         </div>
-
-        <!-- Modal Body -->
-        <div class="settings-body">
-
-            <!-- Left Menu -->
-            <aside class="settings-menu">
-                <ul>
-                    <li class="active">General</li>
-                    <li>Users & Roles</li>
-                    <li>Evaluation</li>
-                    <li>Session Planner</li>
-                    <li>Students</li>
-                    <li>Notifications</li>
-                    <li>Security</li>
-                    <li>System</li>
-                </ul>
-            </aside>
-
-            <!-- Right Content -->
-            <section class="settings-content">
-
-                <!-- General Settings -->
-                <div class="settings-section">
-                    <h3>General Settings</h3>
-
-                    <div class="form-group">
-                        <label>Institution Name</label>
-                        <input type="text">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Academic Year</label>
-                        <select>
-                            <option>2024 – 2025</option>
-                            <option>2025 – 2026</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Time Zone</label>
-                        <select>
-                            <option>GMT +05:45 (Nepal)</option>
-                        </select>
-                    </div>
-                </div>
-
-            </section>
-        </div>
-
-        <!-- Modal Footer -->
-        <div class="settings-footer">
-             <button class="btn-primary">Save Changes</button>
-        </div>
-
+    <!-- Header -->
+    <div class="settings-header">
+      <h2>System Settings</h2>
+      <span class="modal-close">&times;</span>
     </div>
+
+    <!-- Body -->
+    <div class="settings-body">
+
+      <!-- LEFT MENU -->
+      <aside class="settings-menu">
+        <ul>
+          <li class="active" data-tab="general">General</li>
+          <li data-tab="evaluation">Evaluation</li>
+          <li data-tab="security">Security</li>
+          <li data-tab="system">System Info</li>
+        </ul>
+      </aside>
+
+      <!-- RIGHT CONTENT -->
+      <section class="settings-content">
+
+        <!-- GENERAL -->
+        <div class="settings-section active" id="tab-general">
+          <h3>General</h3>
+
+          <div class="form-group">
+            <label>Institution Name</label>
+            <input type="text" id="institutionName">
+          </div>
+
+          <div class="form-group">
+            <label>Established Year</label>
+            <input type="number" id="establishedYear" placeholder="e.g. 2012">
+          </div>
+
+        </div>
+
+        <!-- EVALUATION -->
+        <div class="settings-section" id="tab-evaluation">
+          <h3>Teacher Evaluation</h3>
+
+          <div class="form-group">
+            <label>Student Evaluation Frequency</label>
+            <select id="evaluationFrequency">
+              <option value="daily">Once Per Day</option>
+              <option value="weekly">Once Per Week</option>
+              <option value="monthly">Once Per Month</option>
+            </select>
+
+            <small class="hint">
+              Controlled by Admin – applies system-wide
+            </small>
+          </div>
+        </div>
+
+        <!-- SECURITY -->
+        <div class="settings-section" id="tab-security">
+          <h3>Security</h3>
+
+          <div class="security-box">
+            <p>
+              Change your account password to keep your account secure.
+            </p>
+
+            <button class="btn-primary" id="openChangePassword">
+              Change Password
+            </button>
+          </div>
+        </div>
+
+        <!-- SYSTEM INFO -->
+        <div class="settings-section" id="tab-system">
+          <h3>System Information</h3>
+
+          <p><strong>Application:</strong> SmarTeach</p>
+          <p><strong>Version:</strong> 1.0.0</p>
+          <p><strong>Server Time:</strong> <span id="serverTime"></span></p>
+          <p><strong>Time Zone:</strong> GMT +05:45 (Nepal)</p>
+          <p><strong>Status:</strong> <span class="status-ok">Running</span></p>
+        </div>
+
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="settings-footer">
+       <button class="btn-primary" id="saveSettingsBtn">Save Changes</button>
+    </div>
+
+  </div>
 </div>
+
+
 
             <div class="footer">
                 © 2025 SmarTeach — Teacher Evaluation & Session Planner
@@ -197,108 +242,63 @@
 
     <!-- JS FUNCTIONS -->
  <script>
+     function loadScriptOnce(src) {
+  if (document.querySelector(`script[src="${src}"]`)) return; // already loaded
+  const s = document.createElement("script");
+  s.src = src;
+  document.head.appendChild(s);
+}
 
-function loadPage(pageUrl) {
+    function loadPage(pageUrl) {
     const area = document.getElementById("content-area");
     area.classList.remove("loaded");
 
     fetch(pageUrl)
         .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
         .then(html => {
-            // Remove scripts from loaded pages
+            // Create a temporary div to parse HTML
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = html;
             
-            // Remove script tags but keep their content
+            // Collect all scripts
             const scripts = tempDiv.querySelectorAll('script');
-            scripts.forEach(script => {
-                script.remove();
-                // If it's a script with src, we might need to load it
-                if (script.src) {
-                    console.log('External script found:', script.src);
-                }
-            });
+            const inlineScripts = [];
             
+            // Process scripts
+            scripts.forEach(script => {
+    if (script.src) {
+        console.log('External script found:', script.src);
+        loadScriptOnce(script.src); // ✅ here
+    } else if (script.textContent.trim()) {
+        inlineScripts.push(script.textContent);
+    }
+    script.remove();
+});
+
+            
+            // Set the HTML content
             area.innerHTML = tempDiv.innerHTML;
 
             requestAnimationFrame(() => {
                 area.classList.add("loaded");
             });
 
-            // Handle specific pages
-// In your current loadPage function, update the page-specific handlers:
-
-// Handle specific pages
-if (pageUrl.includes("sessionplan.html")) {
-    // Only try to initialize if we're on the session plan page
-    setTimeout(() => {
-        if (typeof initSessionPlan === 'function') {
-            initSessionPlan();
-        } else {
-            console.log('initSessionPlan not available on this page');
-        }
-    }, 100);
-}
-
-if (pageUrl.includes("student.html")) {
-    setTimeout(() => {
-        if (typeof initStudentPage === 'function') {
-            initStudentPage();
-        } else {
-            console.log('initStudentPage not available on this page');
-        }
-    }, 100);
-}
-if (pageUrl.includes("admin-management.html")) {
-    setTimeout(() => {
-        if (typeof initAdminManagement === 'function') {
-            initAdminManagement();
-        } else {
-            console.log('initAdminManagement not available on this page');
-        }
-    }, 100);
-}
-
-if (pageUrl.includes("teacher.html")) {
-    setTimeout(() => {
-        if (typeof initTeacherPage === 'function') {
-            initTeacherPage();
-        } else {
-            console.log('initTeacherPage not available on this page');
-        }
-    }, 100);
-}
-
-// SPECIAL HANDLING FOR SESSION DETAILS
-if (pageUrl.includes("session-details.html")) {
-    const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
-    const sessionId = urlParams.get('id');
-    
-    if (sessionId) {
-        setTimeout(() => {
-            // First try loadSessionDetails
-            if (typeof loadSessionDetails === 'function') {
-                loadSessionDetails(sessionId);
-            } 
-            // Then try initSessionDetails
-            else if (typeof initSessionDetails === 'function') {
-                initSessionDetails();
-            }
-            else {
-                console.error('No session details functions found');
-                // Try to fetch and display manually
-                fetch(`/api/session-plans/${sessionId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log('Manual fetch:', data);
-                        // Basic display
-                        document.getElementById('courseTitle').textContent = data.course || 'No Course';
-                        document.getElementById('sessionId').textContent = data.id || 'N/A';
-                    });
-            }
-        }, 200);
-    }
-}
+            // Execute all inline scripts AFTER HTML is loaded
+            setTimeout(() => {
+                inlineScripts.forEach(scriptContent => {
+                    try {
+                        // Create and execute the script
+                        const script = document.createElement('script');
+                        script.textContent = scriptContent;
+                        area.appendChild(script);
+                    } catch (error) {
+                        console.error('Error executing script:', error);
+                    }
+                });
+                
+                // Now handle specific pages
+                handlePageSpecificFunctions(pageUrl);
+            }, 100);
             
             initModals();
         })
@@ -307,6 +307,132 @@ if (pageUrl.includes("session-details.html")) {
             area.innerHTML = `<h3 class='text-danger'>Error loading page</h3>`;
         });
 }
+
+// Separate function to handle page-specific initialization
+function handlePageSpecificFunctions(pageUrl) {
+    console.log('Handling page:', pageUrl);
+    if (pageUrl.includes("EvaluationForm.html")) {
+    setTimeout(() => {
+        if (typeof window.initEvaluationForm === "function") {
+            window.initEvaluationForm();
+        } else {
+            console.error("initEvaluationForm not found");
+        }
+    }, 300);
+}
+
+    // Handle session plan page
+    if (pageUrl.includes("sessionplan.html")) {
+        setTimeout(() => {
+            if (typeof initSessionPlan === 'function') {
+                console.log('Calling initSessionPlan');
+                initSessionPlan();
+            } else {
+                console.log('initSessionPlan not available on this page');
+            }
+        }, 200);
+    }
+    if (pageUrl.includes("AdminEvaluation.html")) {
+    setTimeout(() => {
+        if (typeof initAdminEvaluation === 'function') {
+            initAdminEvaluation();
+        }
+    }, 200);
+}
+
+    // Handle evaluation dashboard
+if (pageUrl.includes("evaldashboard.html")) {
+    console.log('Eval dashboard loaded');
+    
+    // Wait for external script to load and execute
+    setTimeout(() => {
+        if (typeof initEvalDashboard === 'function') {
+            console.log('Calling initEvalDashboard');
+            initEvalDashboard();
+        } else if (typeof loadStudentTeachers === 'function') {
+            console.log('Calling loadStudentTeachers directly');
+            loadStudentTeachers();
+        } else {
+            console.error('Evaluation functions not available');
+            // Minimal error display
+            const container = document.getElementById('teachersContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Please refresh the page to load evaluation system.</p>
+                    </div>
+                `;
+            }
+        }
+    }, 400); // Give time for external script to load
+}
+    
+    // Handle student page
+    if (pageUrl.includes("student.html")) {
+        setTimeout(() => {
+            if (typeof initStudentPage === 'function') {
+                initStudentPage();
+            } else {
+                console.log('initStudentPage not available on this page');
+            }
+        }, 200);
+    }
+    
+    // Handle admin management page
+    if (pageUrl.includes("admin-management.html")) {
+        setTimeout(() => {
+            if (typeof initAdminManagement === 'function') {
+                initAdminManagement();
+            } else {
+                console.log('initAdminManagement not available on this page');
+            }
+        }, 200);
+    }
+    
+    // Handle teacher page
+    if (pageUrl.includes("teacher.html")) {
+        setTimeout(() => {
+            if (typeof initTeacherPage === 'function') {
+                initTeacherPage();
+            } else {
+                console.log('initTeacherPage not available on this page');
+            }
+        }, 200);
+    }
+    
+    // Handle session details page
+    if (pageUrl.includes("session-details.html")) {
+        const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
+        const sessionId = urlParams.get('id');
+        
+        if (sessionId) {
+            setTimeout(() => {
+                if (typeof loadSessionDetails === 'function') {
+                    loadSessionDetails(sessionId);
+                } else if (typeof initSessionDetails === 'function') {
+                    initSessionDetails();
+                } else {
+                    console.error('No session details functions found');
+                    // Try manual fetch
+                    fetch(`/api/session-plans/${sessionId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            console.log('Manual fetch:', data);
+                            if (document.getElementById('courseTitle')) {
+                                document.getElementById('courseTitle').textContent = data.course || 'No Course';
+                            }
+                            if (document.getElementById('sessionId')) {
+                                document.getElementById('sessionId').textContent = data.id || 'N/A';
+                            }
+                        });
+                }
+            }, 300);
+        }
+    }
+}
+
+// Add this function to dashboard.html (outside loadPage)
 
 window.onload = function () {
     loadPage('/pages/dashboard-content.html');
@@ -388,11 +514,7 @@ function modalHandler(e) {
     if (e.target.closest(".addsession") ) {
         sessionModal.classList.add("show");
     }
-    // Settings
-if (e.target.closest("#settingsLink") && settingsModal) {
-    e.preventDefault();
-    settingsModal.classList.add("show");
-}
+ 
 //addprogram
 if (e.target.closest(".programAdd") ) {
         programModal.classList.add("show");
@@ -443,19 +565,19 @@ if (e.target.closest(".programAdd") ) {
 
 }
 
-// In your dashboard.js
+//// In your dashboard.js
 document.addEventListener('DOMContentLoaded', function() {
-    // Your dashboard initialization code here
-    
-    // Check if elements exist before adding listeners
+//    // Your dashboard initialization code here
+//    
+//    // Check if elements exist before adding listeners
     const element = document.getElementById('someElementId');
     if (element) {
         element.addEventListener('click', function() {
             // your code
         });
     }
-    
-    // OR use optional chaining
+//    
+//    // OR use optional chaining
     document.getElementById('someElementId')?.addEventListener('click', function() {
         // your code
     });
@@ -463,12 +585,44 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <!--searchteacher-->
 <script>
- const searchInput = document.getElementById('teacherSearch');
+const searchInput = document.getElementById('teacherSearch');
 const filterSelect = document.getElementById('teacherFilter');
 const table = document.querySelector('.teacher-table tbody');
 
-searchInput.addEventListener('keyup', filterTable);
-filterSelect.addEventListener('change', filterTable);
+if (searchInput && filterSelect && table) {
+  searchInput.addEventListener('keyup', filterTable);
+  filterSelect.addEventListener('change', filterTable);
+}
+
+function filterTable() {
+  if (!table) return;
+
+  const filterValue = (searchInput?.value || '').toLowerCase();
+  const filterColumn = filterSelect?.value || 'all';
+  const rows = table.querySelectorAll('tr');
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    let text = '';
+
+    if (filterColumn === 'all') {
+      text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+    } else if (filterColumn === 'name') {
+      text = (cells[0]?.textContent || '').toLowerCase();
+    } else if (filterColumn === 'email') {
+      text = (cells[1]?.textContent || '').toLowerCase();
+    } else if (filterColumn === 'department') {
+      text = (cells[2]?.textContent || '').toLowerCase();
+    } else if (filterColumn === 'status') {
+      text = (cells[3]?.textContent || '').toLowerCase();
+    }
+
+    row.style.display = text.includes(filterValue) ? '' : 'none';
+  });
+}
+
+
+
 
 function filterTable() {
     const filterValue = searchInput.value.toLowerCase();
@@ -494,6 +648,68 @@ function filterTable() {
         row.style.display = text.includes(filterValue) ? '' : 'none';
     });
 }
+//searchInput.addEventListener('keyup', filterTable);
+//filterSelect.addEventListener('change', filterTable);
+</script>
+<!-- Avatar dropdown -->
+<script>
+document.addEventListener("click", function (e) {
+
+  const avatarBtn = document.getElementById("avatarBtn");
+  const dropdown = document.getElementById("avatarDropdown");
+  const settingsModal = document.getElementById("settingsModal");
+
+  // Toggle avatar dropdown
+  if (e.target.closest("#avatarBtn")) {
+    dropdown.classList.toggle("show");
+    return;
+  }
+
+ // Profile
+if (e.target.closest("#profileBtn")) {
+    dropdown.classList.remove("show");
+
+    // Mark that the profile page should show the logged-in user
+    sessionStorage.setItem("profileMode", "SELF");
+    localStorage.removeItem("currentSelectedProfile"); // clear leftover
+
+    // Load the same StudentProfile page
+    loadStudentProfilePage();
+    return;
+}
+
+
+  // Settings (ONLY ENTRY POINT)
+  if (e.target.closest("#settingsBtn")) {
+    dropdown.classList.remove("show");
+    settingsModal.classList.add("show");
+    initSettings();
+    return;
+  }
+
+  // Logout
+  if (e.target.closest("#logoutBtn")) {
+    dropdown.classList.remove("show");
+
+    Swal.fire({
+      title: "Logout?",
+      text: "Are you sure you want to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Logout"
+    }).then(result => {
+      if (result.isConfirmed) {
+        window.location.href = "/logout";
+      }
+    });
+    return;
+  }
+
+  // Click outside closes dropdown
+  if (!e.target.closest(".avatar-wrapper")) {
+    dropdown?.classList.remove("show");
+  }
+});
 </script>
 <!--plansession-->
 <script src="js/sessionplan.js"></script>
@@ -501,6 +717,8 @@ function filterTable() {
 <script src="js/teacher.js"></script>
 <script src="/js/session-details.js"></script>
 <script src="/js/admin-management.js"></script>
+<script src="/js/setting.js"></script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

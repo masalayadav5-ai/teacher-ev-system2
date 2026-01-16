@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
 public class AdminManagementController {
+    @PersistenceContext
+private EntityManager entityManager;
 
     @Autowired
     private ProgramRepository programRepository;
@@ -342,4 +346,51 @@ public List<Map<String, Object>> getStructureTree() {
     public List<Course> getAllCoursesByProgram(@PathVariable Long programId) {
         return courseRepository.findByProgramId(programId);
     }
+    // ADD THIS METHOD TO AdminManagementController.java
+@GetMapping("/teachers/{teacherId}/courses-for-session")
+public List<Map<String, Object>> getCoursesForSessionPlanning(@PathVariable Long teacherId) {
+    // Use Native SQL query to get exactly what we need
+    String sql = "SELECT " +
+                 "c.id as course_id, c.code as course_code, c.name as course_name, " +
+                 "c.description as course_description, c.credits as course_credits, " +
+                 "s.id as semester_id, s.name as semester_name, " +
+                 "p.id as program_id, p.name as program_name, p.code as program_code " +
+                 "FROM course c " +
+                 "INNER JOIN semester s ON c.semester_id = s.id " +
+                 "INNER JOIN program p ON s.program_id = p.id " +
+                 "INNER JOIN teacher_course tc ON c.id = tc.course_id " +
+                 "WHERE tc.teacher_id = ?1 " +
+                 "AND c.is_active = true";
+    
+    List<Object[]> results = entityManager.createNativeQuery(sql)
+        .setParameter(1, teacherId)
+        .getResultList();
+    
+    List<Map<String, Object>> courses = new ArrayList<>();
+    
+    for (Object[] row : results) {
+        Map<String, Object> course = new HashMap<>();
+        course.put("id", row[0]);           // course_id
+        course.put("code", row[1]);         // course_code
+        course.put("name", row[2]);         // course_name
+        course.put("description", row[3]);  // course_description
+        course.put("credits", row[4]);      // course_credits
+        
+        Map<String, Object> semester = new HashMap<>();
+        semester.put("id", row[5]);         // semester_id
+        semester.put("name", row[6]);       // semester_name
+        
+        Map<String, Object> program = new HashMap<>();
+        program.put("id", row[7]);          // program_id
+        program.put("name", row[8]);        // program_name
+        program.put("code", row[9]);        // program_code
+        
+        semester.put("program", program);
+        course.put("semester", semester);
+        
+        courses.add(course);
+    }
+    
+    return courses;
+}
 }

@@ -1,6 +1,6 @@
 // ================= API BASE URL =================
 const STUDENT_API_BASE_URL = "http://localhost:8080/api";let editingStudentId = null;
-
+let students = []; 
 // ================= INIT STUDENT PAGE =================
 function initStudentPage() {
 
@@ -8,10 +8,11 @@ function initStudentPage() {
     const studentForm = document.getElementById("studentForm");
     const searchStudent = document.getElementById("searchStudent");
     const studentPanel = document.getElementById("studentPanel");
-
+    const facultySelect = document.getElementById("faculty");
     // ===== Batch Dropdown =====
     const batchSelect = document.getElementById("batch");
     const currentYear = new Date().getFullYear();
+    if (!studentForm || !submitStudentBtn || !batchSelect || !facultySelect) return;
     batchSelect.innerHTML = `<option value="">-- Select Batch --</option>`;
     for (let y = currentYear; y >= currentYear - 10; y--) {
         batchSelect.innerHTML += `<option value="${y}">${y}</option>`;
@@ -166,7 +167,7 @@ function initStudentPage() {
 async function loadStudents() {
     const studentTableBody = document.getElementById("studentTableBody");
     const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
-    const students = await res.json();
+    students = await res.json();
 
     studentTableBody.innerHTML = "";
 
@@ -373,112 +374,53 @@ async function editStudent(id) {
     }
 }
 // ================= VIEW STUDENT =================
-async function viewStudent(id) {
-    console.log("viewStudent called with ID:", id);
-    
-    try {
-        console.log("Fetching students from API...");
-        const res = await fetch(`${STUDENT_API_BASE_URL}/students`);
-        const students = await res.json();
-        console.log("Total students fetched:", students.length);
-        
-        const s = students.find(st => st.id === id);
-        console.log("Found student:", s);
-        
-        if (!s) {
-            showMessage("Student not found!", "error");
-            return;
-        }
+function viewStudent(studentId) {
+    console.log("viewStudent called with ID:", studentId);
 
-        // Store student data
-        console.log("Storing student data in localStorage:", s);
-        localStorage.setItem('currentStudentProfile', JSON.stringify(s));
-        
-        // Verify storage
-        const stored = localStorage.getItem('currentStudentProfile');
-        console.log("Verified stored data:", stored);
-        
-        // Directly load profile page
-        console.log("Loading profile page...");
-        fetch('/pages/studentprofile.html')
-            .then(res => {
-                console.log("Profile HTML response status:", res.status);
-                return res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>";
-            })
-            .then(html => {
-                console.log("Profile HTML loaded, length:", html.length);
-                const area = document.getElementById("content-area");
-                if (!area) {
-                    console.error("content-area element not found!");
-                    return;
-                }
-                
-                area.innerHTML = html;
-                console.log("Profile HTML inserted into content-area");
-                
-                // Load and init profile script
-                const script = document.createElement('script');
-                script.src = '/js/studentprofile.js?v=' + Date.now(); // Add cache buster
-                
-                // Define the onload handler
-                script.onload = function() {
-                    console.log("studentprofile.js loaded successfully");
-                    console.log("Checking if initStudentProfile exists:", typeof window.initStudentProfile);
-                    
-                    // Give it a moment to register
-                    setTimeout(function() {
-                        if (typeof window.initStudentProfile === 'function') {
-                            console.log("Calling initStudentProfile...");
-                            window.initStudentProfile();
-                        } else {
-                            console.error("window.initStudentProfile is not a function!");
-                            console.log("Available window functions:", Object.keys(window).filter(key => typeof window[key] === 'function'));
-                        }
-                    }, 100);
-                };
-                
-                script.onerror = function(error) {
-                    console.error("Error loading studentprofile.js:", error);
-                };
-                
-                document.body.appendChild(script);
-                console.log("studentprofile.js script tag added to body");
-            })
-            .catch(error => {
-                console.error("Error loading profile page:", error);
-            });
-        
-    } catch (error) {
-        console.error("Error in viewStudent:", error);
-        showMessage("Error loading student details!", "error");
+    // Find the student object from your data array
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+        console.error("Student not found!");
+        return;
     }
+
+    console.log("Selected student:", student);
+
+    // Store in localStorage
+    localStorage.setItem('currentSelectedProfile', JSON.stringify(student));
+
+    // Set mode to STUDENT
+    sessionStorage.setItem('profileMode', 'STUDENT');
+
+    // Load profile page
+    loadStudentProfilePage();
 }
+
+
 
 // ================= LOAD STUDENT PROFILE PAGE =================
 function loadStudentProfilePage() {
-    // Load the student profile HTML
     fetch('/pages/studentprofile.html')
         .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>")
         .then(html => {
             const area = document.getElementById("content-area");
             area.innerHTML = html;
-            
-            // Load student profile JavaScript
+
+            // Load profile script
             const script = document.createElement('script');
-            script.src = '/js/studentprofile.js';
-            document.body.appendChild(script);
-            
-            // Initialize profile after script loads
-            setTimeout(() => {
-                if (window.initStudentProfile) {
+            script.src = '/js/studentprofile.js?v=' + Date.now();
+            script.onload = () => {
+                if (typeof window.initStudentProfile === 'function') {
                     window.initStudentProfile();
                 }
-            }, 100);
+            };
+            document.body.appendChild(script);
         })
         .catch(error => {
             console.error("Error loading profile page:", error);
         });
 }
+
 // ================= LOAD PROGRAMS DYNAMICALLY =================
 async function loadPrograms(selectedProgramId = null) {
     try {
@@ -629,6 +571,4 @@ document.querySelector(".modal-close").onclick = () => {
 };
 
 // ================= RUN INIT =================
-document.addEventListener("DOMContentLoaded", initStudentPage);
-// Add this test function at the bottom of your file
-
+window.initStudentPage = initStudentPage;// Add this test function at the bottom of your file

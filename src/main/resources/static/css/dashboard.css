@@ -362,3 +362,62 @@ nav {
 /*
 .............................clicks student
 */
+/* Avatar Dropdown */
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.avatar-dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 160px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.avatar-dropdown a {
+  padding: 10px 14px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-dropdown a:hover {
+  background: #f1f5f9;
+}
+
+.avatar-dropdown .logout {
+  color: #dc2626;
+}
+
+.avatar-dropdown hr {
+  margin: 6px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Show dropdown */
+.avatar-dropdown.show {
+  display: flex;
+}

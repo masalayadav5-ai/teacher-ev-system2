@@ -1,44 +1,29 @@
-// sessionplan.js - COMPLETE FIXED VERSION
-
+// sessionplan.js - CLEAN & MINIMAL VERSION
 function initSessionPlan() {
-    // Check if session modal exists on this page
     const sessionModal = document.getElementById("sessionModal");
-    if (!sessionModal) return; // Not on session plan page, exit
+    if (!sessionModal) return;
 
-    /** -------------------------
-     * ELEMENTS
-     * ------------------------- */
+    // Elements
     const nextBtn = document.getElementById("addDayBtn");
     const prevBtn = document.getElementById("prevDayBtn");
     const saveBtn = document.getElementById("savePlanBtn");
-
     const dayLabel = sessionModal.querySelector(".day-label");
     const topicInput = sessionModal.querySelector(".day-topic");
     const descInput = sessionModal.querySelector(".day-desc");
     const methodSelect = sessionModal.querySelector(".day-method");
-
     const facultySelect = document.getElementById("faculty");
-    const courseSelect = document.getElementById("course");
     const semesterSelect = document.getElementById("semester");
+    let courseSelect = document.getElementById("course");
 
-    // If any key element is missing, stop execution
     if (!nextBtn || !prevBtn || !saveBtn || !dayLabel || !topicInput || !descInput || !methodSelect) return;
 
-    /** -------------------------
-     * DAY DATA
-     * ------------------------- */
+    // State
     let currentDay = 1;
     const maxDays = 30;
-    let dayData = {}; // store topic + description + method per day
-
-    /** -------------------------
-     * TEACHER DATA
-     * ------------------------- */
+    let dayData = {};
     let currentTeacher = null;
 
-    /** -------------------------
-     * DAY MANAGEMENT FUNCTIONS
-     * ------------------------- */
+    // Day Management
     function saveCurrentDay() {
         dayData[currentDay] = {
             topic: topicInput.value,
@@ -56,9 +41,6 @@ function initSessionPlan() {
         prevBtn.disabled = day === 1;
     }
 
-    /** -------------------------
-     * DAY NAVIGATION
-     * ------------------------- */
     nextBtn.onclick = () => {
         saveCurrentDay();
         if (currentDay < maxDays) {
@@ -75,164 +57,110 @@ function initSessionPlan() {
         }
     };
 
-    /** -------------------------
-     * GET TEACHER INFO
-     * ------------------------- */
+    // Teacher Info
     function getCurrentTeacher() {
-        console.log('=== DEBUG: Getting teacher info ===');
-        
-        // Priority 1: Check window.currentUser from topbar.js
         if (window.currentUser) {
-            console.log('Found in window.currentUser:', window.currentUser);
-            
-            // IMPORTANT: If teacherId is missing but userId exists, use userId as teacherId
             const user = { ...window.currentUser };
             if (!user.teacherId && user.userId && user.role === 'TEACHER') {
                 user.teacherId = user.userId;
-                console.log('Using userId as teacherId:', user.teacherId);
             }
-            
             return user;
         }
         
-        // Priority 2: Check localStorage
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser) {
             const user = JSON.parse(storedUser);
-            console.log('Found in localStorage:', user);
-            
-            // Same fix for localStorage data
             if (!user.teacherId && user.userId && user.role === 'TEACHER') {
                 user.teacherId = user.userId;
             }
-            
             return user;
         }
         
-        // Priority 3: Extract from topbar
         const topTitle = document.querySelector(".top-title");
         if (topTitle && topTitle.dataset.username) {
-            const user = {
+            return {
                 username: topTitle.dataset.username,
                 role: topTitle.dataset.role,
                 userId: topTitle.dataset.userId || '0',
                 teacherId: topTitle.dataset.teacherId || topTitle.dataset.userId || '0'
             };
-            
-            console.log('Extracted from topbar dataset:', user);
-            return user;
         }
         
-        console.warn('No teacher info found');
         return null;
     }
 
-    /** -------------------------
-     * FETCH TEACHER'S ASSIGNED COURSES
-     * ------------------------- */
+    // Fetch teacher courses
     async function fetchTeacherCourses(teacherId) {
-        console.log(`Fetching courses for teacher ID: ${teacherId}`);
+        facultySelect.innerHTML = '<option value="">Loading your courses...</option>';
+        facultySelect.disabled = true;
         
         try {
-            facultySelect.innerHTML = '<option value="">Loading your courses...</option>';
-            facultySelect.disabled = true;
-            semesterSelect.disabled = true;
-            courseSelect.disabled = true;
-            
-            // Use userId as teacherId for the API call
-            const response = await fetch(`/api/admin/teachers/${teacherId}/courses`);
-            
-            console.log('API Response status:', response.status);
-            
-            if (!response.ok) {
-                throw new Error(`Failed to fetch courses: ${response.status}`);
-            }
-            
+            const response = await fetch(`/api/admin/teachers/${teacherId}/courses-for-session`);
+            if (!response.ok) throw new Error('Failed to fetch courses');
             const courses = await response.json();
-            console.log('Teacher assigned courses:', courses);
-            
-            if (courses && courses.length > 0) {
-                // Process and organize the courses
-                organizeAndPopulateCourses(courses);
-                
-                // Update modal with teacher info
-                updateModalWithTeacherInfo(currentTeacher.username, courses.length);
-            } else {
-                console.log('No courses found for teacher');
-                showNoCoursesMessage();
-            }
-            
+            processCourses(courses);
         } catch (error) {
-            console.error('Error fetching teacher courses:', error);
-            showErrorMessage('Failed to load your assigned courses. Please try again.');
-            setupStaticOptions(); // Fallback to static options
+            console.error('Error fetching courses:', error);
+            alert('Failed to load your assigned courses.');
+            setupStaticOptions();
         }
     }
 
-    /** -------------------------
-     * ORGANIZE AND POPULATE COURSES
-     * ------------------------- */
+    function processCourses(courses) {
+        if (courses && courses.length > 0) {
+            organizeAndPopulateCourses(courses);
+        } else {
+            showNoCoursesMessage();
+        }
+    }
+
     function organizeAndPopulateCourses(courses) {
-        // Group courses by program and semester
         const programsMap = {};
         
-        courses.forEach(course => {
-            // Ensure course has semester and program data
-            if (course.semester && course.semester.program) {
-                const program = course.semester.program;
-                const semester = course.semester;
+        courses.forEach((course) => {
+            let semesterId = 1, semesterName = 'Unknown Semester';
+            let programId = 1, programName = 'Unknown Program';
+            
+            if (course.semester) {
+                semesterId = course.semester.id || semesterId;
+                semesterName = course.semester.name || semesterName;
                 
-                // Create program entry if not exists
-                if (!programsMap[program.id]) {
-                    programsMap[program.id] = {
-                        id: program.id,
-                        name: program.name,
-                        semesters: {}
-                    };
+                if (course.semester.program) {
+                    programId = course.semester.program.id || programId;
+                    programName = course.semester.program.name || programName;
                 }
-                
-                // Create semester entry if not exists
-                if (!programsMap[program.id].semesters[semester.id]) {
-                    programsMap[program.id].semesters[semester.id] = {
-                        id: semester.id,
-                        name: semester.name,
-                        courses: []
-                    };
-                }
-                
-                // Add course to semester
-                programsMap[program.id].semesters[semester.id].courses.push({
-                    id: course.id,
-                    code: course.code,
-                    name: course.name,
-                    credits: course.credits,
-                    fullName: `${course.code} - ${course.name}`
-                });
             }
+            
+            if (!programsMap[programId]) {
+                programsMap[programId] = { id: programId, name: programName, semesters: {} };
+            }
+            
+            if (!programsMap[programId].semesters[semesterId]) {
+                programsMap[programId].semesters[semesterId] = {
+                    id: semesterId,
+                    name: semesterName,
+                    courses: []
+                };
+            }
+            
+            programsMap[programId].semesters[semesterId].courses.push({
+                id: course.id,
+                code: course.code,
+                name: course.name,
+                fullName: `${course.code} - ${course.name}`
+            });
         });
         
-        // Store globally for cascading dropdown
         window.teacherCoursesGrouped = programsMap;
-        
-        // Populate faculty/program dropdown
         populateFacultyDropdown(programsMap);
     }
 
     function populateFacultyDropdown(programsMap) {
-        // Clear existing options
         facultySelect.innerHTML = '<option value="">-- Select Your Program --</option>';
         semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
+        resetCourseSelect();
         
-        // Check if we have programs
-        const programIds = Object.keys(programsMap);
-        
-        if (programIds.length === 0) {
-            showNoCoursesMessage();
-            return;
-        }
-        
-        // Add program options
-        programIds.forEach(programId => {
+        Object.keys(programsMap).forEach(programId => {
             const program = programsMap[programId];
             const option = document.createElement('option');
             option.value = program.id;
@@ -240,20 +168,13 @@ function initSessionPlan() {
             facultySelect.appendChild(option);
         });
         
-        // Reset course select
-        resetCourseSelect();
-        
-        // Enable faculty select
         facultySelect.disabled = false;
-        
-        // Setup cascading dropdown events
         setupCascadingDropdowns();
     }
 
     function resetCourseSelect() {
-        // If course is currently a select, reset it to an input
+        const parent = courseSelect.parentElement;
         if (courseSelect.tagName === 'SELECT') {
-            const parent = courseSelect.parentElement;
             const newInput = document.createElement('input');
             newInput.type = 'text';
             newInput.id = 'course';
@@ -261,6 +182,7 @@ function initSessionPlan() {
             newInput.placeholder = 'Select Program and Semester first';
             newInput.disabled = true;
             parent.replaceChild(newInput, courseSelect);
+            courseSelect = newInput;
         } else {
             courseSelect.value = '';
             courseSelect.placeholder = 'Select Program and Semester first';
@@ -269,21 +191,15 @@ function initSessionPlan() {
     }
 
     function setupCascadingDropdowns() {
-        // Faculty/Program change
         facultySelect.addEventListener('change', function() {
             const programId = this.value;
-            
-            // Reset semester and course
             semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
             semesterSelect.disabled = !programId;
             resetCourseSelect();
             
             if (programId && window.teacherCoursesGrouped[programId]) {
                 const program = window.teacherCoursesGrouped[programId];
-                const semesters = Object.values(program.semesters);
-                
-                // Populate semesters
-                semesters.forEach(semester => {
+                Object.values(program.semesters).forEach(semester => {
                     const option = document.createElement('option');
                     option.value = semester.id;
                     option.textContent = semester.name;
@@ -292,219 +208,78 @@ function initSessionPlan() {
             }
         });
         
-        // Semester change
         semesterSelect.addEventListener('change', function() {
             const programId = facultySelect.value;
             const semesterId = this.value;
             
-            if (programId && semesterId && 
-                window.teacherCoursesGrouped[programId] && 
-                window.teacherCoursesGrouped[programId].semesters[semesterId]) {
-                
+            if (programId && semesterId && window.teacherCoursesGrouped[programId]?.semesters[semesterId]) {
                 const semester = window.teacherCoursesGrouped[programId].semesters[semesterId];
-                
-                // Change course input to select
                 const parent = courseSelect.parentElement;
                 const newSelect = document.createElement('select');
                 newSelect.id = 'course';
                 newSelect.className = 'form-control';
                 newSelect.innerHTML = '<option value="">-- Select Course --</option>';
                 
-                // Add course options
                 semester.courses.forEach(course => {
                     const option = document.createElement('option');
                     option.value = course.id;
                     option.textContent = course.fullName;
-                    option.dataset.courseName = course.name;
-                    option.dataset.courseCode = course.code;
                     newSelect.appendChild(option);
                 });
                 
-                // Replace input with select
                 parent.replaceChild(newSelect, courseSelect);
-                newSelect.disabled = false;
-                
+                courseSelect = newSelect;
+                courseSelect.disabled = false;
             } else {
                 resetCourseSelect();
             }
         });
     }
 
-  function updateModalWithTeacherInfo(teacherName, courseCount) {
-    // Update modal title
-    const modalTitle = document.querySelector('.modal-header h2');
-    if (modalTitle) {
-        modalTitle.textContent = `Add Session Plan - ${teacherName}`;
-    }
-    
-    // Add teacher info badge
-    const modalBody = document.querySelector('.modal-body');
-    if (!modalBody) {
-        console.error('Modal body not found');
-        return;
-    }
-    
-    // Remove existing badge
-    const existingBadge = modalBody.querySelector('.teacher-info-badge');
-    if (existingBadge) {
-        existingBadge.remove();
-    }
-    
-    const badge = document.createElement('div');
-    badge.className = 'teacher-info-badge';
-    badge.style.cssText = `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    `;
-    badge.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="font-size: 24px;">👨‍🏫</div>
-            <div>
-                <div style="font-weight: bold; font-size: 16px;">${teacherName}</div>
-                <div style="font-size: 14px; opacity: 0.9;">${courseCount} courses assigned</div>
-            </div>
-        </div>
-    `;
-    
-    // Insert at the beginning of modal body, before the form
-    const sessionForm = modalBody.querySelector('#sessionForm');
-    if (sessionForm) {
-        modalBody.insertBefore(badge, sessionForm);
-    } else {
-        modalBody.insertBefore(badge, modalBody.firstChild);
-    }
-}
-
-function showNoCoursesMessage() {
-    facultySelect.innerHTML = '<option value="">No courses assigned to you</option>';
-    facultySelect.disabled = false; // Allow them to see the message
-    
-    const modalBody = document.querySelector('.modal-body');
-    if (!modalBody) {
-        console.error('Modal body not found');
-        return;
-    }
-    
-    // Remove any existing warning messages first
-    const existingWarnings = modalBody.querySelectorAll('.alert.alert-warning, .no-courses-message');
-    existingWarnings.forEach(el => el.remove());
-    
-    const warning = document.createElement('div');
-    warning.className = 'alert alert-warning no-courses-message';
-    warning.style.margin = '10px 0';
-    warning.style.padding = '10px';
-    warning.style.backgroundColor = '#fff3cd';
-    warning.style.border = '1px solid #ffeaa7';
-    warning.style.borderRadius = '4px';
-    warning.innerHTML = `
-        <i class="fas fa-info-circle"></i>
-        <span>You don't have any courses assigned yet. Please contact administrator.</span>
-    `;
-    
-    // Find the form-row element in your specific HTML structure
-    const formRow = modalBody.querySelector('.form-row');
-    console.log('Form row found:', formRow);
-    
-    if (formRow && formRow.parentNode === modalBody) {
-        // Insert before the form-row
-        modalBody.insertBefore(warning, formRow);
-    } else if (formRow) {
-        // Form row exists but might be in a different parent
-        formRow.parentNode.insertBefore(warning, formRow);
-    } else {
-        // Fallback: Insert at the beginning of modal body
-        modalBody.insertBefore(warning, modalBody.firstChild);
-    }
-}
-    function showErrorMessage(message) {
-        console.error(message);
-        alert(message);
+    function showNoCoursesMessage() {
+        facultySelect.innerHTML = '<option value="">No courses assigned</option>';
+        facultySelect.disabled = true;
+        semesterSelect.disabled = true;
+        courseSelect.disabled = true;
     }
 
     function setupStaticOptions() {
-        console.log('Setting up static options as fallback');
-        
-        // Enable static options as fallback
         facultySelect.disabled = false;
         semesterSelect.disabled = false;
-        
-        // Reset to original static options
         facultySelect.innerHTML = `
             <option value="">-- Select Faculty --</option>
-            <option value="BE Computer">BE Computer</option>
-            <option value="BE Civil">BE Civil</option>
-            <option value="BBA">BBA</option>
-            <option value="BCA">BCA</option>
+            <option value="1">BE Computer</option>
+            <option value="2">BE Civil</option>
         `;
-        
         semesterSelect.innerHTML = `
             <option value="">Select Semester</option>
-            <option>Semester I</option>
-            <option>Semester II</option>
-            <option>Semester III</option>
-            <option>Semester IV</option>
-            <option>Semester V</option>
-            <option>Semester VI</option>
-            <option>Semester VII</option>
-            <option>Semester VIII</option>
+            <option value="1">Semester I</option>
+            <option value="2">Semester II</option>
         `;
-        
-        // Ensure course is input field
         resetCourseSelect();
         courseSelect.placeholder = 'Enter Course';
         courseSelect.disabled = false;
     }
 
-    /** -------------------------
-     * MODAL HANDLING
-     * ------------------------- */
+    // Modal Handling
     const addSessionBtn = document.querySelector('.addsession');
     const modalOverlay = document.getElementById('sessionModal');
     const modalClose = document.querySelector('.modal-close');
     
     if (addSessionBtn) {
         addSessionBtn.addEventListener('click', async function() {
-            console.log('Add Session button clicked');
-            
-            // Get teacher info
             currentTeacher = getCurrentTeacher();
-            
             if (!currentTeacher) {
                 alert('Please login as a teacher to create session plans');
                 return;
             }
             
-            // FIX: Check for teacherId or userId
-            if (!currentTeacher.teacherId && !currentTeacher.userId) {
-                alert('Unable to identify teacher. Please refresh the page.');
-                return;
-            }
-            
-            // Ensure teacherId exists for API calls
             if (!currentTeacher.teacherId && currentTeacher.userId) {
                 currentTeacher.teacherId = currentTeacher.userId;
-                console.log('Set teacherId from userId:', currentTeacher.teacherId);
             }
             
-            // Reset form
             resetForm();
-            
-            // Personalize UI
-            const pageSubtitle = document.querySelector('.page-subtitle');
-            if (pageSubtitle) {
-                pageSubtitle.textContent = `Teacher lesson planning for ${currentTeacher.username}'s students`;
-            }
-            
-            console.log('Fetching courses for teacher ID:', currentTeacher.teacherId);
-            
-            // Fetch teacher's courses
             await fetchTeacherCourses(currentTeacher.teacherId);
-            
-            // Show modal
             modalOverlay.style.display = 'flex';
         });
     }
@@ -522,45 +297,31 @@ function showNoCoursesMessage() {
             resetForm();
         }
     });
-    
+
     function resetForm() {
-        console.log('Resetting form');
-        
-        // Reset dropdowns
         facultySelect.innerHTML = '<option value="">-- Select Program --</option>';
         semesterSelect.innerHTML = '<option value="">-- Select Program First --</option>';
         semesterSelect.disabled = true;
-        
-        // Reset course field
         resetCourseSelect();
-        courseSelect.disabled = true;
-        
-        // Reset day data
         currentDay = 1;
         dayData = {};
         loadDay(currentDay);
-        
-        // Remove teacher badge and messages
-        const modalBody = document.querySelector('.modal-body');
-        if (modalBody) {
-            const elementsToRemove = modalBody.querySelectorAll(
-                '.teacher-info-badge, .alert, .no-courses-message'
-            );
-            elementsToRemove.forEach(el => el.remove());
-        }
     }
 
-    /** -------------------------
-     * SAVE SESSION PLAN
-     * ------------------------- */
+    // Save Session Plan - SIMPLIFIED
     saveBtn.onclick = () => {
         saveCurrentDay();
-
-        const facultyValue = facultySelect?.value.trim();
-        const courseValue = courseSelect?.value.trim();
-        const semesterValue = semesterSelect?.value.trim();
-
-        if (!facultyValue || !courseValue || !semesterValue) {
+        
+        const courseElement = document.getElementById('course');
+        if (courseElement !== courseSelect) {
+            courseSelect = courseElement;
+        }
+        
+        const facultyValue = facultySelect.value;
+        const semesterValue = semesterSelect.value;
+        const courseValue = courseSelect.value;
+        
+        if (!facultyValue || !semesterValue || !courseValue) {
             alert("Please select Program, Semester, and Course");
             return;
         }
@@ -570,125 +331,90 @@ function showNoCoursesMessage() {
             return;
         }
 
-        // Get course name
-        let courseName = courseValue;
-        let courseId = courseValue;
-        let courseCode = '';
-        
-        if (courseSelect.tagName === 'SELECT') {
-            const courseOption = courseSelect.options[courseSelect.selectedIndex];
-            courseName = courseOption?.dataset.courseName || courseValue;
-            courseCode = courseOption?.dataset.courseCode || '';
-            courseId = courseSelect.value;
-        }
-
-        // Get program name
-        let programName = facultyValue;
-        let programId = facultyValue;
-        if (facultySelect.tagName === 'SELECT') {
-            const programOption = facultySelect.options[facultySelect.selectedIndex];
-            programName = programOption?.textContent || facultyValue;
-            programId = facultySelect.value;
-        }
-
-        // Get semester name
-        let semesterName = semesterValue;
-        let semesterId = semesterValue;
-        if (semesterSelect.tagName === 'SELECT') {
-            const semesterOption = semesterSelect.options[semesterSelect.selectedIndex];
-            semesterName = semesterOption?.textContent || semesterValue;
-            semesterId = semesterSelect.value;
-        }
-
         // Create days array
         const days = [];
-        for (const dayKey in dayData) {
-            if (dayData.hasOwnProperty(dayKey)) {
-                const dayNum = parseInt(dayKey, 10);
-                if (!isNaN(dayNum)) {
-                    days.push({
-                        day_number: dayNum,
-                        topic: dayData[dayKey].topic,
-                        description: dayData[dayKey].description,
-                        method: dayData[dayKey].method
-                    });
-                }
+        for (const [dayKey, data] of Object.entries(dayData)) {
+            const dayNum = parseInt(dayKey);
+            if (!isNaN(dayNum) && data.topic) {
+                days.push({
+                    day_number: dayNum,
+                    topic: data.topic || '',
+                    description: data.description || '',
+                    method: data.method || 'Lecture'
+                });
             }
         }
-
+        
+        if (days.length === 0) {
+            alert("Please add at least one day with a topic");
+            return;
+        }
+        
         days.sort((a, b) => a.day_number - b.day_number);
 
+        // Create payload
         const payload = {
-            teacher_id: currentTeacher.teacherId || currentTeacher.userId,
-            teacher_name: currentTeacher.username,
-            program_id: programId,
-            program_name: programName,
-            semester_id: semesterId,
-            semester_name: semesterName,
-            course_id: courseId,
-            course_name: courseName,
-            course_code: courseCode,
+            teacherId: parseInt(currentTeacher.teacherId || currentTeacher.userId),
+            programId: parseInt(facultyValue),
+            semesterId: parseInt(semesterValue),
+            courseId: parseInt(courseValue),
             days: days
         };
 
         console.log("Saving session plan:", payload);
 
+        // Show loading
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
+
+        // Send to server
         fetch("/api/session-plans", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         })
-        .then(res => res.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            return response.json();
+        })
         .then((data) => {
-            console.log("Response:", data);
-            alert("Session Plan Saved Successfully");
-            modalOverlay.style.display = 'none';
-            resetForm();
-            loadPublishedPlans();
+            if (data && data.id) {
+                alert("Session Plan Saved Successfully!");
+                modalOverlay.style.display = 'none';
+                resetForm();
+                loadPublishedPlans();
+            } else {
+                throw new Error("Invalid response from server");
+            }
         })
         .catch(err => {
-            console.error(err);
-            alert("Failed to save session plan");
+            console.error("Save error:", err);
+            alert(`Failed to save session plan: ${err.message}`);
+        })
+        .finally(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
         });
     };
 
-    /** -------------------------
-     * LOAD PUBLISHED PLANS
-     * ------------------------- */
+    // Load Published Plans
     function loadPublishedPlans() {
         const tbody = document.querySelector(".session-table tbody");
         if (!tbody) return;
 
-        // Get current teacher
+        if (!currentTeacher) currentTeacher = getCurrentTeacher();
         if (!currentTeacher) {
-            currentTeacher = getCurrentTeacher();
-        }
-
-        if (!currentTeacher) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="empty-state">
-                        Please login as a teacher to view session plans
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="4">Please login as a teacher</td></tr>`;
             return;
         }
 
-        // Ensure teacherId exists for API call
         const teacherId = currentTeacher.teacherId || currentTeacher.userId;
         if (!teacherId) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="4" class="empty-state">
-                        Unable to identify teacher ID
-                    </td>
-                </tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="4">Unable to identify teacher ID</td></tr>`;
             return;
         }
 
-        // Show personalized loading
         tbody.innerHTML = `
             <tr>
                 <td colspan="4" class="loading-cell">
@@ -698,83 +424,76 @@ function showNoCoursesMessage() {
             </tr>
         `;
 
-        // Fetch only this teacher's plans using the API
         fetch(`/api/session-plans/teacher/${teacherId}`)
             .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
             })
-            .then(teacherPlans => {
-                tbody.innerHTML = "";
+            .then(plans => {
+                displayPlans(plans);
+            })
+            .catch(err => {
+                console.error('Error loading plans:', err);
+                displayPlans([]);
+            });
 
-                if (!teacherPlans || teacherPlans.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="4" class="empty-state">
-                                <div class="empty-content">
-                                    <i class="fas fa-calendar-plus"></i>
-                                    <div>
-                                        <h4>No Session Plans Yet</h4>
-                                        <p><strong>${currentTeacher.username}</strong> hasn't created any session plans.</p>
-                                        <button class="btn-add-first" onclick="document.querySelector('.addsession')?.click()">
-                                            <i class="fas fa-plus"></i> Create First Plan
-                                        </button>
-                                    </div>
+        function displayPlans(plans) {
+            tbody.innerHTML = "";
+            
+            if (!plans || plans.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <div class="empty-content">
+                                <i class="fas fa-calendar-plus"></i>
+                                <div>
+                                    <h4>No Session Plans Yet</h4>
+                                    <p><strong>${currentTeacher.username}</strong> hasn't created any session plans.</p>
                                 </div>
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
 
-                teacherPlans.forEach(plan => {
-                    const tr = document.createElement("tr");
-                    const date = plan.createdDate ? new Date(plan.createdDate).toLocaleDateString() : '';
-                    const method = plan.days && plan.days.length ? plan.days[0].method : "Lecture";
-
-                    tr.innerHTML = `
-                        <td>${plan.course_name || plan.course}</td>
-                        <td>${plan.semester_name || plan.semester}</td>
-                        <td>${date}</td>
-                        <td><span class="method-badge">${method}</span></td>
-                    `;
-
-                    tr.style.cursor = "pointer";
-                    tr.title = "Click to view details";
-                    
-                    tr.addEventListener("click", () => {
-                        // Load session-details page with ID
+            plans.forEach(plan => {
+                const tr = document.createElement("tr");
+                
+                // Extract data
+                const courseName = plan.course?.name || 'Unknown Course';
+                const semesterName = plan.semester?.name || 'Unknown Semester';
+                const date = plan.createdDate || '';
+                const formattedDate = date ? new Date(date).toLocaleDateString() : '';
+                const method = plan.days?.[0]?.method || "Lecture";
+                
+                tr.innerHTML = `
+                    <td>${courseName}</td>
+                    <td>${semesterName}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="method-badge">${method}</span></td>
+                `;
+                
+                tr.style.cursor = "pointer";
+                tr.title = "Click to view details";
+                
+                tr.addEventListener("click", () => {
+                    if (plan.id) {
                         if (typeof loadPage === 'function') {
                             loadPage(`/pages/session-details.html?id=${plan.id}`);
                         } else {
                             window.location.href = `/pages/session-details.html?id=${plan.id}`;
                         }
-                    });
-
-                    tbody.appendChild(tr);
+                    }
                 });
-            })
-            .catch(err => {
-                console.error('Error loading session plans:', err);
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="error-cell">
-                            Failed to load session plans
-                        </td>
-                    </tr>
-                `;
+                
+                tbody.appendChild(tr);
             });
+        }
     }
 
-    /** -------------------------
-     * INITIALIZE
-     * ------------------------- */
-    // Initialize day navigation
+    // Initialize
     loadDay(currentDay);
-    
-    // Load teacher's published plans on page load
     currentTeacher = getCurrentTeacher();
     loadPublishedPlans();
 }

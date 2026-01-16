@@ -39,12 +39,16 @@
     font-weight: 600;
 }
 
-.close-btn {
-    background: none;
-    border: none;
+.modal-close {
     font-size: 22px;
     cursor: pointer;
+    color: #374151;
 }
+
+.modal-close:hover {
+    color: #1d4ed8;
+}
+
 
 /* Body */
 .settings-body {
@@ -144,4 +148,20 @@
     border-radius: 4px;
     cursor: pointer;
 }
- 
+ .settings-section {
+    display: none;
+}
+
+.settings-section.active {
+    display: block;
+}
+
+.settings-menu li {
+    border-left: 3px solid transparent;
+}
+
+.settings-menu li.active {
+    background: #eef2ff;
+    color: #1d4ed8;
+    border-left-color: #1d4ed8;
+}

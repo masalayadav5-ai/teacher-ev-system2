@@ -310,4 +310,12 @@ public class TeacherController {
                 "pending", teacherService.getPendingTeachersCount()
         );
     }
+    // ================= GET TEACHER BY ID =================
+@GetMapping("/{id}")
+public ResponseEntity<?> getTeacherById(@PathVariable Long id) {
+    return teacherRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+}
+
 }

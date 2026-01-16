@@ -1,10 +1,14 @@
 package com.college.academic.evaluationsystem.controller;
 
+import com.college.academic.evaluationsystem.model.Teacher;
 import com.college.academic.evaluationsystem.model.User;
+import com.college.academic.evaluationsystem.repository.StudentRepository;
+import com.college.academic.evaluationsystem.repository.TeacherRepository;
 import com.college.academic.evaluationsystem.repository.UserRepository;
 import com.college.academic.evaluationsystem.service.EmailService;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +25,12 @@ public class AdminController {
 
     @Autowired
     private UserRepository repo;
+    
+    @Autowired
+    private TeacherRepository teacherRepository;
+    
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Autowired
     private EmailService emailService;
@@ -107,37 +117,55 @@ public class AdminController {
     //------------------------------------
     // NEW: USER INFO ENDPOINT FOR STATIC PAGES
     //------------------------------------
-      @GetMapping("admin/api/userinfo")
-   @ResponseBody
-public Map<String, Object> getUserInfo(Authentication authentication) {
+@GetMapping("/admin/api/userinfo")
+@ResponseBody
+public Map<String, Object> getLoggedInUserInfo(Authentication authentication) {
     Map<String, Object> map = new HashMap<>();
+    if (authentication == null) return map;
 
-    if (authentication != null) {
-        // Get username and role as before
-        map.put("username", authentication.getName());
-        
-        String role = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst()
-                .orElse("ROLE_USER");
-        map.put("role", role.replace("ROLE_", ""));
-        
-        // NEW: Get user ID and teacher-specific data
-        User user = repo.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) {
-            map.put("userId", user.getId());
-            map.put("email", user.getEmail());
-          
-        }
-    } else {
-        map.put("username", "Guest");
-        map.put("role", "USER");
-        map.put("userId", 0);
+    // Use the injected 'repo' instead of UserRepository (static)
+    User user = repo.findByUsername(authentication.getName()).orElse(null);
+    if (user == null) return map;
+
+    map.put("userId", user.getId());
+    map.put("username", user.getUsername());
+    map.put("email", user.getEmail());
+    map.put("role", user.getRole());
+
+    switch(user.getRole()) {
+        case "STUDENT":
+            // Use injected studentRepository
+            studentRepository.findByUserId(user.getId()).ifPresent(s -> {
+                map.put("studentId", s.getId());
+                map.put("fullName", s.getFullName());
+                map.put("contact", s.getContact());
+                map.put("address", s.getAddress());
+                map.put("batch", s.getBatch());
+                map.put("semester", s.getSemester() != null ? s.getSemester().getName() : "-");
+                map.put("department", s.getProgram() != null ? s.getProgram().getName() : "-");
+            });
+            break;
+
+        case "TEACHER":
+            teacherRepository.findByUserId(user.getId()).ifPresent(t -> {
+                map.put("teacherId", t.getId());
+                map.put("fullName", t.getFullName());
+                map.put("contact", t.getContact());
+                map.put("address", t.getAddress());
+                map.put("department", t.getProgram() != null ? t.getProgram().getName() : "-");
+            });
+            break;
+
+        case "ADMIN":
+            map.put("fullName", user.getUsername());
+            map.put("contact", "-");
+            map.put("address", "-");
+            map.put("department", "-");
+            break;
     }
 
     return map;
 }
-}
 
- 
+
+}

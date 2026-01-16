@@ -22,8 +22,13 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findBySemesterIdAndIsActive(Long semesterId, boolean isActive);
     
     // Find courses by teacher (using the teacher_course relationship)
-    @Query("SELECT c FROM Course c JOIN c.teachers t WHERE t.id = :teacherId")
-    List<Course> findByTeacherId(@Param("teacherId") Long teacherId);
+    // Update the existing findByTeacherId method in CourseRepository.java
+@Query("SELECT DISTINCT c FROM Course c " +
+       "LEFT JOIN FETCH c.semester s " +
+       "LEFT JOIN FETCH s.program p " +
+       "JOIN c.teachers t " +
+       "WHERE t.id = :teacherId")
+List<Course> findByTeacherId(@Param("teacherId") Long teacherId);
     
     // Find active courses in a semester
     @Query("SELECT c FROM Course c WHERE c.semester.id = :semesterId AND c.isActive = true ORDER BY c.code")

@@ -3,6 +3,7 @@ package com.college.academic.evaluationsystem.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore; // ← Add this import
 
 @Entity
 @Table(name = "teacher")
@@ -50,6 +51,7 @@ public class Teacher {
 
     // NEW: Relationship with SessionPlans
     @OneToMany(mappedBy = "teacher")
+     @JsonIgnore 
     private List<SessionPlan> sessionPlans = new ArrayList<>();
 
     // ===== Getters and Setters =====

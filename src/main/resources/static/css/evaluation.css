@@ -1,3 +1,7 @@
+/* ============================================
+   EVALUATION FORM STYLES (Your original styles)
+   ============================================ */
+
 /* Reset and base styles */
 .evaluation-container * {
     box-sizing: border-box;
@@ -9,9 +13,7 @@
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     max-width: 900px;
     margin: 0 auto;
-/*    padding: 20px;*/
     color: #333;
-/*    background-color: rgba(76, 111, 255, 0.08);*/
 }
 
 /* Header */
@@ -50,10 +52,8 @@
     color: #4c6fff;
     margin-bottom: 10px;
     font-weight: 600;
-    text-align: center; /* ← add this */
-    
+    text-align: center;
 }
-
 
 .section-subtitle {
     font-size: 15px;
@@ -296,6 +296,378 @@
     line-height: 1.5;
 }
 
+/* ============================================
+   ADMIN EVALUATION STYLES (Additional styles)
+   ============================================ */
+
+/* Admin Evaluation Styles */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #e74c3c;
+}
+
+.error-state i {
+    margin-bottom: 20px;
+}
+
+.retry-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.retry-btn:hover {
+    background: #2980b9;
+}
+
+.parameters-list {
+    margin-bottom: 40px;
+}
+
+.category-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.category-section h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+}
+
+.parameters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.parameter-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.parameter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.parameter-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.parameter-type {
+    background: #ecf0f1;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.parameter-status {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.parameter-status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.parameter-status.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.parameter-body {
+    margin-bottom: 15px;
+}
+
+.parameter-question {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.parameter-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+}
+
+.parameter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit, .btn-delete {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-edit {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #ddd;
+}
+
+.btn-edit:hover {
+    background: #e9ecef;
+}
+
+.btn-delete {
+    background: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #ddd;
+}
+
+.btn-delete:hover {
+    background: #f8d7da;
+}
+
+/* Form styles for admin */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group select,
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.scale-labels-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.scale-labels-input input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.scale-labels-input span {
+    color: #666;
+    font-weight: 600;
+}
+
+/* ============================================
+   COMMON STYLES (Both forms)
+   ============================================ */
+
+/* Back button styles */
+.back-container {
+    margin-bottom: 15px;
+}
+
+.back-container button,
+.back-btn {
+    padding: 8px 16px;
+    background: #4c6fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.back-container button:hover,
+.back-btn:hover {
+    background: #3f5be0;
+}
+
+/* Additional styles for dynamic form */
+.question-number {
+    font-weight: bold;
+    color: #4c6fff;
+    margin-right: 8px;
+}
+
+.required-indicator {
+    color: #ef4444;
+    margin-left: 4px;
+}
+
+.validation-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.validation-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #dc2626;
+}
+
+.validation-errors i {
+    font-size: 16px;
+}
+
+.evaluation-instruction {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.success-icon {
+    text-align: center;
+    margin: 20px 0;
+    color: #22c55e;
+}
+
+.success-message {
+    text-align: center;
+    font-size: 16px;
+    color: #334155;
+    margin-bottom: 30px;
+}
+
+.select-question {
+    margin-bottom: 25px;
+}
+
+.select-question select {
+    margin-top: 10px;
+}
+
+/* Progress indicator (optional) */
+.progress-container {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #4c6fff;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Animation for selections */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.scale-number.selected {
+    animation: pulse 0.3s ease;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .evaluation-container {
@@ -314,6 +686,10 @@
         grid-template-columns: repeat(2, 1fr);
     }
     
+    .parameters-grid {
+        grid-template-columns: 1fr;
+    }
+    
     .scale-numbers {
         max-width: 320px;
     }
@@ -325,6 +701,10 @@
     
     .grade-select {
         max-width: 100%;
+    }
+    
+    .parameter-card {
+        padding: 12px;
     }
 }
 
@@ -355,35 +735,171 @@
         width: 100%;
         padding: 14px;
     }
+    
+    .parameters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .parameter-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-edit, .btn-delete {
+        width: 100%;
+    }
 }
 
-/* Animation for selections */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+/* Page title styles for admin */
+.page-subtitle {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 16px;
+    text-align: center;
 }
 
-.scale-number.selected {
-    animation: pulse 0.3s ease;
-}
-/* backbuttoncode */
-.back-container {
-    margin-bottom: 15px;
+/* Checkbox and radio alignment */
+.form-group label input[type="checkbox"],
+.form-group label input[type="radio"] {
+    margin-right: 8px;
+    accent-color: #3498db;
 }
 
-.back-container button,
-.back-btn {
-    padding: 8px 16px;
-    background: #4c6fff;
-    border: none;
-    border-radius: 8px;
+/* Inline checkboxes for grade options */
+.form-group > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.form-group > div label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+    margin-bottom: 0;
     cursor: pointer;
-    font-size: 14px;
-    color: white;
 }
 
-.back-container button:hover,
-.back-btn:hover {
-    background: #3f5be0;
+/* Container padding 
+.container {
+    padding: 20px;
+}*/
+/*.container {
+    min-height: 100vh;            FULL screen height 
+    display: flex;
+    flex-direction: column;
+}*/
+/* Success/Error states */
+.success-state {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.error-state {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* ================= ADMIN SURVEY SECTION ================= */
+.admin-survey {
+    background: linear-gradient(to right, #eef2ff, #f8faff);
+    border: 1px solid #dbeafe;
+}
+
+/* ================= CATEGORY LIST SECTION ================= */
+.admin-category-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Category header */
+.category-section {
+    background: #f9fafb;
+    border-left: 5px solid #4c6fff;
+}
+
+/* Parameter card */
+.parameter-card {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
+
+.parameter-type {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* Buttons */
+.btn-edit {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.btn-delete {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+/* ================================
+   Already Evaluated – Centered UI
+   ================================ */
+/* ================================
+   Evaluation Stage Layout (FIX)
+   ================================ */
+
+.evaluation-stage {
+    flex: 1;                    /* take remaining dashboard height */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Center ONLY when visible */
+#alreadyEvaluated {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Icon */
+#alreadyEvaluated i {
+    color: #22c55e;
+    margin-bottom: 16px;
+}
+
+/* Title */
+#alreadyEvaluated h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 12px;
+}
+
+/* Paragraph — FORCE CENTER */
+#alreadyEvaluated p {
+    margin: 0 auto;
+    text-align: center;
+    max-width: 420px;
 }

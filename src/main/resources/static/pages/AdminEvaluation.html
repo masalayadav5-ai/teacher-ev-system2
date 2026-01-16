@@ -1,0 +1,197 @@
+
+    
+    <title>Manage Evaluation Parameters - Admin</title>
+    <link rel="stylesheet" href="/css/evaluation.css">
+    <link rel="stylesheet" href="/css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Temporary styles for message container */
+        #messageContainer {
+            margin: 20px 0;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .message-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .message-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+
+    <div class="container">
+        <div class="back-container">
+          <button onclick="parent.loadPage('/pages/evaldashboard.html')">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </div>
+
+        <h1>Manage Evaluation Parameters</h1>
+        <p class="page-subtitle">Add, edit, or remove evaluation questions and categories</p>
+
+        <!-- Message container for feedback -->
+        <div id="messageContainer"></div>
+
+        <!-- Static form for admin to add parameters -->
+        <div class="evaluation-container">
+            
+            
+            <!-- Add New Parameter Form -->
+            <div class="survey-section admin-survey">
+                <h2 class="section-title">Add New Evaluation Parameter</h2>
+                <form id="addParameterForm">
+                    <div class="form-group">
+                        <label for="categorySelect">Category: *</label>
+                        <select id="categorySelect" name="categorySelect" required>
+                            <option value="">Select Category</option>
+                            <!-- Will be populated from API -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionText">Question Text: *</label>
+                        <textarea id="questionText" name="questionText" required rows="3" 
+                                 placeholder="Enter the evaluation question..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="parameterType">Parameter Type: *</label>
+                        <select id="parameterType" name="parameterType" required>
+                            <!-- REMOVE the onchange from here - JavaScript will handle it -->
+                            <option value="">Select Type</option>
+                            <option value="rating">Rating Scale (1-5)</option>
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="text_area">Text Area</option>
+                            <option value="overall_rating">Overall Rating</option>
+                            <option value="grade_prediction">Grade Prediction</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Rating Options -->
+                    <div id="ratingOptions" style="display: none;">
+                        <div class="form-group">
+                            <label>Scale Labels:</label>
+                            <div class="scale-labels-input">
+                                <input type="text" id="scaleMinLabel" name="scaleMinLabel" 
+                                       placeholder="Min (e.g., Poor)">
+                                <span>to</span>
+                                <input type="text" id="scaleMaxLabel" name="scaleMaxLabel" 
+                                       placeholder="Max (e.g., Excellent)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Multiple Choice Options -->
+                    <div id="multipleChoiceOptions" style="display: none;">
+                        <div class="form-group">
+                            <label for="mcOptions">Options (comma separated):</label>
+                            <input type="text" id="mcOptions" name="mcOptions" 
+                                   placeholder="Always, Often, Sometimes, Rarely, Never">
+                        </div>
+                    </div>
+                    
+                    <!-- Grade Prediction Options -->
+                    <div id="gradeOptions" style="display: none;">
+                        <div class="form-group">
+                            <label>Grade Options:</label>
+                            <div class="grade-options-container">
+                                <label><input type="checkbox" id="gradeA" name="gradeA" value="A"> A</label>
+                                <label><input type="checkbox" id="gradeB" name="gradeB" value="B"> B</label>
+                                <label><input type="checkbox" id="gradeC" name="gradeC" value="C"> C</label>
+                                <label><input type="checkbox" id="gradeD" name="gradeD" value="D"> D</label>
+                                <label><input type="checkbox" id="gradeF" name="gradeF" value="F"> F</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sortOrder">Sort Order:</label>
+                        <input type="number" id="sortOrder" name="sortOrder" min="0" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isRequired" name="isRequired" checked> Required Question
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isActive" name="isActive" checked> Active
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-plus"></i> Add Parameter
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Categories and parameters management UI -->
+        <div class="admin-category-section">
+        <h2 class="section-title">Existing Evaluation Parameters</h2>
+            <div id="parameterManagement">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading parameters...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/admin-evaluation.js"></script>
+    
+    <script>
+        // Global navigation function
+     
+        // If the CSS doesn't have these styles, add them inline
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add CSS for grade options if not present
+            if (!document.querySelector('.grade-options-container')) {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .grade-options-container {
+                        display: flex;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        margin-top: 5px;
+                    }
+                    .grade-options-container label {
+                        display: flex;
+                        align-items: center;
+                        cursor: pointer;
+                    }
+                    .grade-options-container input[type="checkbox"] {
+                        margin-right: 5px;
+                    }
+                    .small-text {
+                        font-size: 12px;
+                        color: #666;
+                        margin-top: 10px;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>

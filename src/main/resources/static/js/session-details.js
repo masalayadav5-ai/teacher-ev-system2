@@ -1,4 +1,4 @@
-// session-details.js - Fixed version
+// session-details.js - UPDATED
 let isInitialized = false;
 
 // Helper functions
@@ -18,7 +18,7 @@ function showError(message) {
 
 function safeUpdate(elementId, value) {
     const element = document.getElementById(elementId);
-    if (element) element.textContent = value;
+    if (element) element.textContent = value || 'Not specified';
 }
 
 function formatDate(dateString) {
@@ -67,11 +67,18 @@ function loadSessionDetails(sessionId) {
 }
 
 function updateSessionUI(session) {
-    // Update basic info
-    safeUpdate('courseTitle', session.course || 'No Course');
+    // Update basic info - FIXED: Extract nested object properties
+    safeUpdate('courseTitle', session.course?.name || session.course || 'No Course');
     safeUpdate('sessionId', session.id || 'N/A');
-    safeUpdate('faculty', session.faculty || 'Not specified');
-    safeUpdate('semester', session.semester || 'Not specified');
+    
+    // FIX: Extract program name from nested object
+    const programName = session.program?.name || 'Not specified';
+    safeUpdate('faculty', programName);
+    
+    // FIX: Extract semester name from nested object
+    const semesterName = session.semester?.name || 'Not specified';
+    safeUpdate('semester', semesterName);
+    
     safeUpdate('createdDate', formatDate(session.createdDate));
     
     // Display days

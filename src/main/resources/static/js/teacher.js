@@ -390,33 +390,37 @@ async function toggleTeacherStatus(id, currentStatus) {
 }
 
 // ================= VIEW TEACHER =================
-async function viewTeacher(id) {
+async function viewTeacher(teacherId) {
+    console.log("viewTeacher called with ID:", teacherId);
+
     try {
+        // fetch teachers list
         const response = await fetch(`${TEACHER_API_BASE_URL}/teachers`);
         const teachers = await response.json();
-        const teacher = teachers.find(t => t.id === id);
-        
+
+        // find the selected teacher
+        const teacher = teachers.find(t => t.id === teacherId);
         if (!teacher) {
-            alert("Teacher not found!");
+            console.error("Teacher not found!");
             return;
         }
-        
-        alert(`TEACHER DETAILS
------------------
-Name: ${teacher.fullName}
-ID: ${teacher.teacherId}
-Username: ${teacher.username}
-Program: ${teacher.program ? teacher.program.name : 'Not assigned'}
-Qualification: ${teacher.qualification}
-Experience: ${teacher.experience} years
-Email: ${teacher.email}
-Contact: ${teacher.contact}
-Status: ${teacher.status}
-Address: ${teacher.address || 'N/A'}`);
+
+        console.log("Selected teacher:", teacher);
+
+        // store in localStorage
+        localStorage.setItem('currentSelectedProfile', JSON.stringify(teacher));
+
+        // set mode
+        sessionStorage.setItem('profileMode', 'TEACHER');
+
+        // load teacher profile page
+loadStudentProfilePage();
+
     } catch (error) {
-        alert("Error loading details!");
+        console.error("Error loading teacher list:", error);
     }
 }
+
 
 // ================= HIDE TEACHER =================
 async function hideTeacher(id) {

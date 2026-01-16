@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @JsonIgnoreProperties(
-    value = {"program", "students"},
+    value = {"courses","students"},
     allowSetters = true
 )
 @Table(name = "semester")
