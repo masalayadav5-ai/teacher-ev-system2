@@ -196,7 +196,7 @@ evaluation = evaluationRepository.save(evaluation);
                     EvaluationResponse response = new EvaluationResponse();
                     response.setEvaluation(evaluation);
                     response.setParameter(parameter);
-                    response.setResponseValue(value);
+response.setResponseValue(String.valueOf(value));
                     
                     responseRepository.save(response);
                     savedResponses.add(parameterId.toString());

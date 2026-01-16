@@ -9,6 +9,8 @@ import com.college.academic.evaluationsystem.repository.StudentEvaluationReposit
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.stream.Collectors;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,188 +18,185 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/evaluation/responses")
 public class EvaluationResponseController {
-    
+
     @Autowired
     private EvaluationResponseRepository responseRepository;
-    
+
     @Autowired
     private StudentEvaluationRepository evaluationRepository;
-    
+
     @Autowired
     private EvaluationParameterRepository parameterRepository;
-    
-    // Get all responses
+
+    // ================= GET ALL RESPONSES =================
     @GetMapping
     public ResponseEntity<List<EvaluationResponse>> getAllResponses() {
-        List<EvaluationResponse> responses = responseRepository.findAll();
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(responseRepository.findAll());
     }
-    
-    // Get response by ID
+
+    // ================= GET RESPONSE BY ID =================
     @GetMapping("/{id}")
     public ResponseEntity<EvaluationResponse> getResponseById(@PathVariable Long id) {
-        Optional<EvaluationResponse> response = responseRepository.findById(id);
-        return response.map(ResponseEntity::ok)
-                      .orElse(ResponseEntity.notFound().build());
+        return responseRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
-    
-    // Get responses by evaluation
+
+    // ================= GET RESPONSES BY EVALUATION =================
     @GetMapping("/evaluation/{evaluationId}")
     public ResponseEntity<List<EvaluationResponse>> getResponsesByEvaluation(@PathVariable Long evaluationId) {
-        List<EvaluationResponse> responses = responseRepository.findByEvaluationId(evaluationId);
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(responseRepository.findByEvaluationId(evaluationId));
     }
-    
-    // Get responses by parameter
+
+    // ================= GET RESPONSES BY PARAMETER =================
     @GetMapping("/parameter/{parameterId}")
     public ResponseEntity<List<EvaluationResponse>> getResponsesByParameter(@PathVariable Long parameterId) {
-        List<EvaluationResponse> responses = responseRepository.findByParameterId(parameterId);
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(responseRepository.findByParameterId(parameterId));
     }
-    
-    // Create response
+
+    // ================= CREATE SINGLE RESPONSE =================
     @PostMapping
     public ResponseEntity<EvaluationResponse> createResponse(
             @RequestParam Long evaluationId,
             @RequestParam Long parameterId,
             @RequestBody Map<String, Object> responseData) {
-        
+
         Optional<StudentEvaluation> evaluationOpt = evaluationRepository.findById(evaluationId);
         Optional<EvaluationParameter> parameterOpt = parameterRepository.findById(parameterId);
-        
-        if (!evaluationOpt.isPresent() || !parameterOpt.isPresent()) {
+
+        if (evaluationOpt.isEmpty() || parameterOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        
-        // Check if response already exists
+
         if (responseRepository.existsByEvaluationIdAndParameterId(evaluationId, parameterId)) {
             return ResponseEntity.badRequest().build();
         }
-        
+
+        Object value = responseData.get("value");
+        if (value == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
         EvaluationResponse response = new EvaluationResponse();
         response.setEvaluation(evaluationOpt.get());
         response.setParameter(parameterOpt.get());
-        
-        // Set response value based on type
-        Object value = responseData.get("value");
-        if (value != null) {
-            response.setResponseValue(value);
-        }
-        
-        EvaluationResponse saved = responseRepository.save(response);
-        return ResponseEntity.ok(saved);
+
+        // 🔥 FIX: ALWAYS store as String
+        response.setResponseValue(String.valueOf(value));
+
+        return ResponseEntity.ok(responseRepository.save(response));
     }
-    
-    // Submit multiple responses at once (for evaluation submission)
+
+    // ================= BULK SUBMIT RESPONSES =================
     @PostMapping("/bulk")
     public ResponseEntity<Map<String, String>> submitResponses(
             @RequestParam Long evaluationId,
             @RequestBody Map<String, Object> responses) {
-        
+
         Optional<StudentEvaluation> evaluationOpt = evaluationRepository.findById(evaluationId);
-        if (!evaluationOpt.isPresent()) {
+        if (evaluationOpt.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         int count = 0;
+
         for (Map.Entry<String, Object> entry : responses.entrySet()) {
             try {
                 Long parameterId = Long.parseLong(entry.getKey());
                 Object value = entry.getValue();
-                
+
+                if (value == null) continue;
+
                 Optional<EvaluationParameter> parameterOpt = parameterRepository.findById(parameterId);
-                if (parameterOpt.isPresent()) {
-                    // Check if response already exists
-                    if (!responseRepository.existsByEvaluationIdAndParameterId(evaluationId, parameterId)) {
-                        EvaluationResponse response = new EvaluationResponse();
-                        response.setEvaluation(evaluationOpt.get());
-                        response.setParameter(parameterOpt.get());
-                        response.setResponseValue(value);
-                        responseRepository.save(response);
-                        count++;
-                    }
+                if (parameterOpt.isPresent()
+                        && !responseRepository.existsByEvaluationIdAndParameterId(evaluationId, parameterId)) {
+
+                    EvaluationResponse response = new EvaluationResponse();
+                    response.setEvaluation(evaluationOpt.get());
+                    response.setParameter(parameterOpt.get());
+
+                    // 🔥 FIX: ALWAYS store as String
+                    response.setResponseValue(String.valueOf(value));
+
+                    responseRepository.save(response);
+                    count++;
                 }
-            } catch (NumberFormatException e) {
-                // Skip invalid parameter IDs
+            } catch (NumberFormatException ignored) {
             }
         }
-        
+
         return ResponseEntity.ok(Map.of(
-            "message", "Responses submitted successfully",
-            "count", String.valueOf(count)
+                "message", "Responses submitted successfully",
+                "count", String.valueOf(count)
         ));
     }
-    
-    // Update response
+
+    // ================= UPDATE RESPONSE =================
     @PutMapping("/{id}")
     public ResponseEntity<EvaluationResponse> updateResponse(
             @PathVariable Long id,
             @RequestBody Map<String, Object> update) {
-        
+
         return responseRepository.findById(id).map(response -> {
-            if (update.containsKey("ratingValue")) {
-                response.setRatingValue(Integer.parseInt(update.get("ratingValue").toString()));
+
+            if (update.containsKey("responseValue")) {
+                response.setResponseValue(
+                        String.valueOf(update.get("responseValue"))
+                );
             }
-            if (update.containsKey("textResponse")) {
-                response.setTextResponse((String) update.get("textResponse"));
-            }
-            if (update.containsKey("selectedOption")) {
-                response.setSelectedOption((String) update.get("selectedOption"));
-            }
-            
-            EvaluationResponse updated = responseRepository.save(response);
-            return ResponseEntity.ok(updated);
+
+            return ResponseEntity.ok(responseRepository.save(response));
         }).orElse(ResponseEntity.notFound().build());
     }
-    
-    // Delete response
+
+    // ================= DELETE RESPONSE =================
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteResponse(@PathVariable Long id) {
-        if (responseRepository.existsById(id)) {
-            responseRepository.deleteById(id);
-            return ResponseEntity.ok(Map.of("message", "Response deleted successfully"));
+        if (!responseRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
+        responseRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("message", "Response deleted successfully"));
     }
-    
-    // Get statistics for a parameter
+
+    // ================= PARAMETER STATISTICS =================
     @GetMapping("/parameter/{parameterId}/stats")
     public ResponseEntity<Map<String, Object>> getParameterStats(@PathVariable Long parameterId) {
+
         List<EvaluationResponse> responses = responseRepository.findByParameterId(parameterId);
-        
+
         if (responses.isEmpty()) {
             return ResponseEntity.ok(Map.of(
-                "total", 0,
-                "message", "No responses found"
+                    "total", 0,
+                    "message", "No responses found"
             ));
         }
-        
-        // For rating parameters, calculate average
+
         Optional<EvaluationParameter> parameterOpt = parameterRepository.findById(parameterId);
         if (parameterOpt.isPresent() && parameterOpt.get().isRatingType()) {
-            double average = responses.stream()
-                .filter(r -> r.getRatingValue() != null)
-                .mapToInt(EvaluationResponse::getRatingValue)
-                .average()
-                .orElse(0.0);
-            
-            Map<Integer, Long> distribution = responses.stream()
-                .filter(r -> r.getRatingValue() != null)
-                .collect(java.util.stream.Collectors.groupingBy(
-                    EvaluationResponse::getRatingValue,
-                    java.util.stream.Collectors.counting()
-                ));
-            
+
+           List<Integer> ratings = responses.stream()
+        .map(r -> {
+            try {
+return Integer.valueOf(String.valueOf(r.getResponseValue()));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        })
+        .filter(v -> v != null)
+        .collect(java.util.stream.Collectors.toList());
+
+            double average = ratings.stream().mapToInt(i -> i).average().orElse(0.0);
+
             return ResponseEntity.ok(Map.of(
-                "total", responses.size(),
-                "average", Math.round(average * 100.0) / 100.0,
-                "distribution", distribution
+                    "total", responses.size(),
+                    "average", Math.round(average * 100.0) / 100.0
             ));
         }
-        
+
         return ResponseEntity.ok(Map.of(
-            "total", responses.size(),
-            "responses", responses
+                "total", responses.size(),
+                "responses", responses
         ));
     }
 }

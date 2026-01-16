@@ -19,54 +19,65 @@ function initStudentProfile() {
 }
 
 function loadSelectedProfile() {
-    const selectedDataString = localStorage.getItem('currentSelectedProfile');
-    if (!selectedDataString) {
-        console.error("No selected profile in storage!");
-        return;
-    }
+  const selectedDataString = localStorage.getItem("currentSelectedProfile");
+  if (!selectedDataString) {
+    console.error("No selected profile in storage!");
+    return;
+  }
 
-    const data = JSON.parse(selectedDataString);
+  const data = JSON.parse(selectedDataString);
+  const role = sessionStorage.getItem("profileMode") || "STUDENT";
 
-    const role = sessionStorage.getItem("profileMode") || "STUDENT";
+  const profile = {
+    studentId: data.studentId || data.id || null,
+    teacherId: data.teacherId || null,
+    fullName: data.fullName || "-",
+    email: data.email || "-",
+    contact: data.contact || "-",
+    address: data.address || "-",
+    batch: data.batch || "-",
 
-    const profile = {
-        studentId: data.studentId || null,
-        teacherId: data.teacherId || null,
-        fullName: data.fullName,
-        email: data.email || "-",
-        contact: data.contact || "-",
-        address: data.address || "-",
-        batch: data.batch || "-",
-        program: user.program || null,
-  semester: user.semester || null,
-  faculty: user.program?.name || "-",
-        status: data.status || "Active"
-    };
+    // ✅ program object exists in student list
+    program: data.program || null,
+    semester: data.semester || null,
 
-    populateProfile(profile, role);
+    status: data.status || "Active"
+  };
+
+  populateProfile(profile, role);
 }
+
 
 
 
 // ================= LOAD LOGGED-IN USER PROFILE =================
 function loadLoggedInUserProfile() {
-    fetch("/api/userinfo")
+    fetch("/admin/api/userinfo")
         .then(res => res.ok ? res.json() : Promise.reject("Unauthorized"))
         .then(user => {
             const role = user.role || "STUDENT";
 
             const profile = {
-                studentId: user.studentId || null,
-                teacherId: user.teacherId || null,
-                fullName: user.fullName || user.username,
-                email: user.email || "-",
-                contact: user.contact || "-",
-                address: user.address || "-",
-                faculty: user.program?.name || "-",      // <-- correct mapping
-                batch: user.batch || "-",
-                semester: user.semester || "-",
-                status: "Active"
-            };
+  studentId: user.studentId || null,
+  teacherId: user.teacherId || null,
+  fullName: user.fullName || user.username,
+  email: user.email || "-",
+  contact: user.contact || "-",
+  address: user.address || "-",
+
+  // 🔥 NORMALIZE BACKEND DATA
+  program: user.department
+    ? { code: "", name: user.department }
+    : null,
+
+  semester: user.semester
+    ? { name: user.semester }
+    : null,
+
+  batch: user.batch || "-",
+  status: "Active"
+};
+ 
 
             populateProfile(profile, role);
 
@@ -96,9 +107,22 @@ function populateProfile(user, role) {
     if (studentIdElem) studentIdElem.textContent = user.studentId || user.teacherId || "-";
     if (nameElem) nameElem.textContent = user.fullName || "-";
     if (deptElem) {
-    deptElem.textContent = user.program ? `${user.program.code} - ${user.program.name}` : user.faculty || "-";
-    }
-    if (semesterElem) semesterElem.textContent = user.semester?.name || "-";
+  if (user.program?.name) {
+    deptElem.textContent =
+      (user.program.code ? user.program.code + " - " : "") + user.program.name;
+  } else if (user.department) {
+    deptElem.textContent = user.department;
+  } else {
+    deptElem.textContent = "-";
+  }
+}
+
+if (semesterElem) {
+  semesterElem.textContent =
+    typeof user.semester === "string"
+      ? user.semester
+      : user.semester?.name || "-";
+}
     if (batchElem) batchElem.textContent = user.batch || "-";
     if (emailElem) emailElem.textContent = user.email || "-";
     if (phoneElem) phoneElem.textContent = user.contact || "-";

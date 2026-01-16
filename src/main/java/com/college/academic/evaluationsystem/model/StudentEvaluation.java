@@ -103,7 +103,8 @@ private LocalDate weekStart;
         this.submittedAt = LocalDateTime.now();
     }
 
-    public void setWeekStart(LocalDate currentWeekStart) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public void setWeekStart(LocalDate weekStart) {
+    this.weekStart = weekStart;
+}
+
 }
