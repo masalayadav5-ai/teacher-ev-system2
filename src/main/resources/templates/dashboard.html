@@ -17,6 +17,9 @@
 <link rel="stylesheet" href="/css/register_stu.css">
 <link rel="stylesheet" href="/css/evaldashboard.css">
 <link rel="stylesheet" href="/css/evaluation.css">
+  
+ 
+
 
 </head>
 
@@ -46,58 +49,56 @@
                 
                 
                 <ul class="nav flex-column">
+<li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/dashboard-content.html')">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+    </a>
+</li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/dashboard-content.html')">
-                            <i class="bi bi-speedometer2"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-<!-- In your sidebar navigation (dashboard.html) -->
-<li class="nav-item">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/admin-management.html')">
+<li class="nav-item" data-role="ADMIN">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/academic-management.html')">
         <i class="fas fa-cogs"></i>
         <span>Academic Management</span>
     </a>
 </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
-                            <i class="bi bi-people"></i>
-                            <span>Students</span>
-                        </a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
-                            <i class="bi bi-person-lines-fill"></i>
-                            <span>Teachers</span>
-                        </a>
-                    </li>
+<li class="nav-item" data-role="STUDENT">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
+        <i class="bi bi-journal-text"></i>
+        <span>Evaluation</span>
+    </a>
+</li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
-                            <i class="bi bi-journal-text"></i>
-                            <span>Evaluation</span>
-                        </a>
-                    </li>
- <li class="nav-item">
+<li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
+        <i class="bi bi-calendar-week"></i>
+        <span>Session Planner</span>
+    </a>
+</li>
+
+<li class="nav-item" data-role="ADMIN">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
+        <i class="bi bi-people"></i>
+        <span>Students</span>
+    </a>
+</li>
+
+<li class="nav-item" data-role="ADMIN">
+    <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
+        <i class="bi bi-person-lines-fill"></i>
+        <span>Teachers</span>
+    </a>
+</li>
+
+ <li class="nav-item" data-role="ADMIN">
                         <a class="nav-link" href="#" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
                             <i class="bi bi-journal-text"></i>
                             <span>Admin Evaluation Analytics</span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
-                            <i class="bi bi-calendar-week"></i>
-                            <span>Session Planner</span>
-                        </a>
-                    </li>
-<li class="nav-item">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/StudentProfile.html')">
-                            <i class="bi bi-journal-text"></i>
-                            <span>Student Profile</span>
-                        </a>
-                    </li>
+                  
+
  
                 </ul>
             </nav>
@@ -283,6 +284,12 @@
             
             // Set the HTML content
             area.innerHTML = tempDiv.innerHTML;
+// 🔁 Re-apply role-based UI after dynamic page load
+setTimeout(() => {
+    if (window.currentUser?.role) {
+        applyRoleBasedUI(window.currentUser.role);
+    }
+}, 50);
 
             requestAnimationFrame(() => {
                 area.classList.add("loaded");
@@ -387,7 +394,7 @@ if (pageUrl.includes("evaldashboard.html")) {
     }
     
     // Handle admin management page
-    if (pageUrl.includes("admin-management.html")) {
+    if (pageUrl.includes("academic-management.html")) {
         setTimeout(() => {
             if (typeof initAdminManagement === 'function') {
                 initAdminManagement();
@@ -440,7 +447,9 @@ if (pageUrl.includes("evaldashboard.html")) {
 }
 
 // Add this function to dashboard.html (outside loadPage)
-
+window.addEventListener("error", function (e) {
+        console.error("GLOBAL JS ERROR:", e.message);
+    });
 window.onload = function () {
     loadPage('/pages/dashboard-content.html');
 };
@@ -723,20 +732,44 @@ if (e.target.closest("#profileBtn")) {
     dropdown?.classList.remove("show");
   }
 });
+
+function applyRoleBasedUI(role) {
+    console.log("Applying UI for role:", role);
+
+    // Sidebar items
+    document.querySelectorAll(".nav-item").forEach(item => {
+        const allowedRoles = item.dataset.role;
+        if (!allowedRoles) return;
+
+        if (allowedRoles.split(",").includes(role)) {
+            item.style.display = "block";
+        } else {
+            item.style.display = "none";
+        }
+    });
+
+    // Session Planner → Add Session button
+    const addSessionBtn = document.querySelector(".addsession");
+    if (addSessionBtn) {
+        if (role === "STUDENT" || role === "ADMIN") {
+            addSessionBtn.style.display = "none";
+        } else {
+            addSessionBtn.style.display = "inline-block";
+        }
+    }
+}
+
+
 </script>
-<!--plansession-->
+<script src="/js/topbar.js"></script>
+
 <script src="js/sessionplan.js"></script>
 <script src="js/student.js"></script>
 <script src="js/teacher.js"></script>
 <script src="/js/session-details.js"></script>
-<script src="/js/admin-management.js"></script>
+<script src="/js/academic-management.js"></script>
 <script src="/js/setting.js"></script>
-
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script src="/js/topbar.js"></script>
-
 </body>
 </html>

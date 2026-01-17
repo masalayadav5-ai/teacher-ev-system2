@@ -163,3 +163,12 @@ console.log('Evaluation dashboard functions registered');
 function loadAdminEvaluationPage() {
     window.location.href = '/pages/evaluation/AdminEvaluation.html';
 }
+function initEvalDashboard() {
+    console.log("Eval Dashboard Init");
+    loadStudentTeachers();
+}
+
+/* 🌍 REGISTER */
+window.initEvalDashboard = initEvalDashboard;
+window.loadStudentTeachers = loadStudentTeachers;
+window.evaluateTeacherCourse = evaluateTeacherCourse;

@@ -4,18 +4,48 @@ let currentProgramId = null;
 let currentSemesterId = null;
 window.preventAutoLoad = false; 
 // Initialize Admin Management Page
+function isAdminManagementPageLoaded() {
+    return document.getElementById("programsTable") !== null;
+}
+function setTextSafe(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.textContent = value;
+    } else {
+        console.warn(`Element #${id} not found (overview not loaded yet)`);
+    }
+}
+
 function initAdminManagement() {
     console.log('Initializing Admin Management...');
 
-    // Load initial data
+    // ✅ STOP if page HTML is not loaded yet
+    if (!isAdminManagementPageLoaded()) {
+        console.warn("Admin Management DOM not ready, retrying...");
+        setTimeout(initAdminManagement, 100);
+        return;
+    }
+protectAdminPage();
+    // ✅ NOW SAFE TO ACCESS DOM
     loadAllPrograms();
     loadProgramsForFilter();
     loadOverviewStats();
 
-    // Set up event listeners
     setupEventListeners();
 }
 
+function protectAdminPage() {
+    if (!window.currentUser) return;
+    if (window.currentUser.role !== "ADMIN") {
+        Swal.fire("Access Denied", "Admins only", "error");
+        if (typeof loadPage === "function") {
+            loadPage("/pages/dashboard-content.html");
+        }
+    }
+}
+
+/* 🌍 REGISTER GLOBALLY */
+window.initAdminManagement = initAdminManagement;
 function confirmAction(title, text, onConfirm) {
     Swal.fire({
         title: title,
@@ -116,6 +146,10 @@ async function loadAllPrograms() {
 function renderProgramsTable(programs) {
     const tableBody = document.getElementById('programsTable');
 
+    if (!tableBody) {
+        console.warn("programsTable not found (page not loaded yet)");
+        return;
+    }
     if (!programs || programs.length === 0) {
         tableBody.innerHTML = `
             <tr>
@@ -1480,46 +1514,65 @@ async function removeCourseFromTeacher(courseId) {
 // ================= OVERVIEW =================
 
 // Load overview stats
+
 async function loadOverviewStats() {
+    // ✅ STOP if overview DOM is not ready
+    if (!document.getElementById("totalPrograms")) {
+        console.warn("Overview DOM not ready, skipping stats load");
+        return;
+    }
+
     try {
-        // Load counts from different endpoints
-        const [programsRes, semestersRes, coursesRes, assignmentsRes] = await Promise.all([
+        const [
+            programsRes,
+            semestersRes,
+            coursesRes,
+            assignmentsRes
+        ] = await Promise.all([
             fetch('/api/admin/programs'),
             fetch('/api/admin/semesters'),
             fetch('/api/admin/courses'),
             fetch('/api/admin/assignments/count')
         ]);
 
-        let programs = [], semesters = [], courses = [], assignmentsCount = 0;
+        let programs = [];
+        let semesters = [];
+        let courses = [];
+        let assignmentsCount = 0;
 
-        if (programsRes.ok)
-            programs = await programsRes.json();
-        if (semestersRes.ok)
-            semesters = await semestersRes.json();
-        if (coursesRes.ok)
-            courses = await coursesRes.json();
+        if (programsRes.ok) programs = await programsRes.json();
+        if (semestersRes.ok) semesters = await semestersRes.json();
+        if (coursesRes.ok) courses = await coursesRes.json();
         if (assignmentsRes.ok) {
             const data = await assignmentsRes.json();
             assignmentsCount = data.count || 0;
         }
 
-        // Update UI
         const activePrograms = programs.filter(p => p.active);
         const activeSemesters = semesters.filter(s => s.active);
         const activeCourses = courses.filter(c => c.active);
 
-        document.getElementById('totalPrograms').textContent = activePrograms.length;
-        document.getElementById('totalSemesters').textContent = activeSemesters.length;
-        document.getElementById('totalCourses').textContent = activeCourses.length;
-        document.getElementById('totalAssignments').textContent = assignmentsCount;
+        // ✅ SAFE DOM UPDATES
+        setTextSafe('totalPrograms', activePrograms.length);
+        setTextSafe('totalSemesters', activeSemesters.length);
+        setTextSafe('totalCourses', activeCourses.length);
+        setTextSafe('totalAssignments', assignmentsCount);
 
     } catch (error) {
         console.error('Error loading overview stats:', error);
     }
 }
 
+
 // Load structure tree
 async function loadStructureTree() {
+    const treeContainer = document.getElementById('structureTree');
+
+    if (!treeContainer) {
+        console.warn("structureTree not found (overview not loaded)");
+        return;
+    }
+
     try {
         const response = await fetch('/api/admin/structure-tree');
         if (!response.ok)
@@ -1527,15 +1580,17 @@ async function loadStructureTree() {
 
         const structure = await response.json();
         renderStructureTree(structure);
+
     } catch (error) {
         console.error('Error loading structure tree:', error);
-        document.getElementById('structureTree').innerHTML = `
+        treeContainer.innerHTML = `
             <div class="empty-state">
                 <p>Failed to load academic structure</p>
             </div>
         `;
     }
 }
+
 
 function renderStructureTree(structure) {
     const treeContainer = document.getElementById('structureTree');

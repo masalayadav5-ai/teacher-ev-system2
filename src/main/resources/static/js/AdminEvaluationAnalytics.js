@@ -209,3 +209,4 @@ function renderAnalyticsChart(labels, values) {
     });
 }
 
+window.initAdminEvaluationAnalytics = initAdminEvaluationAnalytics;

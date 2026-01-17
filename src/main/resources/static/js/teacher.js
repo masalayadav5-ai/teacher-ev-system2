@@ -519,7 +519,4 @@ window.hideTeacher = hideTeacher;
 window.closeTeacherPanel = closeTeacherPanel;
 
 // ================= INITIALIZE =================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM ready, initializing teacher page");
-    initTeacherPage();
-});
+window.initTeacherPage = initTeacherPage;

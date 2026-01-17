@@ -497,3 +497,14 @@ function initSessionPlan() {
     currentTeacher = getCurrentTeacher();
     loadPublishedPlans();
 }
+document.addEventListener("DOMContentLoaded", () => {
+    protectPage(["STUDENT", "TEACHER", "ADMIN"]);
+
+    // Hide Add Session button for STUDENT + ADMIN
+    if (window.currentUser?.role !== "TEACHER") {
+        document.querySelector(".addsession")?.remove();
+    }
+
+    initSessionPlan();
+});
+window.initSessionPlan = initSessionPlan;
