@@ -2,7 +2,8 @@ package com.college.academic.evaluationsystem.controller;
 
 import com.college.academic.evaluationsystem.model.*;
 import com.college.academic.evaluationsystem.repository.*;
-import com.college.academic.evaluationsystem.service.AdminManagementService;
+import com.college.academic.evaluationsystem.service.AcademicManagementService;
+
 import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
-public class AdminManagementController {
+public class AcademicManagementController {
     @PersistenceContext
 private EntityManager entityManager;
 
@@ -36,7 +37,7 @@ private EntityManager entityManager;
     private TeacherRepository teacherRepository;
 
     @Autowired
-    private AdminManagementService adminService;
+    private AcademicManagementService adminService;
 
     // ================= PROGRAMS =================
     

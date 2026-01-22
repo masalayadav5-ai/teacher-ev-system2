@@ -566,20 +566,4 @@ nav a:hover::after {
 .otp-close:hover {
     color: #ff6b6b;
 }
-
-.alert {
-    padding: 10px;
-    border-radius: 8px;
-    margin: 10px 0;
-    font-size: 0.85rem;
-}
-
-.alert-error {
-    background: rgba(255,107,107,0.15);
-    color: #ff6b6b;
-}
-
-.alert-success {
-    background: rgba(46,204,113,0.15);
-    color: #2ecc71;
-}
+ 

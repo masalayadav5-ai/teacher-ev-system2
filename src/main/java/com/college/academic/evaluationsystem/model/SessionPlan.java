@@ -6,7 +6,12 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-@Table(name = "session_plan")
+@Table(
+    name = "session_plan",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"program_id", "semester_id","course_id"}
+    ))
+
 public class SessionPlan {
 
     @Id

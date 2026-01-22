@@ -91,47 +91,113 @@ function updateSessionUI(session) {
 function displayDays(days) {
     const container = document.getElementById('daysTableContainer');
     if (!container) return;
-    
+
+    const isTeacher = window.currentUser?.role === "TEACHER";
+
     if (!days || days.length === 0) {
         container.innerHTML = '<div class="empty-state">No days planned</div>';
         return;
     }
-    
-    // Sort by day_number
-    const sortedDays = [...days].sort((a, b) => (a.day_number || 0) - (b.day_number || 0));
-    
+
+    const sortedDays = [...days].sort(
+        (a, b) => (a.day_number || 0) - (b.day_number || 0)
+    );
+
     let html = `
-        <table class="days-table">
-            <thead>
-                <tr>
-                    <th>Day</th>
-                    <th>Method</th>
-                    <th>Topic</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-    
-    sortedDays.forEach(day => {
-        const dayNum = day.day_number !== undefined ? day.day_number : (day.day || '');
-        const method = day.method || 'Lecture';
-        const topic = day.topic || '-';
-        const description = day.description || '-';
-        
-        html += `
+    <table class="days-table">
+        <thead>
             <tr>
-                <td class="day-cell">Day ${dayNum}</td>
-                <td><span class="method-badge">${method}</span></td>
-                <td>${topic}</td>
-                <td>${description}</td>
+                <th>Day</th>
+                <th>Topic</th>
+                <th>Description</th>
+                <th>Method</th>
+                <th>Status</th>
+                <th>Remarks</th>
+                ${isTeacher ? "<th>Action</th>" : ""}
             </tr>
+        </thead>
+        <tbody>
+    `;
+
+    sortedDays.forEach(day => {
+        const isCompleted = day.completed === true;
+
+        html += `
+        <tr>
+            <td>Day ${day.day_number}</td>
+
+            <td>
+              ${isTeacher && !isCompleted
+                ? `<input class="topic-input" value="${day.topic || ''}">`
+                : day.topic || ''}
+            </td>
+
+            <td>
+              ${isTeacher && !isCompleted
+                ? `<textarea class="desc-input">${day.description || ''}</textarea>`
+                : day.description || ''}
+            </td>
+
+            <td>
+              ${isTeacher && !isCompleted
+                ? `
+                  <select class="method-input">
+                    <option ${day.method==="Lecture"?"selected":""}>Lecture</option>
+                    <option ${day.method==="Discussion"?"selected":""}>Discussion</option>
+                    <option ${day.method==="Practical"?"selected":""}>Practical</option>
+                  </select>
+                  `
+                : `<span class="method-badge">${day.method || ''}</span>`}
+            </td>
+
+            <td>
+                ${
+                    day.completed
+                        ? `<span class="status completed">Completed</span>`
+                        : `<span class="status pending">Pending</span>`
+                }
+            </td>
+
+ <td>
+  ${
+    isTeacher
+      ? (isCompleted
+          ? `<span class="remarks-readonly">${day.remarks || "-"}</span>`
+          : `<textarea class="remarks">${day.remarks || ""}</textarea>`
+        )
+      : (day.remarks || "-")
+  }
+</td>
+
+
+
+
+
+           ${isTeacher ? `
+<td>
+  <div class="action-cell">
+    <input type="checkbox"
+      ${day.completed ? "checked" : ""}
+      ${isCompleted ? "disabled" : ""}>
+
+    <button class="btn-update ${isCompleted ? "locked" : ""}"
+      ${isCompleted ? "disabled" : ""}
+      onclick="updateDay(${day.id}, this)">
+      ${isCompleted ? "Locked" : "Update"}
+    </button>
+  </div>
+</td>` : ""}
+
+
+        </tr>
         `;
     });
-    
-    html += '</tbody></table>';
+
+    html += `</tbody></table>`;
     container.innerHTML = html;
 }
+
+
 
 function updateStats(days) {
     const totalDays = days.length;
@@ -153,6 +219,9 @@ function initSessionDetails() {
     
     console.log('Initializing session details');
     
+    if (localStorage.getItem("role") === "TEACHER") {
+    document.querySelector(".info-note")?.remove();
+}
     // Get ID from URL
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('id');
@@ -187,4 +256,33 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSessionDetails);
 } else {
     initSessionDetails();
+}
+function updateDay(dayId, btn) {
+    const row = btn.closest("tr");
+
+    const topic = row.querySelector(".topic-input")?.value;
+    const description = row.querySelector(".desc-input")?.value;
+    const method = row.querySelector(".method-input")?.value;
+    const completedDate = row.querySelector(".completed-date")?.value;
+    const remarks = row.querySelector(".remarks")?.value;
+
+    fetch(`/api/session-plans/day/${dayId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            topic,
+            description,
+            method,
+            completedDate,
+            remarks,
+            completed: true
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Update failed");
+        alert("Day updated successfully");
+        btn.disabled = true;
+        btn.textContent = "Locked";
+    })
+    .catch(err => alert(err.message));
 }

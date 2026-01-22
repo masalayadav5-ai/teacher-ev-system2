@@ -1,321 +1,303 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmarTeach | Teacher Evaluation System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/change-password-modal.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SmarTeach | Teacher Evaluation System</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/change-password-modal.css">
+    </head>
+    <body
+        th:attr="data-force-change=${forcePasswordChange == true or otpVerified == true} ? 'true' : 'false'">
 
-<body>
+        <!-- BACKGROUND VIDEO -->
+        <video class="bg-video" autoplay muted loop playsinline>
+            <source src="/videos/bg.mp4" type="video/mp4">
+        </video>
 
-    <!-- BACKGROUND VIDEO -->
-    <video class="bg-video" autoplay muted loop playsinline>
-        <source src="/videos/bg.mp4" type="video/mp4">
-    </video>
+        <!-- DARK OVERLAY -->
+        <div class="overlay"></div>
 
-    <!-- DARK OVERLAY -->
-    <div class="overlay"></div>
-
-    <!-- NAVBAR -->
-    <header class="fade-in nav-blur">
-        <div class="logo">
-            <i class="fa-solid fa-chalkboard-user"></i> SmarTeach
-        </div>
-
-        <nav>
-            <a href="#">Home</a>
-            <a href="#">Courses</a>
-            <a href="#">About</a>
-            <a href="#">Contact</a>
-        </nav>
-
-        <div class="search-box">
-            <input type="text" placeholder="Search...">
-            <button><i class="fa fa-search"></i></button>
-        </div>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="hero fade-in">
-        <div class="text-area">
-            <h1>Empower Education with 
-                <span class="typing"><span class="smarteach-color">SmarTeach</span></span>
-            </h1>
-
-            <p class="tagline">Transforming Feedback Into Better Teaching.<br>
-                <span class="rotating-text">Plan Better Sessions • Evaluate Smarter • Improve Outcomes</span>
-            </p>
-            <button class="join-btn">Get Started</button>
-        </div>
-
-        <!-- LOGIN CARD -->
-        <div class="auth-wrapper fade-in">
-            <div class="login-box">
-                <h2>Login</h2>
-
-                <p th:if="${param.error}" class="error-msg">Invalid username or password!</p>
-                <p th:if="${param.logout}" class="success-msg">Logged out successfully.</p>
-                <p th:if="${param.passwordChanged}" class="success-msg">Password changed successfully! Please login with your new password.</p>
-
-                <form action="/do-login" method="POST" id="loginForm">
-                    <div class="input-wrapper">
-                        <i class="fa fa-user icon"></i>
-                        <input type="text" name="username" placeholder="Username" required id="usernameInput">
-                    </div>
-
-                    <div class="password-wrapper input-wrapper">
-                        <i class="fa fa-lock icon"></i>
-<input type="password" id="login-pass" name="password" placeholder="Password" required> 
-<i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
-                    </div>
-                     <button class="login-btn" type="submit" id="loginButton">Login</button>
-                      <div class="forgot-wrapper">
-    <a href="#" id="forgotPasswordLink">Forgot Password?</a>
-</div>
-                </form>
-
-                <hr class="login-divider">
-                <p class="role-hint">For Students, Faculty, and Staff</p>
-            </div>
-        </div>
-    </section>
-    <!-- Forgot Password Modal -->
-<div class="forgot-modal-overlay" id="forgotPasswordModal">
-    <div class="forgot-modal-container">
-        <div class="forgot-modal-header">
-            <i class="fa-solid fa-unlock-keyhole"></i>
-            <h2>Forgot Password</h2>
-            <p>Enter your registered email to receive reset instructions.</p>
-        </div>
-
-        <form action="/forgot-password" method="post">
-            <div class="input-wrapper">
-                <i class="fa fa-envelope icon"></i>
-                <input type="email" name="email" placeholder="Registered Email" required>
+        <!-- NAVBAR -->
+        <header class="fade-in nav-blur">
+            <div class="logo">
+                <i class="fa-solid fa-chalkboard-user"></i> SmarTeach
             </div>
 
-            <button type="submit" class="forgot-btn">
-                <i class="fa-solid fa-paper-plane"></i> Send OTP 
-            </button>
+            <nav>
+                <a href="#">Home</a>
+                <a href="#">Courses</a>
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+            </nav>
 
-            <div class="forgot-close" id="closeForgotModal">
-                Cancel
+            <div class="search-box">
+                <input type="text" placeholder="Search...">
+                <button><i class="fa fa-search"></i></button>
             </div>
-        </form>
-    </div>
-</div>
-<!-- OTP Verification Modal -->
-<div class="otp-modal-overlay" th:classappend="${otpSent} ? 'show' : ''" id="otpVerificationModal">
-    <div class="otp-modal-container">
-        <div class="otp-modal-header">
-            <i class="fa-solid fa-shield-check"></i>
-            <h2>Verify OTP</h2>
-            <p>Enter the 6-digit OTP sent to your email</p>
-        </div>
+        </header>
 
-        <form action="/verify-otp" method="post">
-            <input type="hidden" name="email" th:value="${email}" id="otpEmail">
-            
-            <div class="input-wrapper">
-                <i class="fa-solid fa-key icon"></i>
-                <input type="text" name="otp" placeholder="Enter 6-digit OTP" 
-                       maxlength="6" pattern="\d{6}" required>
-            </div>
-            
-            <div th:if="${otpError}" class="alert alert-error">
-                <i class="fa-solid fa-exclamation-circle"></i>
-                <span th:text="${otpError}"></span>
-            </div>
-            
-            <div th:if="${emailError}" class="alert alert-error">
-                <i class="fa-solid fa-exclamation-circle"></i>
-                <span th:text="${emailError}"></span>
-            </div>
-            
-            <button type="submit" class="otp-verify-btn">
-                <i class="fa-solid fa-check"></i> Verify OTP
-            </button>
-            
-            <div class="otp-resend">
-                Didn't receive OTP? 
-                <a href="#" onclick="resendOtp()">Resend</a>
-            </div>
-            
-            <div class="otp-close" onclick="closeOtpModal()">
-                Cancel
-            </div>
-        </form>
-    </div>
-</div>
-    <!-- Force Change Password Modal -->
-<div class="password-modal-overlay"
-     th:classappend="(${forcePasswordChange} == true or ${otpVerified} == true) ? 'show' : ''"
-     id="changePasswordModal">
+        <!-- HERO SECTION -->
+        <section class="hero fade-in">
+            <div class="text-area">
+                <h1>Empower Education with 
+                    <span class="typing"><span class="smarteach-color">SmarTeach</span></span>
+                </h1>
 
-        <div class="password-modal-container">
-            <div class="password-modal-header">
-                <div class="password-modal-logo">
-                    <i class="fa-solid fa-key"></i>
-                    <h2>Change Password Required</h2>
+                <p class="tagline">Transforming Feedback Into Better Teaching.<br>
+                    <span class="rotating-text">Plan Better Sessions • Evaluate Smarter • Improve Outcomes</span>
+                </p>
+                <button class="join-btn">Get Started</button>
+            </div>
+
+            <!-- LOGIN CARD -->
+            <div class="auth-wrapper fade-in">
+                <div class="login-box">
+                    <h2>Login</h2>
+
+                    <p th:if="${param.error != null}" class="error-msg">Invalid username or password!</p>
+                    <p th:if="${param.logout != null}" class="success-msg">Logged out successfully.</p>
+                    <p th:if="${param.passwordChanged != null}" class="success-msg">
+                        Password changed successfully! Please login with your new password.
+                    </p>
+
+
+                    <form action="/do-login" method="POST" id="loginForm">
+                        <div class="input-wrapper">
+                            <i class="fa fa-user icon"></i>
+                            <input type="text" name="username" placeholder="Username" required id="usernameInput">
+                        </div>
+
+                        <div class="password-wrapper input-wrapper">
+                            <i class="fa fa-lock icon"></i>
+                            <input type="password" id="login-pass" name="password" placeholder="Password" required> 
+                            <i class="fa-solid fa-eye toggle-pass" data-target="login-pass"></i>
+                        </div>
+                        <button class="login-btn" type="submit" id="loginButton">Login</button>
+                        <div class="forgot-wrapper">
+                            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+                        </div>
+                    </form>
+
+                    <hr class="login-divider">
+                    <p class="role-hint">For Students, Faculty, and Staff</p>
                 </div>
-                <p class="password-modal-subtitle">Welcome! , Please set a new password to continue.</p>
             </div>
-            
-            <div class="password-modal-body">
-<form id="changePasswordForm"
-      method="post"
-      th:action="${otpVerified} ? '/reset-password-otp' : '/change-password'">
+        </section>
+        <!-- Forgot Password Modal -->
+        <div class="forgot-modal-overlay" id="forgotPasswordModal">
+            <div class="forgot-modal-container">
+                <div class="forgot-modal-header">
+                    <i class="fa-solid fa-unlock-keyhole"></i>
+                    <h2>Forgot Password</h2>
+                    <p>Enter your registered email to receive reset instructions.</p>
+                </div>
 
+                <form action="/forgot-password" method="post">
+                    <div class="input-wrapper">
+                        <i class="fa fa-envelope icon"></i>
+                        <input type="email" name="email" placeholder="Registered Email" required>
+                    </div>
 
-                    <input type="hidden" name="userId" th:value="${userId}" id="modalUserId">
-                    
-                    <div class="form-group">
-                        <label for="newPassword">
-                            <i class="fa-solid fa-lock"></i> New Password
-                        </label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="newPassword" name="newPassword" required 
-                                   placeholder="Enter new password" class="password-modal-input">
-                            <i class="fa-solid fa-eye toggle-modal-password" data-target="newPassword"></i>
-                        </div>
-<!--                        <div class="password-hint">
-                            <i class="fa-solid fa-info-circle"></i> Password must be at least 6 characters long
-                        </div>-->
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="confirmPassword">
-                            <i class="fa-solid fa-lock"></i> Confirm Password
-                        </label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="confirmPassword" name="confirmPassword" required 
-                                   placeholder="Confirm new password" class="password-modal-input">
-                            <i class="fa-solid fa-eye toggle-modal-password" data-target="confirmPassword"></i>
-                        </div>
-                        <div id="passwordMatchMessage" class="password-match"></div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="password-modal-btn" id="submitBtn">
-                            <i class="fa-solid fa-key"></i> Change Password
-                        </button>
-                    </div>
-                    
-                    <div th:if="${error}" class="alert alert-error">
-                        <i class="fa-solid fa-exclamation-circle"></i>
-                        <span th:text="${error}"></span>
+                    <button type="submit" class="forgot-btn">
+                        <i class="fa-solid fa-paper-plane"></i> Send OTP 
+                    </button>
+
+                    <div class="forgot-close" id="closeForgotModal">
+                        Cancel
                     </div>
                 </form>
             </div>
         </div>
-    </div>
-    
+        <!-- OTP Verification Modal -->
+        <div class="otp-modal-overlay" th:classappend="${otpSent == true} ? 'show' : ''" id="otpVerificationModal">
 
-    <script src="/js/script.js"></script>
-<script th:if="${forcePasswordChange} or ${otpVerified}">
-document.addEventListener('DOMContentLoaded', function () {
+            <div class="otp-modal-container">
+                <div class="otp-modal-header">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <h2>Verify OTP</h2>
+                    <p>Enter the 6-digit OTP sent to your email</p>
+                </div>
 
-    const newPassword = document.getElementById('newPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    const passwordMatchMessage = document.getElementById('passwordMatchMessage');
-    const submitBtn = document.getElementById('submitBtn');
+                <form action="/verify-otp" method="post">
+                    <input type="hidden" name="email" th:value="${email}" id="otpEmail">
 
-    // 🔒 SAME regex as backend
-    const strongPasswordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-key icon"></i>
+                        <input type="text" name="otp" placeholder="Enter 6-digit OTP" 
+                               maxlength="6" pattern="\d{6}" required>
+                    </div>
 
-    // 👁 Eye toggle (modal passwords)
-    document.querySelectorAll('.toggle-modal-password').forEach(toggle => {
-        toggle.addEventListener('click', function () {
-            const targetId = this.getAttribute('data-target');
-            const input = document.getElementById(targetId);
+                    <div th:if="${otpError}" class="alert alert-error">
+                        <i class="fa-solid fa-exclamation-circle"></i>
+                        <span th:text="${otpError}"></span>
+                    </div>
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                this.classList.remove('fa-eye');
-                this.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                this.classList.remove('fa-eye-slash');
-                this.classList.add('fa-eye');
-            }
-        });
-    });
+                    <div th:if="${emailError}" class="alert alert-error">
+                        <i class="fa-solid fa-exclamation-circle"></i>
+                        <span th:text="${emailError}"></span>
+                    </div>
 
-    function validatePasswords() {
-        const password = newPassword.value;
-        const confirm = confirmPassword.value;
+                    <button type="submit" class="otp-verify-btn">
+                        <i class="fa-solid fa-check"></i> Verify OTP
+                    </button>
 
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.6';
-        passwordMatchMessage.textContent = '';
-        passwordMatchMessage.className = 'password-match';
+                    <div class="otp-resend">
+                        Didn't receive OTP? 
+                        <a href="#" onclick="resendOtp()">Resend</a>
+                    </div>
 
-        newPassword.classList.remove('error');
-        confirmPassword.classList.remove('error');
+                    <div class="otp-close" onclick="closeOtpModal()">
+                        Cancel
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- CHANGE PASSWORD MODAL -->
+        <div class="password-modal-overlay" id="changePasswordModal">
+            <div class="password-modal-container">
 
-        if (!password || !confirm) return;
+                <div class="password-modal-header">
+                    <div class="password-modal-logo">
+                        <i class="fa-solid fa-key"></i>
+                        <h2>Change Password</h2>
+                    </div>
+                    <p class="password-modal-subtitle">
+                        Please set a new password to continue
+                    </p>
+                </div>
 
-        // 🔐 Strong password check
-        if (!strongPasswordRegex.test(password)) {
-            passwordMatchMessage.textContent =
-                'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.';
-            passwordMatchMessage.classList.add('error');
-            newPassword.classList.add('error');
-            return;
-        }
+                <div class="password-modal-body">
 
-        // 🔁 Match check
-        if (password !== confirm) {
-            passwordMatchMessage.textContent = 'Passwords do not match';
-            passwordMatchMessage.classList.add('error');
-            confirmPassword.classList.add('error');
-            return;
-        }
+                    <form id="changePasswordForm"
+                          th:action="${otpVerified == true} ? '/reset-password-otp' : '/change-password'"
+                          method="post"
+                          onsubmit="handlePasswordSubmit(event)">
 
-        // ✅ Success
-        passwordMatchMessage.textContent = 'Strong password ✔';
-        passwordMatchMessage.classList.add('success');
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-    }
+                        <!-- ✅ Only present for OTP reset -->
+                        <input type="hidden" name="userId"
+                               th:if="${otpVerified == true}"
+                               th:value="${userId}" />
 
-    newPassword.addEventListener('input', validatePasswords);
-    confirmPassword.addEventListener('input', validatePasswords);
 
-    // 🚫 Block submit if invalid
-    document.getElementById('changePasswordForm')
-        .addEventListener('submit', function (e) {
-            if (submitBtn.disabled) {
-                e.preventDefault();
-                alert('Please fix password requirements before submitting.');
-            }
-        });
-
-    // Focus UX
-    setTimeout(() => newPassword.focus(), 300);
-});
-</script>
+                        <input type="hidden" id="sameAsOld"
+                               th:value="${error != null and error.contains('same')} ? 'true' : 'false'">
 
 
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="footer-social">
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-google"></i></a>
+                        <div class="form-group">
+                            <input type="password"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   class="password-modal-input"
+                                   placeholder="New Password"
+                                   required>
+                            <i class="fa-solid fa-eye toggle-modal-password"
+                               data-target="newPassword"></i>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="password"
+                                   id="confirmPassword"
+                                   name="confirmPassword"
+                                   class="password-modal-input"
+                                   placeholder="Confirm Password"
+                                   required>
+                            <i class="fa-solid fa-eye toggle-modal-password"
+                               data-target="confirmPassword"></i>
+                        </div>
+
+
+                        <div id="passwordMatchMessage" class="password-match"></div>
+
+                        <button type="submit" class="password-modal-btn">
+                            Change Password
+                        </button>
+
+                        <!-- 🔴 Error shown INSIDE modal -->
+                        <div id="changePasswordError"
+                             class="alert alert-error"
+                             style="display:none;"></div>
+
+                    </form>
+
+                </div>
+
+
+            </div>
         </div>
 
-        <div class="footer-bottom">
-            <p>&copy; 2025 SmarTeach. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a></p>
-        </div>
-    </footer>
 
-</body>
+        <script src="/js/script.js"></script>
+        <script th:if="${forcePasswordChange == true or otpVerified == true}">
+                  document.addEventListener("DOMContentLoaded", () => {
+                      initPasswordValidation();
+                  });
+        </script>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                if (document.body.dataset.forceChange === "true") {
+                    document.getElementById("changePasswordModal").classList.add("show");
+                }
+
+            });
+        </script>
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", () => {
+
+                const otpSent = /*[[${otpSent}]]*/ false;
+
+                console.log("DEBUG otpSent =", otpSent);
+
+                if (otpSent === true) {
+                    document.getElementById("otpVerificationModal")?.classList.add("show");
+                    console.log("OTP MODAL OPENED");
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Eye toggle for modal
+                document.querySelectorAll(".toggle-modal-password").forEach(icon => {
+                    icon.addEventListener("click", () => {
+                        const targetId = icon.getAttribute("data-target");
+                        const input = document.getElementById(targetId);
+
+                        if (input.type === "password") {
+                            input.type = "text";
+                            icon.classList.remove("fa-eye");
+                            icon.classList.add("fa-eye-slash");
+                        } else {
+                            input.type = "password";
+                            icon.classList.remove("fa-eye-slash");
+                            icon.classList.add("fa-eye");
+                        }
+                    });
+                });
+
+            });
+        </script>
+        <script src="/js/change-password-validate.js"></script>
+
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="footer-social">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-google"></i></a>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 SmarTeach. All rights reserved. | <a href="#">Terms</a> | <a href="#">Privacy</a></p>
+            </div>
+        </footer>
+
+    </body>
 </html>

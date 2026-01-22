@@ -1,46 +1,178 @@
-/* ---------------- CARD ---------------- */
+/* ================= CARD ================= */
 .card {
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
+    background: #ffffff;
+    padding: 26px;
+    border-radius: 14px;
+    border: 1px solid #e6e9f0;
     margin-bottom: 25px;
+    box-shadow: 0 6px 18px rgba(15, 23, 36, 0.04);
 }
 
 .card h3 {
-    margin-bottom: 15px;
-    color: #333;
+    margin-bottom: 18px;
+    color: #0f1724;
+    font-size: 18px;
+    font-weight: 700;
 }
 
-/* ---------------- FORM ---------------- */
+/* ================= FORM ================= */
 .session-form .form-row {
     display: flex;
     gap: 20px;
+    align-items: flex-start;
 }
 
 .form-group {
     flex: 1;
-    margin-bottom: 15px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
+    min-height: 18px;
+    
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 9px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #ffffff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+.form-group input,
+.form-group select {
+    height: 44px;            /* 🔒 SAME HEIGHT */
+    line-height: 44px;
+    box-sizing: border-box;
 }
 
-  
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4c6fff;
+    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.15);
+}
 
-/* ---------------- TABLE ---------------- */
+/* ================= DAY SECTION ================= */
+.day-title {
+    margin: 18px 0 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #4c6fff;
+}
+
+.day-card {
+    border: 1px solid #e6e9f0;
+    border-radius: 12px;
+    padding: 16px;
+    background: #f9fafb;
+    margin-bottom: 14px;
+}
+
+.day-card h5 {
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f1724;
+}
+
+.day-card input,
+.day-card textarea,
+.day-card select {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+/* ================= DAY NAV BUTTONS ================= */
+.day-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+}
+
+#prevDayBtn,
+#addDayBtn {
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+/* Previous (Secondary) */
+#prevDayBtn {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+}
+
+#prevDayBtn:hover:not(:disabled) {
+    background: #e2e8f0;
+}
+
+#prevDayBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Next (Primary outline) */
+#addDayBtn {
+    background: #ffffff;
+    color: #4c6fff;
+    border: 1px solid #4c6fff;
+}
+
+#addDayBtn:hover {
+    background: #eef2ff;
+}
+
+/* ================= MODAL FOOTER ================= */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 12px;
+    border-top: 1px solid #e6e9f0;
+}
+
+/* Save Button (Primary CTA) */
+.submit-btn {
+    background: linear-gradient(135deg, #4c6fff, #6b7cff);
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 14px rgba(76, 111, 255, 0.35);
+}
+
+.submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(76, 111, 255, 0.45);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* ================= TABLE ================= */
 .session-table {
     width: 100%;
     border-collapse: collapse;
@@ -48,76 +180,54 @@
 
 .session-table th,
 .session-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e6e9f0;
     font-size: 14px;
 }
 
 .session-table th {
-    background: #f2f4ff;
-    text-align: left;
+    background: #f5f7ff;
+    font-weight: 700;
+    color: #475569;
 }
 
- .day-title {
-    margin: 15px 0 10px;
-    font-size: 16px;
-    color: #4c6fff;
-}
-
-.day-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 12px;
-    background: #fafafa;
-}
-
-.day-card h5 {
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #333;
-}
-
-.day-card input,
-.day-card textarea {
-    width: 100%;
-    margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-.add-day-btn {
-    margin-top: 10px;
-    background: transparent;
-    color: #4c6fff;
-    border: 1px dashed #4c6fff;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-}
 .session-table tbody tr {
     cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
+    transition: background 0.15s ease;
 }
 
 .session-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.06),
+        rgba(118, 75, 162, 0.06)
+    );
     border-left: 3px solid #667eea;
-    box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.1);}
+}
 
+/* ================= MESSAGE ================= */
+.message-container {
+    margin: 12px 16px 0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
 
+.message-container.success {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
 
-
-
-/* ---------------- ANIMATION ---------------- */
-@keyframes fadeIn {
-    from {
-        transform: translateY(-15px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.message-container.error {
+    background: #fff5f5;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+/* 🔒 FIX table header & row alignment */
+.session-table th,
+.session-table td {
+    text-align: left !important;
+    vertical-align: middle;
 }

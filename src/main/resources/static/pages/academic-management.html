@@ -153,12 +153,31 @@
                     <div id="teacher-assignments-tab" class="tab-pane">
                         <div class="tab-header">
                             <h3><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Course Assignments</h3>
-                            <div class="filter-section">
-                                <!-- Teacher Program Filter (for filtering teachers) -->
-                                <select id="teacherProgramFilter" class="form-select" onchange="loadTeachersByProgram()">
-                                    <option value="">Select Teacher's Program</option>
-                                </select>
+                           
+                        </div>
 
+                        <div class="assignment-container">
+                            <div class="teacher-list">
+                                <h4>Teachers</h4>
+                                <!-- NEW: Program filter inside teacher list -->
+    <select id="teacherProgramFilter"
+            class="form-select mb-3"
+            onchange="loadTeachersByProgram()">
+        <option value="">Select Teacher Program</option>
+    </select>
+                                <div id="teachersList" class="list-group">
+                                    <!-- Teachers will be loaded here -->
+                                </div>
+                            </div>
+
+                            <div class="course-assignment">
+                             
+<h4>
+    Course Assignments —
+    <span id="selectedTeacherName">Please select a teacher</span>
+</h4>
+                                 <div class="filter-section">
+                         
                                 <!-- Course Program Filter (for fetching available courses) -->
                                 <select id="courseProgramForAssignFilter" class="form-select" onchange="loadSemestersForCourseAssignments()">
                                     <option value="">Select Course Program</option>
@@ -169,19 +188,7 @@
                                     <option value="">Select Course Semester</option>
                                 </select>
 
-                            </div>
-                        </div>
-
-                        <div class="assignment-container">
-                            <div class="teacher-list">
-                                <h4>Teachers</h4>
-                                <div id="teachersList" class="list-group">
-                                    <!-- Teachers will be loaded here -->
-                                </div>
-                            </div>
-
-                            <div class="course-assignment">
-                                <h4>Course Assignment for <span id="selectedTeacherName">Select Teacher</span></h4>
+                            </div>   
                                 <div class="available-courses">
                                     <h5>Available Courses</h5>
                                     <div id="availableCourses" class="courses-list">

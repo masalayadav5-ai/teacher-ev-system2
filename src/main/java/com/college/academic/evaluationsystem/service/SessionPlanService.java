@@ -4,8 +4,10 @@ import com.college.academic.evaluationsystem.dto.DayDTO;
 import com.college.academic.evaluationsystem.dto.SessionPlanRequestDTO;
 import com.college.academic.evaluationsystem.model.*;
 import com.college.academic.evaluationsystem.controller.*;
+import com.college.academic.evaluationsystem.dto.DayUpdateDTO;
 
 import com.college.academic.evaluationsystem.repository.*;
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +32,31 @@ public class SessionPlanService {
 
     @Autowired
     private TeacherRepository teacherRepository;
+    
+    @Autowired
+    private SessionDayRepository sessionDayRepository;
 
     @Transactional
     public SessionPlan save(SessionPlanRequestDTO dto) {
         SessionPlan plan = new SessionPlan();
+ if (
+        dto.getProgramId() != null &&
+        dto.getSemesterId() != null) {
 
+       boolean exists =
+    sessionPlanRepository
+        .existsByProgram_IdAndSemester_IdAndCourse_Id(
+            dto.getProgramId(),
+            dto.getSemesterId(),
+            dto.getCourseId()
+        );
+
+if (exists) {
+    throw new RuntimeException(
+        "Session plan already exists for this Program, Semester and Course"
+    );
+}
+}
         // Fetch and set relationships instead of strings
         if (dto.getProgramId() != null) {
             Program program = programRepository.findById(dto.getProgramId())
@@ -110,5 +132,37 @@ public class SessionPlanService {
         // You'll need to implement this based on your Student entity
         // This would fetch student, then find sessions for their program/semester
         return new ArrayList<>();
+    }
+ public boolean existsByProgramSemesterCourse(
+        Long programId,
+        Long semesterId,
+        Long courseId) {
+
+    return sessionPlanRepository
+        .existsByProgram_IdAndSemester_IdAndCourse_Id(
+            programId, semesterId, courseId
+        );
+}
+ @Transactional
+    public SessionDay updateSessionDay(Long dayId,DayUpdateDTO dto) {
+
+        // 1️⃣ Fetch existing day from DB
+        SessionDay day = sessionDayRepository.findById(dayId)
+                .orElseThrow(() -> new RuntimeException("Session day not found"));
+
+         day.setTopic(dto.getTopic());
+    day.setDescription(dto.getDescription());
+    day.setMethod(dto.getMethod());
+    
+        // 2️⃣ Update fields
+        day.setCompleted(dto.isCompleted());
+        day.setRemarks(dto.getRemarks());
+
+       if (dto.getCompletedDate() != null && !dto.getCompletedDate().isEmpty()) {
+        day.setCompletedDate(LocalDate.parse(dto.getCompletedDate()));
+    }
+
+        // 3️⃣ Save updated day
+        return sessionDayRepository.save(day);
     }
 }

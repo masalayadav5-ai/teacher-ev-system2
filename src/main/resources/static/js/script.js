@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".toggle-pass").forEach(icon => {
         icon.addEventListener("click", () => {
             const target = document.getElementById(icon.dataset.target);
-            if (!target) return;
+            if (!target)
+                return;
 
             if (target.type === "password") {
                 target.type = "text";
@@ -24,19 +25,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const sidebar = document.getElementById("sidebar");
 
     window.toggleSidebar = function () {
-        if (!sidebar) return;
+        if (!sidebar)
+            return;
 
         if (window.innerWidth < 700) {
             sidebar.classList.toggle("open");
             return;
         }
 
-        if (window.innerWidth < 1100) return; // no toggle
+        if (window.innerWidth < 1100)
+            return; // no toggle
         sidebar.classList.toggle("collapsed");
     };
 
     function autoCollapseSidebar() {
-        if (!sidebar) return;
+        if (!sidebar)
+            return;
 
         if (window.innerWidth < 700) {
             sidebar.classList.remove("collapsed");
@@ -72,69 +76,65 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ==========================
-    // Force Change Password Modal
-    // ==========================
-    const changePasswordModal = document.getElementById("changePasswordModal");
-    if (changePasswordModal && changePasswordModal.classList.contains("show")) {
-        changePasswordModal.style.display = "flex";
-    }
-
-    // ==========================
     // OTP Modal Functions
     // ==========================
-    
+
     // OTP Modal functions
     function closeOtpModal() {
         const otpModal = document.getElementById('otpVerificationModal');
-        if (otpModal) otpModal.classList.remove('show');
+        if (otpModal)
+            otpModal.classList.remove('show');
     }
-    
-    function resendOtp() {
-        const email = document.getElementById('otpEmail').value;
-        if (email) {
-            fetch('/forgot-password', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'email=' + encodeURIComponent(email)
-            }).then(() => {
-                alert('OTP resent successfully!');
-            });
-        }
-    }
-    
+
+function resendOtp() {
+    const email = document.getElementById('otpEmail').value;
+
+    fetch('/forgot-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'email=' + encodeURIComponent(email)
+    }).then(() => {
+        alert('OTP resent successfully!');
+    });
+}
+
     // Auto-focus OTP input when modal opens
     const otpModal = document.getElementById('otpVerificationModal');
+
     if (otpModal) {
-        // Using MutationObserver to detect when modal becomes visible
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.attributeName === 'class') {
-                    if (otpModal.classList.contains('show')) {
-                        const otpInput = otpModal.querySelector('input[name="otp"]');
-                        if (otpInput) {
-                            setTimeout(() => otpInput.focus(), 100);
-                        }
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (
+                        mutation.attributeName === 'class' &&
+                        otpModal.classList.contains('show')
+                        ) {
+                    const otpInput = otpModal.querySelector('input[name="otp"]');
+                    if (otpInput) {
+                        setTimeout(() => otpInput.focus(), 100);
                     }
                 }
             });
         });
-        
-        observer.observe(otpModal, { attributes: true });
+
+        observer.observe(otpModal, {attributes: true});
     }
-    
+
+
     // Auto-advance OTP input
-    document.addEventListener('input', function(e) {
-        if (e.target.name === 'otp' && e.target.value.length === 6) {
-            // Optional: auto-submit after 6 digits
-            setTimeout(() => {
-                if (e.target.form) {
-                    e.target.form.submit();
-                }
-            }, 500);
-        }
-    });
+  document.addEventListener('input', function (e) {
+    if (
+        e.target.name === 'otp' &&
+        e.target.value.length === 6 &&
+        e.target.form &&
+        e.target.form.method.toLowerCase() === 'post' &&
+        e.target.form.action.endsWith('/verify-otp')
+    ) {
+        e.target.form.submit();
+    }
+});
+
 
     // ==========================
     // Make OTP functions available globally
@@ -143,3 +143,48 @@ document.addEventListener("DOMContentLoaded", function () {
     window.resendOtp = resendOtp;
 
 });
+function handlePasswordSubmit(event) {
+
+  const form = document.getElementById("changePasswordForm");
+  const errorBox = document.getElementById("changePasswordError");
+
+  // OTP reset → NORMAL submit
+  if (form.action.endsWith("/reset-password-otp")) {
+    return;
+  }
+
+  // ALL other modes → AJAX
+  event.preventDefault();
+
+  const formData = new FormData(form);
+
+  fetch(form.action, {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if (!data.success) {
+      errorBox.textContent = data.message;
+      errorBox.style.display = "block";
+      setTimeout(() => errorBox.style.display = "none", 3000);
+      return;
+    }
+
+    // 🔥 Dashboard success
+    if (form.action.endsWith("/change-password-auth")) {
+      Swal.fire("Success", "Password updated successfully", "success");
+      document.getElementById("changePasswordModal").classList.remove("show");
+      form.reset();
+      return;
+    }
+
+    // 🔥 First-login success
+    window.location.href = "/login?passwordChanged=true";
+  })
+  .catch(() => {
+    errorBox.textContent = "Something went wrong. Try again.";
+    errorBox.style.display = "block";
+  });
+}

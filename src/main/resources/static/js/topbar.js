@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 🔹 Store globally
         window.currentUser = userData;
         localStorage.setItem("currentUser", JSON.stringify(userData));
+        localStorage.setItem("role", userData.role);
         applyRoleBasedUI(userData.role);
 
         // 🔹 Determine display name

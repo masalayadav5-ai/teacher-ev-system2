@@ -369,3 +369,68 @@
         padding: 10px;
     }
 }
+.info-note {
+    background: #f1f5ff;
+    color: #333;
+    padding: 10px 14px;
+    border-left: 4px solid #3b82f6;
+    margin-bottom: 12px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+.status.completed {
+    color: green;
+    font-weight: bold;
+}
+.status.pending {
+    color: orange;
+    font-weight: bold;
+}
+textarea {
+    width: 100%;
+    resize: vertical;
+}
+.remarks-readonly {
+    display: inline-block;
+    min-height: 20px;
+    line-height: 1.4;
+    padding: 6px 0;        /* keep row height similar */
+    font-size: 14px;
+    color: #333;
+    background: transparent;  /* NO box */
+    border: none;             /* NO border */
+    white-space: pre-wrap;
+}
+/* Update Button Style */
+.btn-update {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #4d5bff, #6a3bff);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(77, 91, 255, 0.25);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Hover effect */
+.btn-update:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+/* Disabled / Locked Style */
+.btn-update.locked {
+    background: #e1e1e1;
+    color: #777;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;          /* <-- space between checkbox and button */
+    justify-content: flex-start;
+}

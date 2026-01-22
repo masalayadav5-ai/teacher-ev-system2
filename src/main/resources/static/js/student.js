@@ -278,7 +278,7 @@ async function loadStatistics() {
 function openAddStudent() {
     editingStudentId = null;
     const studentForm = document.getElementById("studentForm");
-    resetStudentForm();
+   
 
     const studentIdInput = document.getElementById("studentId");
     studentIdInput.disabled = false;

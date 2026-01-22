@@ -24,4 +24,5 @@ public class SessionPlanRequestDTO {
     
     public List<DayDTO> getDays() { return days; }
     public void setDays(List<DayDTO> days) { this.days = days; }
+    
 }

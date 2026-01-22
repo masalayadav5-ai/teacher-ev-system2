@@ -55,4 +55,10 @@ public interface SessionPlanRepository extends JpaRepository<SessionPlan, Long> 
     // Find session plans with days eagerly fetched
     @Query("SELECT DISTINCT sp FROM SessionPlan sp LEFT JOIN FETCH sp.days ORDER BY sp.createdDate DESC")
     List<SessionPlan> findAllWithDays();
+   boolean existsByProgram_IdAndSemester_IdAndCourse_Id(
+    Long programId,
+    Long semesterId,
+    Long courseId
+);
+
 }

@@ -1,6 +1,8 @@
 package com.college.academic.evaluationsystem.controller;
 
+import com.college.academic.evaluationsystem.dto.DayUpdateDTO;
 import com.college.academic.evaluationsystem.dto.SessionPlanRequestDTO;
+import com.college.academic.evaluationsystem.model.SessionDay;
 import com.college.academic.evaluationsystem.model.SessionPlan;
 import com.college.academic.evaluationsystem.service.SessionPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,4 +56,20 @@ public class SessionPlanController {
     public List<SessionPlan> getByCourse(@PathVariable Long courseId) {
         return service.findByCourse(courseId);
     }
+ @GetMapping("/exists")
+public boolean exists(
+        @RequestParam Long programId,
+        @RequestParam Long semesterId,
+        @RequestParam Long courseId) {
+
+    return service.existsByProgramSemesterCourse(
+        programId, semesterId, courseId
+    );
+}
+@PutMapping("/day/{dayId}")
+public SessionDay updateSessionDay(
+        @PathVariable Long dayId,
+        @RequestBody DayUpdateDTO dto) {
+    return service.updateSessionDay(dayId, dto);
+}
 }

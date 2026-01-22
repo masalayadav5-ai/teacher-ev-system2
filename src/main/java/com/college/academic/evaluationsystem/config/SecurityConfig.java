@@ -36,7 +36,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/do-login", "/change-password", 
-                               "/css/**", "/js/**", "/images/**", "/videos/**","/pages/**",
+                               "/css/**", "/js/**", "/images/**","/forgot-password",   // ✅ ADD THIS
+                "/verify-otp","/videos/**","/pages/**",
                                "/api/**","/api/evaluation/**").permitAll() // Add public API endpoints
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/teacher/**").hasRole("TEACHER")

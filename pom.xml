@@ -79,6 +79,12 @@
             <version>1.18.30</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>com.dailymotion.kinta</groupId>
+            <artifactId>console</artifactId>
+            <version>0.1.15</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
    <build>

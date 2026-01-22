@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class AdminManagementService {
+public class AcademicManagementService {
 
     @Autowired
     private ProgramRepository programRepository;

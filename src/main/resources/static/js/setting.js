@@ -1,10 +1,3 @@
-document.addEventListener("DOMContentLoaded", () => {
-  initSettingsTabs();
-  initSaveSettings();
-  initSystemInfo();
-  initSecurityButton();
-  loadSystemSettings();
-});
 
 /* ---------------- TAB SWITCHING ---------------- */
 function initSettingsTabs() {
@@ -44,10 +37,20 @@ function initSettingsTabs() {
 
 /* ---------------- SECURITY ---------------- */
 function initSecurityButton() {
-  document.getElementById("openChangePassword")?.addEventListener("click", () => {
-    document.getElementById("changePasswordModal")?.classList.add("show");
+  const btn = document.getElementById("openChangePassword");
+  const modal = document.getElementById("changePasswordModal");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", () => {
+    modal.classList.add("show");
+
+    // Reset form state when opening from settings
+    document.getElementById("changePasswordForm")?.reset();
+    document.getElementById("passwordMatchMessage").textContent = "";
   });
 }
+
 
 /* ---------------- SYSTEM INFO ---------------- */
 function initSystemInfo() {
@@ -69,4 +72,24 @@ function loadSystemSettings() {
 
       })
     .catch(err => console.error("Failed to load settings", err));
+}
+function resetSettingsTabs() {
+  document.querySelectorAll(".settings-menu li").forEach(li =>
+    li.classList.remove("active")
+  );
+  document.querySelectorAll(".settings-section").forEach(sec =>
+    sec.classList.remove("active")
+  );
+
+  document.querySelector('.settings-menu li[data-tab="general"]').classList.add("active");
+  document.getElementById("tab-general").classList.add("active");
+}
+
+function initSettings() {
+  initSettingsTabs();
+  initSaveSettings();
+  initSystemInfo();
+  initSecurityButton();
+  loadSystemSettings();
+  resetSettingsTabs();
 }

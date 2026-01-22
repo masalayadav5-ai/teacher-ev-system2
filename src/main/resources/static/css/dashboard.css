@@ -33,19 +33,10 @@ a {
 .sidebar.collapsed .brand-text {
     display: none;
 }
- 
-
-.sidebar.collapsed .toggle-btn {
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 /* Collapsible Sidebar */
 .sidebar {
-    width: 250px;
-    transition: width 0.3s ease;
+     transition: width 0.3s ease;
     overflow: hidden;
 }
 
@@ -76,10 +67,6 @@ a {
 .sidebar.collapsed .nav-link span {
     display: none;
 }
-/* Hide brand text when collapsed */
-.sidebar.collapsed .brand-text {
-    display: none;
-}
 
 /* Hide brand logo when collapsed */
 .sidebar.collapsed .logo {
@@ -99,15 +86,12 @@ nav ul,
 .nav-item {
     list-style: none;
 }
-
-/* Toggle button styling */
-.toggle-btn {
-    background: none;
-    border: none;
-    font-size: 26px;
-    cursor: pointer;
-    margin-left: auto;
-    color: #475569;
+ 
+.sidebar.collapsed .toggle-btn {
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* In collapsed mode, center the toggle button */
@@ -131,13 +115,7 @@ nav ul,
     margin-right: 20px;
     box-shadow: 0 6px 20px rgba(15, 23, 36, 0.06);
 }
-
-.brand {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;  /* pushes toggle to right */
-}
-
+ 
 .logo {
     width: 44px;
     height: 44px;
@@ -357,6 +335,187 @@ nav {
 }
 #content-area.loaded {
     opacity: 1;
+}
+
+/*
+.............................clicks student
+*/
+/* Avatar Dropdown */
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.avatar-dropdown {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  width: 160px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+}
+
+.avatar-dropdown a {
+  padding: 10px 14px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-dropdown a:hover {
+  background: #f1f5f9;
+}
+
+.avatar-dropdown .logout {
+  color: #dc2626;
+}
+
+.avatar-dropdown hr {
+  margin: 6px 0;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Show dropdown */
+.avatar-dropdown.show {
+  display: flex;
+}
+/* ===== ANALYTICS LAYOUT ===== */
+
+.analytics-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* KPI CARDS */
+.analytics-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.kpi-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    text-align: center;
+}
+
+.kpi-card.highlight {
+    background: linear-gradient(135deg, #4c6fff, #6b8cff);
+    color: #fff;
+}
+
+.kpi-label {
+    font-size: 14px;
+    color: #777;
+}
+
+.kpi-card.highlight .kpi-label {
+    color: #e0e6ff;
+}
+
+.kpi-value {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* CHART CARD */
+.analytics-chart-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.analytics-chart-card h4 {
+    margin-bottom: 16px;
+}
+
+/* TABLE CARD */
+.analytics-table-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.analytics-table th {
+    text-align: left;
+    color: #555;
+    font-weight: 600;
+}
+
+.analytics-table td:last-child {
+    font-weight: 700;
+    text-align: center;
+}
+.rating-zero {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.rating-low {
+    color: #ea580c;
+    font-weight: 600;
+}
+
+.rating-mid {
+    color: #ca8a04;
+    font-weight: 600;
+}
+
+.rating-high {
+    color: #16a34a;
+    font-weight: 700;
+}
+ 
+ 
+
+.card .label {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.card .value {
+    font-size: 22px;
+    font-weight: 700;
 }
 
 /*

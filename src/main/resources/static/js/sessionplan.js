@@ -1,7 +1,8 @@
 // sessionplan.js - CLEAN & MINIMAL VERSION
 function initSessionPlan() {
     const sessionModal = document.getElementById("sessionModal");
-    if (!sessionModal) return;
+    if (!sessionModal)
+        return;
 
     // Elements
     const nextBtn = document.getElementById("addDayBtn");
@@ -15,7 +16,8 @@ function initSessionPlan() {
     const semesterSelect = document.getElementById("semester");
     let courseSelect = document.getElementById("course");
 
-    if (!nextBtn || !prevBtn || !saveBtn || !dayLabel || !topicInput || !descInput || !methodSelect) return;
+    if (!nextBtn || !prevBtn || !saveBtn || !dayLabel || !topicInput || !descInput || !methodSelect)
+        return;
 
     // State
     let currentDay = 1;
@@ -60,13 +62,13 @@ function initSessionPlan() {
     // Teacher Info
     function getCurrentTeacher() {
         if (window.currentUser) {
-            const user = { ...window.currentUser };
+            const user = {...window.currentUser};
             if (!user.teacherId && user.userId && user.role === 'TEACHER') {
                 user.teacherId = user.userId;
             }
             return user;
         }
-        
+
         const storedUser = localStorage.getItem('currentUser');
         if (storedUser) {
             const user = JSON.parse(storedUser);
@@ -75,7 +77,7 @@ function initSessionPlan() {
             }
             return user;
         }
-        
+
         const topTitle = document.querySelector(".top-title");
         if (topTitle && topTitle.dataset.username) {
             return {
@@ -85,7 +87,7 @@ function initSessionPlan() {
                 teacherId: topTitle.dataset.teacherId || topTitle.dataset.userId || '0'
             };
         }
-        
+
         return null;
     }
 
@@ -93,15 +95,16 @@ function initSessionPlan() {
     async function fetchTeacherCourses(teacherId) {
         facultySelect.innerHTML = '<option value="">Loading your courses...</option>';
         facultySelect.disabled = true;
-        
+
         try {
             const response = await fetch(`/api/admin/teachers/${teacherId}/courses-for-session`);
-            if (!response.ok) throw new Error('Failed to fetch courses');
+            if (!response.ok)
+                throw new Error('Failed to fetch courses');
             const courses = await response.json();
             processCourses(courses);
         } catch (error) {
             console.error('Error fetching courses:', error);
-            alert('Failed to load your assigned courses.');
+            showMesssage("Failed to load your assigned courses.","error");
             setupStaticOptions();
         }
     }
@@ -116,25 +119,25 @@ function initSessionPlan() {
 
     function organizeAndPopulateCourses(courses) {
         const programsMap = {};
-        
+
         courses.forEach((course) => {
             let semesterId = 1, semesterName = 'Unknown Semester';
             let programId = 1, programName = 'Unknown Program';
-            
+
             if (course.semester) {
                 semesterId = course.semester.id || semesterId;
                 semesterName = course.semester.name || semesterName;
-                
+
                 if (course.semester.program) {
                     programId = course.semester.program.id || programId;
                     programName = course.semester.program.name || programName;
                 }
             }
-            
+
             if (!programsMap[programId]) {
-                programsMap[programId] = { id: programId, name: programName, semesters: {} };
+                programsMap[programId] = {id: programId, name: programName, semesters: {}};
             }
-            
+
             if (!programsMap[programId].semesters[semesterId]) {
                 programsMap[programId].semesters[semesterId] = {
                     id: semesterId,
@@ -142,7 +145,7 @@ function initSessionPlan() {
                     courses: []
                 };
             }
-            
+
             programsMap[programId].semesters[semesterId].courses.push({
                 id: course.id,
                 code: course.code,
@@ -150,7 +153,7 @@ function initSessionPlan() {
                 fullName: `${course.code} - ${course.name}`
             });
         });
-        
+
         window.teacherCoursesGrouped = programsMap;
         populateFacultyDropdown(programsMap);
     }
@@ -158,8 +161,9 @@ function initSessionPlan() {
     function populateFacultyDropdown(programsMap) {
         facultySelect.innerHTML = '<option value="">-- Select Your Program --</option>';
         semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
-        resetCourseSelect();
         
+        resetCourseSelect();
+
         Object.keys(programsMap).forEach(programId => {
             const program = programsMap[programId];
             const option = document.createElement('option');
@@ -167,7 +171,7 @@ function initSessionPlan() {
             option.textContent = program.name;
             facultySelect.appendChild(option);
         });
-        
+
         facultySelect.disabled = false;
         setupCascadingDropdowns();
     }
@@ -191,12 +195,12 @@ function initSessionPlan() {
     }
 
     function setupCascadingDropdowns() {
-        facultySelect.addEventListener('change', function() {
+        facultySelect.addEventListener('change', function () {
             const programId = this.value;
             semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
             semesterSelect.disabled = !programId;
             resetCourseSelect();
-            
+
             if (programId && window.teacherCoursesGrouped[programId]) {
                 const program = window.teacherCoursesGrouped[programId];
                 Object.values(program.semesters).forEach(semester => {
@@ -207,11 +211,11 @@ function initSessionPlan() {
                 });
             }
         });
-        
-        semesterSelect.addEventListener('change', function() {
+
+        semesterSelect.addEventListener('change', function () {
             const programId = facultySelect.value;
             const semesterId = this.value;
-            
+
             if (programId && semesterId && window.teacherCoursesGrouped[programId]?.semesters[semesterId]) {
                 const semester = window.teacherCoursesGrouped[programId].semesters[semesterId];
                 const parent = courseSelect.parentElement;
@@ -219,14 +223,14 @@ function initSessionPlan() {
                 newSelect.id = 'course';
                 newSelect.className = 'form-control';
                 newSelect.innerHTML = '<option value="">-- Select Course --</option>';
-                
+
                 semester.courses.forEach(course => {
                     const option = document.createElement('option');
                     option.value = course.id;
                     option.textContent = course.fullName;
                     newSelect.appendChild(option);
                 });
-                
+
                 parent.replaceChild(newSelect, courseSelect);
                 courseSelect = newSelect;
                 courseSelect.disabled = false;
@@ -265,32 +269,33 @@ function initSessionPlan() {
     const addSessionBtn = document.querySelector('.addsession');
     const modalOverlay = document.getElementById('sessionModal');
     const modalClose = document.querySelector('.modal-close');
-    
+
     if (addSessionBtn) {
-        addSessionBtn.addEventListener('click', async function() {
+        addSessionBtn.addEventListener('click', async function () {
             currentTeacher = getCurrentTeacher();
             if (!currentTeacher) {
-                alert('Please login as a teacher to create session plans');
+             showMessage("Please login as a teacher to create session plans.", "error");
+
                 return;
             }
-            
+
             if (!currentTeacher.teacherId && currentTeacher.userId) {
                 currentTeacher.teacherId = currentTeacher.userId;
             }
-            
+
             resetForm();
             await fetchTeacherCourses(currentTeacher.teacherId);
             modalOverlay.style.display = 'flex';
         });
     }
-    
+
     if (modalClose) {
         modalClose.addEventListener('click', () => {
             modalOverlay.style.display = 'none';
             resetForm();
         });
     }
-    
+
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) {
             modalOverlay.style.display = 'none';
@@ -307,27 +312,36 @@ function initSessionPlan() {
         dayData = {};
         loadDay(currentDay);
     }
+  async function checkSessionPlanExists(programId, semesterId, courseId) {
+    const res = await fetch(
+        `/api/session-plans/exists?programId=${programId}&semesterId=${semesterId}&courseId=${courseId}`
+    );
+    return res.ok ? await res.json() : false;
+}
+
 
     // Save Session Plan - SIMPLIFIED
-    saveBtn.onclick = () => {
+    saveBtn.onclick = async () => {
         saveCurrentDay();
-        
+
         const courseElement = document.getElementById('course');
         if (courseElement !== courseSelect) {
             courseSelect = courseElement;
         }
-        
+
         const facultyValue = facultySelect.value;
         const semesterValue = semesterSelect.value;
         const courseValue = courseSelect.value;
-        
+
         if (!facultyValue || !semesterValue || !courseValue) {
-            alert("Please select Program, Semester, and Course");
+        showMessage("Please fill all required fields!", "error");
+
             return;
         }
 
         if (!currentTeacher) {
-            alert("Unable to identify teacher. Please refresh the page.");
+        showMessage("Unable to identify teacher. Please refresh the page.", "error");
+
             return;
         }
 
@@ -344,22 +358,46 @@ function initSessionPlan() {
                 });
             }
         }
-        
+
         if (days.length === 0) {
-            alert("Please add at least one day with a topic");
+          showMessage("Please add at least one session day with a topic.", "error");
+
             return;
         }
-        
+
         days.sort((a, b) => a.day_number - b.day_number);
 
         // Create payload
+        const teacherId = parseInt(currentTeacher.teacherId || currentTeacher.userId);
+        const programId = parseInt(facultyValue);
+        const semesterId = parseInt(semesterValue);
+
+// 🔒 CHECK BEFORE SAVE
+       const exists = await checkSessionPlanExists(
+    programId,
+    semesterId,
+    parseInt(courseValue)
+);
+
+if (exists) {
+    showMessage(
+        "Session plan already exists for this Program, Semester and Course.",
+        "error"
+    );
+    return;
+}
+
+
+
+// ✅ SAFE TO SAVE
         const payload = {
-            teacherId: parseInt(currentTeacher.teacherId || currentTeacher.userId),
-            programId: parseInt(facultyValue),
-            semesterId: parseInt(semesterValue),
+            teacherId,
+            programId,
+            semesterId,
             courseId: parseInt(courseValue),
-            days: days
+            days
         };
+
 
         console.log("Saving session plan:", payload);
 
@@ -371,39 +409,45 @@ function initSessionPlan() {
         // Send to server
         fetch("/api/session-plans", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload)
         })
-        .then(response => {
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
-            return response.json();
-        })
-        .then((data) => {
-            if (data && data.id) {
-                alert("Session Plan Saved Successfully!");
-                modalOverlay.style.display = 'none';
-                resetForm();
-                loadPublishedPlans();
-            } else {
-                throw new Error("Invalid response from server");
-            }
-        })
-        .catch(err => {
-            console.error("Save error:", err);
-            alert(`Failed to save session plan: ${err.message}`);
-        })
-        .finally(() => {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-        });
+                .then(response => {
+                    if (!response.ok)
+                        throw new Error(`Server error: ${response.status}`);
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data && data.id) {
+                      showMessage("Session Plan Saved Successfully!", "success");
+
+                        modalOverlay.style.display = 'none';
+                        resetForm();
+                        loadPublishedPlans();
+                    } else {
+                        throw new Error("Invalid response from server");
+                    }
+                })
+                .catch(err => {
+                    console.error("Save error:", err);
+//                    alert(`Failed to save session plan: ${err.message}`);
+                    showMessage("Failed to save session plan. Please try again.", "error");
+
+                })
+                .finally(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                });
     };
 
     // Load Published Plans
     function loadPublishedPlans() {
         const tbody = document.querySelector(".session-table tbody");
-        if (!tbody) return;
+        if (!tbody)
+            return;
 
-        if (!currentTeacher) currentTeacher = getCurrentTeacher();
+        if (!currentTeacher)
+            currentTeacher = getCurrentTeacher();
         if (!currentTeacher) {
             tbody.innerHTML = `<tr><td colspan="4">Please login as a teacher</td></tr>`;
             return;
@@ -425,21 +469,22 @@ function initSessionPlan() {
         `;
 
         fetch(`/api/session-plans/teacher/${teacherId}`)
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-            })
-            .then(plans => {
-                displayPlans(plans);
-            })
-            .catch(err => {
-                console.error('Error loading plans:', err);
-                displayPlans([]);
-            });
+                .then(res => {
+                    if (!res.ok)
+                        throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(plans => {
+                    displayPlans(plans);
+                })
+                .catch(err => {
+                    console.error('Error loading plans:', err);
+                    displayPlans([]);
+                });
 
         function displayPlans(plans) {
             tbody.innerHTML = "";
-            
+
             if (!plans || plans.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -459,24 +504,28 @@ function initSessionPlan() {
 
             plans.forEach(plan => {
                 const tr = document.createElement("tr");
-                
+
                 // Extract data
+                const programName = plan.program?.name || 'Unknown Program';
                 const courseName = plan.course?.name || 'Unknown Course';
                 const semesterName = plan.semester?.name || 'Unknown Semester';
+
                 const date = plan.createdDate || '';
                 const formattedDate = date ? new Date(date).toLocaleDateString() : '';
-                const method = plan.days?.[0]?.method || "Lecture";
-                
+
+
                 tr.innerHTML = `
-                    <td>${courseName}</td>
-                    <td>${semesterName}</td>
-                    <td>${formattedDate}</td>
-                    <td><span class="method-badge">${method}</span></td>
+                    <td>${programName}</td>
+                <td>${semesterName}</td>
+    <td>${courseName}</td>
+    
+    <td>${formattedDate}</td>
+                    
                 `;
-                
+
                 tr.style.cursor = "pointer";
                 tr.title = "Click to view details";
-                
+
                 tr.addEventListener("click", () => {
                     if (plan.id) {
                         if (typeof loadPage === 'function') {
@@ -486,7 +535,7 @@ function initSessionPlan() {
                         }
                     }
                 });
-                
+
                 tbody.appendChild(tr);
             });
         }
@@ -508,3 +557,11 @@ document.addEventListener("DOMContentLoaded", () => {
     initSessionPlan();
 });
 window.initSessionPlan = initSessionPlan;
+
+function showMessage(msg, type) {
+    const box = document.getElementById("formMessage");
+    box.textContent = msg;
+    box.className = `message-container ${type}`;
+    box.style.display = "block";
+    setTimeout(() => box.style.display = "none", 3000);
+}

@@ -1,775 +1,911 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmarTeach | Admin Dashboard</title>
-    <link rel="stylesheet" href="/css/dashboard.css">
- 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SmarTeach | Admin Dashboard</title>
+        <link rel="stylesheet" href="/css/dashboard.css">
 
-    <!-- Bootstrap Icons (required for nav icon) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+        <!-- Bootstrap Icons (required for nav icon) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
         <!-- for evaluation icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
- <link rel="stylesheet" href="/css/student.css">
-<link rel="stylesheet" href="/css/register_stu.css">
-<link rel="stylesheet" href="/css/evaldashboard.css">
-<link rel="stylesheet" href="/css/evaluation.css">
-  
- 
+        <link rel="stylesheet" href="/css/student.css">
+        <link rel="stylesheet" href="/css/register_stu.css">
+        <link rel="stylesheet" href="/css/evaldashboard.css">
+        <link rel="stylesheet" href="/css/evaluation.css">
+        <link rel="stylesheet" href="/css/change-password-dashboard.css">
 
 
-</head>
 
-<body>
-    <div class="app">
 
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="brand">
-                <div class="logo">
-                    <i class="fa-solid fa-chalkboard-user"></i>
+    </head>
+
+    <body>
+        <div class="app">
+
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="brand">
+                    <div class="logo">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+
+                    <div class="brand-text">
+                        <div class="brand-title">SmarTeach</div>
+                        <div class="brand-admin">Admin</div>
+                    </div>
+
+                    <!-- TOGGLE BUTTON (moved here) -->
+                    <button class="toggle-btn" onclick="toggleSidebar()">
+                        <i class="bi bi-list"></i>
+                    </button>
                 </div>
 
-    <div class="brand-text">
-        <div class="brand-title">SmarTeach</div>
-        <div class="brand-admin">Admin</div>
-    </div>
+                <!-- NAVIGATION -->
+                <nav>
 
-    <!-- TOGGLE BUTTON (moved here) -->
-    <button class="toggle-btn" onclick="toggleSidebar()">
-        <i class="bi bi-list"></i>
-    </button>
-</div>
 
-            <!-- NAVIGATION -->
-            <nav>
-                
-                
-                <ul class="nav flex-column">
-<li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/dashboard-content.html')">
-        <i class="bi bi-speedometer2"></i>
-        <span>Dashboard</span>
-    </a>
-</li>
+                    <ul class="nav flex-column">
+                        <li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/dashboard-content.html')">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
 
-<li class="nav-item" data-role="ADMIN">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/academic-management.html')">
-        <i class="fas fa-cogs"></i>
-        <span>Academic Management</span>
-    </a>
-</li>
+                        <li class="nav-item" data-role="ADMIN">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/academic-management.html')">
+                                <i class="fas fa-cogs"></i>
+                                <span>Academic Management</span>
+                            </a>
+                        </li>
 
-<li class="nav-item" data-role="STUDENT">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
-        <i class="bi bi-journal-text"></i>
-        <span>Evaluation</span>
-    </a>
-</li>
+                        <li class="nav-item" data-role="STUDENT">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
+                                <i class="bi bi-journal-text"></i>
+                                <span>Evaluation</span>
+                            </a>
+                        </li>
 
-<li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
-        <i class="bi bi-calendar-week"></i>
-        <span>Session Planner</span>
-    </a>
-</li>
+                        <li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
+                                <i class="bi bi-calendar-week"></i>
+                                <span>Session Planner</span>
+                            </a>
+                        </li>
 
-<li class="nav-item" data-role="ADMIN">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
-        <i class="bi bi-people"></i>
-        <span>Students</span>
-    </a>
-</li>
+                        <li class="nav-item" data-role="ADMIN">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
+                                <i class="bi bi-people"></i>
+                                <span>Students</span>
+                            </a>
+                        </li>
 
-<li class="nav-item" data-role="ADMIN">
-    <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
-        <i class="bi bi-person-lines-fill"></i>
-        <span>Teachers</span>
-    </a>
-</li>
+                        <li class="nav-item" data-role="ADMIN">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
+                                <i class="bi bi-person-lines-fill"></i>
+                                <span>Teachers</span>
+                            </a>
+                        </li>
 
- <li class="nav-item" data-role="ADMIN">
-                        <a class="nav-link" href="#" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
-                            <i class="bi bi-journal-text"></i>
-                            <span>Admin Evaluation Analytics</span>
-                        </a>
-                    </li>
-                  
+                        <li class="nav-item" data-role="ADMIN">
+                            <a class="nav-link" href="#" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
+                                <i class="bi bi-journal-text"></i>
+                                <span>Admin Evaluation Analytics</span>
+                            </a>
+                        </li>
 
- 
-                </ul>
-            </nav>
-        </aside>
 
-    <!-- Main Content -->
-        <main class="main">
 
-            <!-- Topbar -->
-            <div class="topbar">
+                    </ul>
+                </nav>
+            </aside>
 
-                <div class="top-title">Welcome!</div>
+            <!-- Main Content -->
+            <main class="main">
 
-                <div class="top-actions">
+                <!-- Topbar -->
+                <div class="topbar">
 
-  <div class="avatar-wrapper">
-    <div class="avatar" id="avatarBtn">A</div>
+                    <div class="top-title">Welcome!</div>
 
-    <!-- Avatar Dropdown -->
-    <div class="avatar-dropdown" id="avatarDropdown">
-      <a href="#" id="profileBtn">
-        <i class="bi bi-person"></i> Profile
-      </a>
-      <a href="#" id="settingsBtn">
-        <i class="bi bi-gear"></i> Settings
-      </a>
-      <hr>
-      <a href="#" id="logoutBtn" class="logout">
-        <i class="bi bi-box-arrow-right"></i> Logout
-      </a>
-    </div>
-  </div>
+                    <div class="top-actions">
 
-</div>
+                        <div class="avatar-wrapper">
+                            <div class="avatar" id="avatarBtn">A</div>
+
+                            <!-- Avatar Dropdown -->
+                            <div class="avatar-dropdown" id="avatarDropdown">
+                                <a href="#" id="profileBtn">
+                                    <i class="bi bi-person"></i> Profile
+                                </a>
+                                <a href="#" id="settingsBtn">
+                                    <i class="bi bi-gear"></i> Settings
+                                </a>
+                                <hr>
+                                <a href="#" id="logoutBtn" class="logout">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- CONTENT AREA -->
+                <div id="content-area"></div>
+                <link rel="stylesheet" href="css/setting.css">
+                <!-- Settings Modal Overlay -->
+                <div class="settings-overlay" id="settingsModal">
+                    <div class="settings-modal">
+
+                        <!-- Header -->
+                        <div class="settings-header">
+                            <h2>System Settings</h2>
+                            <span class="modal-close">&times;</span>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="settings-body">
+
+                            <!-- LEFT MENU -->
+                            <aside class="settings-menu">
+                                <ul>
+                                    <li class="active" data-tab="general">General</li>
+                                    <li data-tab="evaluation">Evaluation</li>
+                                    <li data-tab="security">Security</li>
+                                    <li data-tab="system">System Info</li>
+                                </ul>
+                            </aside>
+
+                            <!-- RIGHT CONTENT -->
+                            <section class="settings-content">
+
+                                <!-- GENERAL -->
+                                <div class="settings-section active" id="tab-general">
+                                    <h3>General</h3>
+
+                                    <div class="form-group">
+                                        <label>Institution Name</label>
+                                        <input type="text" id="institutionName">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Established Year</label>
+                                        <input type="number" id="establishedYear" placeholder="e.g. 2012">
+                                    </div>
+
+                                </div>
+
+                                <!-- EVALUATION -->
+                                <div class="settings-section" id="tab-evaluation">
+                                    <h3>Teacher Evaluation</h3>
+
+                                    <div class="form-group">
+                                        <label>Student Evaluation Frequency</label>
+                                        <select id="evaluationFrequency">
+                                            <option value="daily">Once Per Day</option>
+                                            <option value="weekly">Once Per Week</option>
+                                            <option value="monthly">Once Per Month</option>
+                                        </select>
+
+                                        <small class="hint">
+                                            Controlled by Admin – applies system-wide
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <!-- SECURITY -->
+                                <div class="settings-section" id="tab-security">
+                                    <h3>Security</h3>
+
+                                    <div class="security-box">
+                                        <p>
+                                            Change your account password to keep your account secure.
+                                        </p>
+
+                                        <button class="btn-primary" id="openChangePassword">
+                                            Change Password
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- SYSTEM INFO -->
+                                <div class="settings-section" id="tab-system">
+                                    <h3>System Information</h3>
+
+                                    <p><strong>Application:</strong> SmarTeach</p>
+                                    <p><strong>Version:</strong> 1.0.0</p>
+                                    <p><strong>Server Time:</strong> <span id="serverTime"></span></p>
+                                    <p><strong>Time Zone:</strong> GMT +05:45 (Nepal)</p>
+                                    <p><strong>Status:</strong> <span class="status-ok">Running</span></p>
+                                </div>
+
+                            </section>
+
+
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="settings-footer">
+                            <button class="btn-primary" id="saveSettingsBtn">Save Changes</button>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <div class="footer">
+                    © 2025 SmarTeach — Teacher Evaluation & Session Planner
+                </div>
+
+            </main>
+
+        </div>
+
+        <!-- ========================================================= -->
+
+        <div class="password-modal-overlay" id="changePasswordModal">
+            <div class="password-modal-container">
+
+                <div class="password-modal-header">
+                    <div class="password-modal-logo">
+                        <i class="fa-solid fa-key"></i>
+                        <h2>Change Password</h2>
+                    </div>
+                    <p class="password-modal-subtitle">
+                        Update your account password
+                    </p>
+                </div>
+
+                <div class="password-modal-body">
+
+                    <form id="changePasswordForm"
+                          action="/change-password-auth"
+                          method="post"
+                          onsubmit="handlePasswordSubmit(event)">
+
+                        <input type="hidden" id="sameAsOld" value="false">
+
+                        <div class="form-group">
+                            <input type="password"
+                                   id="newPassword"
+                                   name="newPassword"
+                                   class="password-modal-input"
+                                   placeholder="New Password"
+                                   required>
+                            <i class="fa-solid fa-eye toggle-modal-password"
+                               data-target="newPassword"></i>
+                        </div>
+
+                        <div class="form-group">
+                            <input type="password"
+                                   id="confirmPassword"
+                                   name="confirmPassword"
+                                   class="password-modal-input"
+                                   placeholder="Confirm Password"
+                                   required>
+                            <i class="fa-solid fa-eye toggle-modal-password"
+                               data-target="confirmPassword"></i>
+                        </div>
+
+                        <div id="passwordMatchMessage" class="password-match"></div>
+
+                        <button type="submit" class="password-modal-btn">
+                            Change Password
+                        </button>
+
+                        <div id="changePasswordError"
+                             class="alert alert-error"
+                             style="display:none;"></div>
+
+                    </form>
+
+                </div>
             </div>
-
-
-            <!-- CONTENT AREA -->
- <div id="content-area"></div>
- <link rel="stylesheet" href="css/setting.css">
-<!-- Settings Modal Overlay -->
-<div class="settings-overlay" id="settingsModal">
-  <div class="settings-modal">
-
-    <!-- Header -->
-    <div class="settings-header">
-      <h2>System Settings</h2>
-      <span class="modal-close">&times;</span>
-    </div>
-
-    <!-- Body -->
-    <div class="settings-body">
-
-      <!-- LEFT MENU -->
-      <aside class="settings-menu">
-        <ul>
-          <li class="active" data-tab="general">General</li>
-          <li data-tab="evaluation">Evaluation</li>
-          <li data-tab="security">Security</li>
-          <li data-tab="system">System Info</li>
-        </ul>
-      </aside>
-
-      <!-- RIGHT CONTENT -->
-      <section class="settings-content">
-
-        <!-- GENERAL -->
-        <div class="settings-section active" id="tab-general">
-          <h3>General</h3>
-
-          <div class="form-group">
-            <label>Institution Name</label>
-            <input type="text" id="institutionName">
-          </div>
-
-          <div class="form-group">
-            <label>Established Year</label>
-            <input type="number" id="establishedYear" placeholder="e.g. 2012">
-          </div>
-
         </div>
+        <!-- JS FUNCTIONS -->
+        <script>
+            let suppressNextModalClose = false;
 
-        <!-- EVALUATION -->
-        <div class="settings-section" id="tab-evaluation">
-          <h3>Teacher Evaluation</h3>
+            function loadScriptOnce(src) {
+                if (document.querySelector(`script[src="${src}"]`))
+                    return; // already loaded
+                const s = document.createElement("script");
+                s.src = src;
+                document.head.appendChild(s);
+            }
 
-          <div class="form-group">
-            <label>Student Evaluation Frequency</label>
-            <select id="evaluationFrequency">
-              <option value="daily">Once Per Day</option>
-              <option value="weekly">Once Per Week</option>
-              <option value="monthly">Once Per Month</option>
-            </select>
+            function loadPage(pageUrl) {
+                const area = document.getElementById("content-area");
+                area.classList.remove("loaded");
 
-            <small class="hint">
-              Controlled by Admin – applies system-wide
-            </small>
-          </div>
-        </div>
+                fetch(pageUrl)
+                        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
+                        .then(html => {
+                            // Create a temporary div to parse HTML
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = html;
 
-        <!-- SECURITY -->
-        <div class="settings-section" id="tab-security">
-          <h3>Security</h3>
+                            // Collect all scripts
+                            const scripts = tempDiv.querySelectorAll('script');
+                            const inlineScripts = [];
 
-          <div class="security-box">
-            <p>
-              Change your account password to keep your account secure.
-            </p>
-
-            <button class="btn-primary" id="openChangePassword">
-              Change Password
-            </button>
-          </div>
-        </div>
-
-        <!-- SYSTEM INFO -->
-        <div class="settings-section" id="tab-system">
-          <h3>System Information</h3>
-
-          <p><strong>Application:</strong> SmarTeach</p>
-          <p><strong>Version:</strong> 1.0.0</p>
-          <p><strong>Server Time:</strong> <span id="serverTime"></span></p>
-          <p><strong>Time Zone:</strong> GMT +05:45 (Nepal)</p>
-          <p><strong>Status:</strong> <span class="status-ok">Running</span></p>
-        </div>
-
-      </section>
-    </div>
-
-    <!-- Footer -->
-    <div class="settings-footer">
-       <button class="btn-primary" id="saveSettingsBtn">Save Changes</button>
-    </div>
-
-  </div>
-</div>
+                            // Process scripts
+                            scripts.forEach(script => {
+                                if (script.src) {
+                                    console.log('External script found:', script.src);
+                                    loadScriptOnce(script.src); // ✅ here
+                                } else if (script.textContent.trim()) {
+                                    inlineScripts.push(script.textContent);
+                                }
+                                script.remove();
+                            });
 
 
+                            // Set the HTML content
+                            area.innerHTML = tempDiv.innerHTML;
+                            // 🔁 Re-apply role-based UI after dynamic page load
+                            setTimeout(() => {
+                                if (window.currentUser?.role) {
+                                    applyRoleBasedUI(window.currentUser.role);
+                                }
+                            }, 50);
 
-            <div class="footer">
-                © 2025 SmarTeach — Teacher Evaluation & Session Planner
-            </div>
+                            requestAnimationFrame(() => {
+                                area.classList.add("loaded");
+                            });
 
-        </main>
+                            // Execute all inline scripts AFTER HTML is loaded
+                            setTimeout(() => {
+                                inlineScripts.forEach(scriptContent => {
+                                    try {
+                                        // Create and execute the script
+                                        const script = document.createElement('script');
+                                        script.textContent = scriptContent;
+                                        area.appendChild(script);
+                                    } catch (error) {
+                                        console.error('Error executing script:', error);
+                                    }
+                                });
 
-    </div>
+                                // Now handle specific pages
+                                handlePageSpecificFunctions(pageUrl);
+                            }, 100);
 
-    <!-- JS FUNCTIONS -->
- <script>
-     function loadScriptOnce(src) {
-  if (document.querySelector(`script[src="${src}"]`)) return; // already loaded
-  const s = document.createElement("script");
-  s.src = src;
-  document.head.appendChild(s);
+                            initModals();
+                        })
+                        .catch(err => {
+                            console.error('Error loading page:', err);
+                            area.innerHTML = `<h3 class='text-danger'>Error loading page</h3>`;
+                        });
+            }
+
+            // Separate function to handle page-specific initialization
+            function handlePageSpecificFunctions(pageUrl) {
+                console.log('Handling page:', pageUrl);
+                if (pageUrl.includes("EvaluationForm.html")) {
+                    setTimeout(() => {
+                        if (typeof window.initEvaluationForm === "function") {
+                            window.initEvaluationForm();
+                        } else {
+                            console.error("initEvaluationForm not found");
+                        }
+                    }, 300);
+                }
+                if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
+                    initAdminEvaluationAnalytics();
+                }
+                // Handle session plan page
+                if (pageUrl.includes("sessionplan.html")) {
+                    setTimeout(() => {
+                        if (typeof initSessionPlan === 'function') {
+                            console.log('Calling initSessionPlan');
+                            initSessionPlan();
+                        } else {
+                            console.log('initSessionPlan not available on this page');
+                        }
+                    }, 200);
+                }
+                if (pageUrl.includes("AdminEvaluation.html")) {
+                    setTimeout(() => {
+                        if (typeof initAdminEvaluation === 'function') {
+                            initAdminEvaluation();
+                        }
+                    }, 200);
+                }
+
+                // Handle evaluation dashboard
+                if (pageUrl.includes("evaldashboard.html")) {
+                    console.log('Eval dashboard loaded');
+
+                    // Wait for external script to load and execute
+                    setTimeout(() => {
+                        if (typeof initEvalDashboard === 'function') {
+                            console.log('Calling initEvalDashboard');
+                            initEvalDashboard();
+                        } else if (typeof loadStudentTeachers === 'function') {
+                            console.log('Calling loadStudentTeachers directly');
+                            loadStudentTeachers();
+                        } else {
+                            console.error('Evaluation functions not available');
+                            // Minimal error display
+                            const container = document.getElementById('teachersContainer');
+                            if (container) {
+                                container.innerHTML = `
+                           <div class="empty-state">
+                               <i class="fas fa-exclamation-circle"></i>
+                               <p>Please refresh the page to load evaluation system.</p>
+                           </div>
+                       `;
+                            }
+                        }
+                    }, 400); // Give time for external script to load
+                }
+
+                // Handle student page
+                if (pageUrl.includes("student.html")) {
+                    setTimeout(() => {
+                        if (typeof initStudentPage === 'function') {
+                            initStudentPage();
+                        } else {
+                            console.log('initStudentPage not available on this page');
+                        }
+                    }, 200);
+                }
+
+                // Handle admin management page
+                if (pageUrl.includes("academic-management.html")) {
+                    setTimeout(() => {
+                        if (typeof initAdminManagement === 'function') {
+                            initAdminManagement();
+                        } else {
+                            console.log('initAdminManagement not available on this page');
+                        }
+                    }, 200);
+                }
+
+                // Handle teacher page
+                if (pageUrl.includes("teacher.html")) {
+                    setTimeout(() => {
+                        if (typeof initTeacherPage === 'function') {
+                            initTeacherPage();
+                        } else {
+                            console.log('initTeacherPage not available on this page');
+                        }
+                    }, 200);
+                }
+
+                // Handle session details page
+                if (pageUrl.includes("session-details.html")) {
+                    const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
+                    const sessionId = urlParams.get('id');
+
+                    if (sessionId) {
+                        setTimeout(() => {
+                            if (typeof loadSessionDetails === 'function') {
+                                loadSessionDetails(sessionId);
+                            } else if (typeof initSessionDetails === 'function') {
+                                initSessionDetails();
+                            } else {
+                                console.error('No session details functions found');
+                                // Try manual fetch
+                                fetch(`/api/session-plans/${sessionId}`)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            console.log('Manual fetch:', data);
+                                            if (document.getElementById('courseTitle')) {
+                                                document.getElementById('courseTitle').textContent = data.course || 'No Course';
+                                            }
+                                            if (document.getElementById('sessionId')) {
+                                                document.getElementById('sessionId').textContent = data.id || 'N/A';
+                                            }
+                                        });
+                            }
+                        }, 300);
+                    }
+                }
+            }
+
+            // Add this function to dashboard.html (outside loadPage)
+            window.addEventListener("error", function (e) {
+                console.error("GLOBAL JS ERROR:", e.message);
+            });
+            window.onload = function () {
+                loadPage('/pages/dashboard-content.html');
+            };
+
+            function toggleSidebar() {
+                document.getElementById("sidebar").classList.toggle("collapsed");
+            }
+
+            /* -------------------------------------
+             UNIVERSAL MODAL SYSTEM (Student + Teacher + viewparameter+ sessionadd)
+             -------------------------------------- */
+
+            let modalListenerAdded = false;
+
+            function initModals() {
+
+                const studentPanel = document.getElementById("studentPanel");
+                const teacherPanel = document.getElementById("teacherPanel");
+                const viewparaPanel = document.getElementById("viewparaPanel");
+                const sessionModal = document.getElementById("sessionModal");
+                const settingsModal = document.getElementById("settingsModal");
+                const programModal = document.getElementById("programModal");
+                const semesterModal = document.getElementById("semesterModal");
+                const courseModal = document.getElementById("courseModal");
+
+
+
+
+
+
+
+                // If neither modal exists on page, do nothing
+                if (!studentPanel && !teacherPanel && !viewparaPanel && !sessionModal && !settingsModal && !programModal && !semesterModal && !courseModal)
+                    return;
+
+                // Add only ONE click listener for all pages
+                if (!modalListenerAdded) {
+                    document.body.addEventListener("click", modalHandler);
+                    modalListenerAdded = true;
+                }
+            }
+
+            function modalHandler(e) {
+
+               if (suppressNextModalClose) return;
+    
+                const studentPanel = document.getElementById("studentPanel");
+                const teacherPanel = document.getElementById("teacherPanel");
+                const viewparaPanel = document.getElementById("viewparaPanel");
+                const sessionModal = document.getElementById("sessionModal");
+                const settingsModal = document.getElementById("settingsModal");
+                const programModal = document.getElementById("programModal");
+                const semesterModal = document.getElementById("semesterModal");
+                const courseModal = document.getElementById("courseModal");
+                const changePasswordModal = document.getElementById("changePasswordModal");
+
+                if (e.target.closest("#openChangePassword") && changePasswordModal) {
+
+    suppressNextModalClose = true;   // 👈 ADD
+
+    if (settingsModal)
+        settingsModal.classList.remove("show");
+
+    changePasswordModal.classList.add("show");
+
+    initChangePasswordModalUI();
+    initPasswordValidation();
+
+    setTimeout(() => suppressNextModalClose = false, 100); // 👈 ADD
+     e.stopPropagation();
+
+    return;
 }
 
-    function loadPage(pageUrl) {
-    const area = document.getElementById("content-area");
-    area.classList.remove("loaded");
 
-    fetch(pageUrl)
-        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
-        .then(html => {
-            // Create a temporary div to parse HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            
-            // Collect all scripts
-            const scripts = tempDiv.querySelectorAll('script');
-            const inlineScripts = [];
-            
-            // Process scripts
-            scripts.forEach(script => {
-    if (script.src) {
-        console.log('External script found:', script.src);
-        loadScriptOnce(script.src); // ✅ here
-    } else if (script.textContent.trim()) {
-        inlineScripts.push(script.textContent);
-    }
-    script.remove();
-});
 
-            
-            // Set the HTML content
-            area.innerHTML = tempDiv.innerHTML;
-// 🔁 Re-apply role-based UI after dynamic page load
-setTimeout(() => {
-    if (window.currentUser?.role) {
-        applyRoleBasedUI(window.currentUser.role);
-    }
-}, 50);
 
-            requestAnimationFrame(() => {
-                area.classList.add("loaded");
+
+                /* ----------------------------
+                 OPEN MODALS
+                 ---------------------------- */
+
+                // Student
+                if (e.target.closest(".student-add-btn") && studentPanel) {
+                    studentPanel.classList.add("show");
+                }
+
+                // Teacher
+                if (e.target.closest(".teacher-add-btn") && teacherPanel) {
+                    teacherPanel.classList.add("show");
+                }
+                // addparameter
+                if (e.target.closest(".viewpara")) {
+                    viewparaPanel.classList.add("show");
+                }
+                //addsession
+                if (e.target.closest(".addsession")) {
+                    sessionModal.classList.add("show");
+                }
+
+                //addprogram
+                if (e.target.closest(".programAdd")) {
+                    programModal.classList.add("show");
+                }
+                //addsemester
+                if (e.target.closest(".semesterAdd")) {
+                    semesterModal.classList.add("show");
+                }
+                //addcourse
+                if (e.target.closest(".courseAdd")) {
+                    courseModal.classList.add("show");
+                }
+
+
+                /* ----------------------------
+                 CLOSE MODALS
+                 ---------------------------- */
+
+                if (e.target.closest(".modal-close")) {
+                    if (studentPanel)
+                        studentPanel.classList.remove("show");
+                    if (teacherPanel)
+                        teacherPanel.classList.remove("show");
+                    if (viewparaPanel)
+                        viewparaPanel.classList.remove("show");
+                    if (sessionModal)
+                        sessionModal.classList.remove("show");
+                    if (settingsModal)
+                        settingsModal.classList.remove("show");
+                    if (programModal)
+                        programModal.classList.remove("show");
+                    if (semesterModal)
+                        semesterModal.classList.remove("show");
+                    if (courseModal)
+                        courseModal.classList.remove("show");
+                    if (changePasswordModal)
+                        changePasswordModal.classList.remove("show");
+
+
+
+
+                }
+
+                // Click outside modal
+                if (suppressNextModalClose) return;
+                if (e.target === studentPanel)
+                    studentPanel.classList.remove("show");
+                if (e.target === teacherPanel)
+                    teacherPanel.classList.remove("show");
+                if (e.target === viewparaPanel)
+                    viewparaPanel.classList.remove("show");
+                if (e.target === sessionModal)
+                    sessionModal.classList.remove("show");
+                if (e.target === settingsModal)
+                    settingsModal.classList.remove("show");
+                if (e.target === programModal)
+                    programModal.classList.remove("show");
+                if (e.target === semesterModal)
+                    semesterModal.classList.remove("show");
+                if (e.target === courseModal)
+                    courseModal.classList.remove("show");
+              if (
+  e.target === changePasswordModal &&
+  !e.target.closest(".password-modal-container") &&
+  !document.body.dataset.forceChange
+) {
+  changePasswordModal.classList.remove("show");
+}
+
+
+
+
+
+
+
+            }
+
+            //// In your dashboard.js
+            document.addEventListener('DOMContentLoaded', function () {
+                //    // Your dashboard initialization code here
+                //    
+                //    // Check if elements exist before adding listeners
+                const element = document.getElementById('someElementId');
+                if (element) {
+                    element.addEventListener('click', function () {
+                        // your code
+                    });
+                }
+                //    
+                //    // OR use optional chaining
+                document.getElementById('someElementId')?.addEventListener('click', function () {
+                    // your code
+                });
+            });
+        </script>
+        <!--searchteacher-->
+        <script>
+            const searchInput = document.getElementById('teacherSearch');
+            const filterSelect = document.getElementById('teacherFilter');
+            const table = document.querySelector('.teacher-table tbody');
+
+            if (searchInput && filterSelect && table) {
+                searchInput.addEventListener('keyup', filterTable);
+                filterSelect.addEventListener('change', filterTable);
+            }
+
+            function filterTable() {
+                if (!table)
+                    return;
+
+                const filterValue = (searchInput?.value || '').toLowerCase();
+                const filterColumn = filterSelect?.value || 'all';
+                const rows = table.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let text = '';
+
+                    if (filterColumn === 'all') {
+                        text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+                    } else if (filterColumn === 'name') {
+                        text = (cells[0]?.textContent || '').toLowerCase();
+                    } else if (filterColumn === 'email') {
+                        text = (cells[1]?.textContent || '').toLowerCase();
+                    } else if (filterColumn === 'department') {
+                        text = (cells[2]?.textContent || '').toLowerCase();
+                    } else if (filterColumn === 'status') {
+                        text = (cells[3]?.textContent || '').toLowerCase();
+                    }
+
+                    row.style.display = text.includes(filterValue) ? '' : 'none';
+                });
+            }
+
+
+
+
+            function filterTable() {
+                const filterValue = searchInput.value.toLowerCase();
+                const filterColumn = filterSelect.value;
+                const rows = table.querySelectorAll('tr');
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let text = '';
+
+                    if (filterColumn === 'all') {
+                        text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
+                    } else if (filterColumn === 'name') {
+                        text = cells[0].textContent.toLowerCase();
+                    } else if (filterColumn === 'email') {
+                        text = cells[1].textContent.toLowerCase();
+                    } else if (filterColumn === 'department') {
+                        text = cells[2].textContent.toLowerCase();
+                    } else if (filterColumn === 'status') {
+                        text = cells[3].textContent.toLowerCase();
+                    }
+
+                    row.style.display = text.includes(filterValue) ? '' : 'none';
+                });
+            }
+            //searchInput.addEventListener('keyup', filterTable);
+            //filterSelect.addEventListener('change', filterTable);
+        </script>
+        <!-- Avatar dropdown -->
+        <script>
+            document.addEventListener("click", function (e) {
+
+                const avatarBtn = document.getElementById("avatarBtn");
+                const dropdown = document.getElementById("avatarDropdown");
+                const settingsModal = document.getElementById("settingsModal");
+
+                // Toggle avatar dropdown
+                if (e.target.closest("#avatarBtn")) {
+                    dropdown.classList.toggle("show");
+                    return;
+                }
+
+                // Profile
+                if (e.target.closest("#profileBtn")) {
+                    dropdown.classList.remove("show");
+
+                    const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
+
+                    sessionStorage.setItem("profileMode", "SELF");
+
+                    if (user?.role === "TEACHER") {
+                        sessionStorage.setItem("profileView", "TEACHER_ANALYTICS");
+                    } else {
+                        sessionStorage.setItem("profileView", "STUDENT");
+                    }
+
+                    loadStudentProfilePage();
+                    return;
+                }
+                if (e.target.closest("#settingsBtn")) {
+                    dropdown.classList.remove("show");
+                    settingsModal.classList.add("show");
+                    initSettings();
+                    return;
+                }
+
+
+                // Logout
+                if (e.target.closest("#logoutBtn")) {
+                    dropdown.classList.remove("show");
+
+                    Swal.fire({
+                        title: "Logout?",
+                        text: "Are you sure you want to logout?",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, Logout"
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            window.location.href = "/logout";
+                        }
+                    });
+                    return;
+                }
+
+                // Click outside closes dropdown
+                if (!e.target.closest(".avatar-wrapper")) {
+                    dropdown?.classList.remove("show");
+                }
             });
 
-            // Execute all inline scripts AFTER HTML is loaded
-            setTimeout(() => {
-                inlineScripts.forEach(scriptContent => {
-                    try {
-                        // Create and execute the script
-                        const script = document.createElement('script');
-                        script.textContent = scriptContent;
-                        area.appendChild(script);
-                    } catch (error) {
-                        console.error('Error executing script:', error);
+            function applyRoleBasedUI(role) {
+                console.log("Applying UI for role:", role);
+
+                // Sidebar items
+                document.querySelectorAll(".nav-item").forEach(item => {
+                    const allowedRoles = item.dataset.role;
+                    if (!allowedRoles)
+                        return;
+
+                    if (allowedRoles.split(",").includes(role)) {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "none";
                     }
                 });
-                
-                // Now handle specific pages
-                handlePageSpecificFunctions(pageUrl);
-            }, 100);
-            
-            initModals();
-        })
-        .catch(err => {
-            console.error('Error loading page:', err);
-            area.innerHTML = `<h3 class='text-danger'>Error loading page</h3>`;
-        });
-}
 
-// Separate function to handle page-specific initialization
-function handlePageSpecificFunctions(pageUrl) {
-    console.log('Handling page:', pageUrl);
-    if (pageUrl.includes("EvaluationForm.html")) {
-    setTimeout(() => {
-        if (typeof window.initEvaluationForm === "function") {
-            window.initEvaluationForm();
-        } else {
-            console.error("initEvaluationForm not found");
-        }
-    }, 300);
-}
- if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
-        initAdminEvaluationAnalytics();
-    }
-    // Handle session plan page
-    if (pageUrl.includes("sessionplan.html")) {
-        setTimeout(() => {
-            if (typeof initSessionPlan === 'function') {
-                console.log('Calling initSessionPlan');
-                initSessionPlan();
-            } else {
-                console.log('initSessionPlan not available on this page');
-            }
-        }, 200);
-    }
-    if (pageUrl.includes("AdminEvaluation.html")) {
-    setTimeout(() => {
-        if (typeof initAdminEvaluation === 'function') {
-            initAdminEvaluation();
-        }
-    }, 200);
-}
-
-    // Handle evaluation dashboard
-if (pageUrl.includes("evaldashboard.html")) {
-    console.log('Eval dashboard loaded');
-   
-    // Wait for external script to load and execute
-    setTimeout(() => {
-        if (typeof initEvalDashboard === 'function') {
-            console.log('Calling initEvalDashboard');
-            initEvalDashboard();
-        } else if (typeof loadStudentTeachers === 'function') {
-            console.log('Calling loadStudentTeachers directly');
-            loadStudentTeachers();
-        } else {
-            console.error('Evaluation functions not available');
-            // Minimal error display
-            const container = document.getElementById('teachersContainer');
-            if (container) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Please refresh the page to load evaluation system.</p>
-                    </div>
-                `;
-            }
-        }
-    }, 400); // Give time for external script to load
-}
-    
-    // Handle student page
-    if (pageUrl.includes("student.html")) {
-        setTimeout(() => {
-            if (typeof initStudentPage === 'function') {
-                initStudentPage();
-            } else {
-                console.log('initStudentPage not available on this page');
-            }
-        }, 200);
-    }
-    
-    // Handle admin management page
-    if (pageUrl.includes("academic-management.html")) {
-        setTimeout(() => {
-            if (typeof initAdminManagement === 'function') {
-                initAdminManagement();
-            } else {
-                console.log('initAdminManagement not available on this page');
-            }
-        }, 200);
-    }
-    
-    // Handle teacher page
-    if (pageUrl.includes("teacher.html")) {
-        setTimeout(() => {
-            if (typeof initTeacherPage === 'function') {
-                initTeacherPage();
-            } else {
-                console.log('initTeacherPage not available on this page');
-            }
-        }, 200);
-    }
-    
-    // Handle session details page
-    if (pageUrl.includes("session-details.html")) {
-        const urlParams = new URLSearchParams(pageUrl.split('?')[1] || '');
-        const sessionId = urlParams.get('id');
-        
-        if (sessionId) {
-            setTimeout(() => {
-                if (typeof loadSessionDetails === 'function') {
-                    loadSessionDetails(sessionId);
-                } else if (typeof initSessionDetails === 'function') {
-                    initSessionDetails();
-                } else {
-                    console.error('No session details functions found');
-                    // Try manual fetch
-                    fetch(`/api/session-plans/${sessionId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            console.log('Manual fetch:', data);
-                            if (document.getElementById('courseTitle')) {
-                                document.getElementById('courseTitle').textContent = data.course || 'No Course';
-                            }
-                            if (document.getElementById('sessionId')) {
-                                document.getElementById('sessionId').textContent = data.id || 'N/A';
-                            }
-                        });
+                // Session Planner → Add Session button
+                const addSessionBtn = document.querySelector(".addsession");
+                if (addSessionBtn) {
+                    if (role === "STUDENT" || role === "ADMIN") {
+                        addSessionBtn.style.display = "none";
+                    } else {
+                        addSessionBtn.style.display = "inline-block";
+                    }
                 }
-            }, 300);
-        }
-    }
-}
-
-// Add this function to dashboard.html (outside loadPage)
-window.addEventListener("error", function (e) {
-        console.error("GLOBAL JS ERROR:", e.message);
-    });
-window.onload = function () {
-    loadPage('/pages/dashboard-content.html');
-};
-
-function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("collapsed");
-}
-
-/* -------------------------------------
-   UNIVERSAL MODAL SYSTEM (Student + Teacher + viewparameter+ sessionadd)
--------------------------------------- */
-
-let modalListenerAdded = false;
-
-function initModals() {
-
-    const studentPanel = document.getElementById("studentPanel");
-    const teacherPanel = document.getElementById("teacherPanel");
-    const viewparaPanel = document.getElementById("viewparaPanel");
-    const sessionModal = document.getElementById("sessionModal");
-    const settingsModal = document.getElementById("settingsModal");
-    const programModal = document.getElementById("programModal");
-    const semesterModal = document.getElementById("semesterModal");
-    const courseModal = document.getElementById("courseModal");
- 
-
-    
- 
-
-
-
-    // If neither modal exists on page, do nothing
-    if (!studentPanel && !teacherPanel && !viewparaPanel && !sessionModal && !settingsModal && !programModal && !semesterModal && !courseModal) return;
-
-    // Add only ONE click listener for all pages
-    if (!modalListenerAdded) {
-        document.body.addEventListener("click", modalHandler);
-        modalListenerAdded = true;
-    }
-}
-
-function modalHandler(e) {
-
-    const studentPanel = document.getElementById("studentPanel");
-    const teacherPanel = document.getElementById("teacherPanel");
-    const viewparaPanel = document.getElementById("viewparaPanel");
-    const sessionModal = document.getElementById("sessionModal");
-    const settingsModal = document.getElementById("settingsModal");
-    const programModal = document.getElementById("programModal");
-    const semesterModal = document.getElementById("semesterModal");
-    const courseModal = document.getElementById("courseModal");
- 
-
-
-
-    
-
-
-
-    /* ----------------------------
-       OPEN MODALS
-    ---------------------------- */
-
-    // Student
-    if (e.target.closest(".student-add-btn") && studentPanel) {
-        studentPanel.classList.add("show");
-    }
-
-    // Teacher
-    if (e.target.closest(".teacher-add-btn") && teacherPanel) {
-        teacherPanel.classList.add("show");
-    }
-    // addparameter
-    if (e.target.closest(".viewpara") ) {
-        viewparaPanel.classList.add("show");
-    }
-    //addsession
-    if (e.target.closest(".addsession") ) {
-        sessionModal.classList.add("show");
-    }
- 
-//addprogram
-if (e.target.closest(".programAdd") ) {
-        programModal.classList.add("show");
-    }
-    //addsemester
-    if (e.target.closest(".semesterAdd") ) {
-        semesterModal.classList.add("show");
-    }
-    //addcourse
-     if (e.target.closest(".courseAdd") ) {
-        courseModal.classList.add("show");
-    }
-    
-
-    /* ----------------------------
-       CLOSE MODALS
-    ---------------------------- */
-
-    if (e.target.closest(".modal-close")) {
-        if (studentPanel) studentPanel.classList.remove("show");
-        if (teacherPanel) teacherPanel.classList.remove("show");
-        if (viewparaPanel) viewparaPanel.classList.remove("show");
-        if (sessionModal) sessionModal.classList.remove("show");
-        if (settingsModal) settingsModal.classList.remove("show");
-        if (programModal) programModal.classList.remove("show");
-        if (semesterModal) semesterModal.classList.remove("show");
-        if (courseModal) courseModal.classList.remove("show");
- 
-
-
-
-
-    }
-
-    // Click outside modal
-    if (e.target === studentPanel) studentPanel.classList.remove("show");
-    if (e.target === teacherPanel) teacherPanel.classList.remove("show");
-    if (e.target === viewparaPanel) viewparaPanel.classList.remove("show");
-    if (e.target === sessionModal) sessionModal.classList.remove("show");
-    if (e.target === settingsModal) settingsModal.classList.remove("show");
-    if (e.target === programModal) programModal.classList.remove("show");
-    if (e.target === semesterModal) semesterModal.classList.remove("show");
-     if (e.target === courseModal) courseModal.classList.remove("show");
- 
-
-
-
-
-}
-
-//// In your dashboard.js
-document.addEventListener('DOMContentLoaded', function() {
-//    // Your dashboard initialization code here
-//    
-//    // Check if elements exist before adding listeners
-    const element = document.getElementById('someElementId');
-    if (element) {
-        element.addEventListener('click', function() {
-            // your code
-        });
-    }
-//    
-//    // OR use optional chaining
-    document.getElementById('someElementId')?.addEventListener('click', function() {
-        // your code
-    });
-});
-</script>
-<!--searchteacher-->
-<script>
-const searchInput = document.getElementById('teacherSearch');
-const filterSelect = document.getElementById('teacherFilter');
-const table = document.querySelector('.teacher-table tbody');
-
-if (searchInput && filterSelect && table) {
-  searchInput.addEventListener('keyup', filterTable);
-  filterSelect.addEventListener('change', filterTable);
-}
-
-function filterTable() {
-  if (!table) return;
-
-  const filterValue = (searchInput?.value || '').toLowerCase();
-  const filterColumn = filterSelect?.value || 'all';
-  const rows = table.querySelectorAll('tr');
-
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    let text = '';
-
-    if (filterColumn === 'all') {
-      text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
-    } else if (filterColumn === 'name') {
-      text = (cells[0]?.textContent || '').toLowerCase();
-    } else if (filterColumn === 'email') {
-      text = (cells[1]?.textContent || '').toLowerCase();
-    } else if (filterColumn === 'department') {
-      text = (cells[2]?.textContent || '').toLowerCase();
-    } else if (filterColumn === 'status') {
-      text = (cells[3]?.textContent || '').toLowerCase();
-    }
-
-    row.style.display = text.includes(filterValue) ? '' : 'none';
-  });
-}
-
-
-
-
-function filterTable() {
-    const filterValue = searchInput.value.toLowerCase();
-    const filterColumn = filterSelect.value;
-    const rows = table.querySelectorAll('tr');
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        let text = '';
-
-        if (filterColumn === 'all') {
-            text = Array.from(cells).map(cell => cell.textContent.toLowerCase()).join(' ');
-        } else if (filterColumn === 'name') {
-            text = cells[0].textContent.toLowerCase();
-        } else if (filterColumn === 'email') {
-            text = cells[1].textContent.toLowerCase();
-        } else if (filterColumn === 'department') {
-            text = cells[2].textContent.toLowerCase();
-        } else if (filterColumn === 'status') {
-            text = cells[3].textContent.toLowerCase();
-        }
-
-        row.style.display = text.includes(filterValue) ? '' : 'none';
-    });
-}
-//searchInput.addEventListener('keyup', filterTable);
-//filterSelect.addEventListener('change', filterTable);
-</script>
-<!-- Avatar dropdown -->
-<script>
-document.addEventListener("click", function (e) {
-
-  const avatarBtn = document.getElementById("avatarBtn");
-  const dropdown = document.getElementById("avatarDropdown");
-  const settingsModal = document.getElementById("settingsModal");
-
-  // Toggle avatar dropdown
-  if (e.target.closest("#avatarBtn")) {
-    dropdown.classList.toggle("show");
-    return;
-  }
-
- // Profile
-if (e.target.closest("#profileBtn")) {
-    dropdown.classList.remove("show");
-
-    const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
-
-    sessionStorage.setItem("profileMode", "SELF");
-
-    if (user?.role === "TEACHER") {
-        sessionStorage.setItem("profileView", "TEACHER_ANALYTICS");
-    } else {
-        sessionStorage.setItem("profileView", "STUDENT");
-    }
-
-    loadStudentProfilePage();
-    return;
-}
-
-
-
-  // Settings (ONLY ENTRY POINT)
-  if (e.target.closest("#settingsBtn")) {
-    dropdown.classList.remove("show");
-    settingsModal.classList.add("show");
-    initSettings();
-    return;
-  }
-
-  // Logout
-  if (e.target.closest("#logoutBtn")) {
-    dropdown.classList.remove("show");
-
-    Swal.fire({
-      title: "Logout?",
-      text: "Are you sure you want to logout?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Logout"
-    }).then(result => {
-      if (result.isConfirmed) {
-        window.location.href = "/logout";
-      }
-    });
-    return;
-  }
-
-  // Click outside closes dropdown
-  if (!e.target.closest(".avatar-wrapper")) {
-    dropdown?.classList.remove("show");
-  }
-});
-
-function applyRoleBasedUI(role) {
-    console.log("Applying UI for role:", role);
-
-    // Sidebar items
-    document.querySelectorAll(".nav-item").forEach(item => {
-        const allowedRoles = item.dataset.role;
-        if (!allowedRoles) return;
-
-        if (allowedRoles.split(",").includes(role)) {
-            item.style.display = "block";
-        } else {
-            item.style.display = "none";
-        }
-    });
-
-    // Session Planner → Add Session button
-    const addSessionBtn = document.querySelector(".addsession");
-    if (addSessionBtn) {
-        if (role === "STUDENT" || role === "ADMIN") {
-            addSessionBtn.style.display = "none";
-        } else {
-            addSessionBtn.style.display = "inline-block";
-        }
-    }
-}
-
-
-</script>
-<script src="/js/topbar.js"></script>
-
-<script src="js/sessionplan.js"></script>
-<script src="js/student.js"></script>
-<script src="js/teacher.js"></script>
-<script src="/js/session-details.js"></script>
-<script src="/js/academic-management.js"></script>
-<script src="/js/setting.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</body>
+            }
+
+
+        </script>
+        <script>
+            function initChangePasswordModalUI() {
+
+                document.querySelectorAll(".toggle-modal-password").forEach(icon => {
+                    icon.onclick = () => {
+                        const targetId = icon.dataset.target;
+                        const input = document.getElementById(targetId);
+                        if (!input)
+                            return;
+
+                        if (input.type === "password") {
+                            input.type = "text";
+                            icon.classList.replace("fa-eye", "fa-eye-slash");
+                        } else {
+                            input.type = "password";
+                            icon.classList.replace("fa-eye-slash", "fa-eye");
+                        }
+                    };
+                });
+
+            }
+        </script>
+
+        <script src="/js/topbar.js"></script>
+
+        <script src="js/sessionplan.js"></script>
+        <script src="js/student.js"></script>
+        <script src="js/teacher.js"></script>
+        <script src="/js/session-details.js"></script>
+        <script src="/js/academic-management.js"></script>
+        <script src="/js/setting.js"></script>
+        <script src="/js/change-password-validate.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </body>
 </html>

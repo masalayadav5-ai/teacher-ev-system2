@@ -2,6 +2,7 @@ package com.college.academic.evaluationsystem.model;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "session_day")
@@ -19,6 +20,10 @@ public class SessionDay {
     private String description;
     private String method; 
 
+     private boolean completed;        // NEW
+    private String remarks;           // NEW
+    private LocalDate completedDate;
+    
     @ManyToOne
     @JoinColumn(name = "session_plan_id")
     @JsonBackReference
@@ -68,4 +73,13 @@ public class SessionDay {
     public String getMethod() { return method; }
     public void setMethod(String method) { this.method = method;
 }
-}
+        public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
+
+    public String getRemarks() { return remarks; }
+    public void setRemarks(String remarks) { this.remarks = remarks; }
+
+    public LocalDate getCompletedDate() { return completedDate; }
+    public void setCompletedDate(LocalDate completedDate) { this.completedDate = completedDate; }
+
+ }
