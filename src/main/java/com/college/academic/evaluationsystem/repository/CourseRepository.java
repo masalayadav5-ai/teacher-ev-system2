@@ -49,4 +49,26 @@ List<Course> findByTeacherId(@Param("teacherId") Long teacherId);
     // Find courses not assigned to a specific teacher
     @Query("SELECT c FROM Course c WHERE c.id NOT IN (SELECT c2.id FROM Course c2 JOIN c2.teachers t WHERE t.id = :teacherId) AND c.semester.id = :semesterId")
     List<Course> findCoursesNotAssignedToTeacher(@Param("teacherId") Long teacherId, @Param("semesterId") Long semesterId);
+    @Query("""
+    SELECT c FROM Course c
+    WHERE c.semester.id = :semesterId
+      AND c.isActive = true
+      AND c.id NOT IN (
+        SELECT c2.id FROM Teacher t
+        JOIN t.courses c2
+      )
+""")
+List<Course> findUnassignedBySemesterId(@Param("semesterId") Long semesterId);
+
+
+
+@Query("""
+   SELECT c, t.fullName FROM Teacher t
+   JOIN t.courses c
+   WHERE c.semester.id = :semesterId
+     AND c.isActive = true
+""")
+List<Object[]> findAssignedWithTeacherBySemester(@Param("semesterId") Long semesterId);
+
+
 }

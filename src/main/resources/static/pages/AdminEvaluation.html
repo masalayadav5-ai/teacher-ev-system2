@@ -1,6 +1,4 @@
-
-    
-    <title>Manage Evaluation Parameters - Admin</title>
+<title>Manage Evaluation Parameters - Admin</title>
     <link rel="stylesheet" href="/css/evaluation.css">
     <link rel="stylesheet" href="/css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -39,8 +37,8 @@
 
     <div class="container">
         <div class="back-container">
-          <button onclick="parent.loadPage('/pages/evaldashboard.html')">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
+          <button onclick="parent.loadPage('/pages/AdminEvaluationAnalytics.html')">
+                <i class="fas fa-arrow-left"></i> Back
             </button>
         </div>
 
@@ -83,6 +81,8 @@
                             <option value="overall_rating">Overall Rating</option>
                             <option value="grade_prediction">Grade Prediction</option>
                         </select>
+                        <p class="small-text" id="typeHint"></p>
+
                     </div>
                     
                     <!-- Rating Options -->

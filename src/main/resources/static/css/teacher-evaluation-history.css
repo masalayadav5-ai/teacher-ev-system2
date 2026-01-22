@@ -1,0 +1,304 @@
+/* ==========================================
+   Teacher Evaluation History – CLEAN LIGHT THEME
+   Fully isolated (does NOT touch common.css)
+========================================== */
+
+.teacher-page {
+  background: transparent !important;
+}
+
+/* ===== Main Card ===== */
+.teacher-page .analytics-card.glass {
+  background: linear-gradient(180deg, #f9fbff, #eef3ff) !important;
+  border: 1px solid rgba(76, 111, 255, 0.28) !important;
+  box-shadow: 0 14px 38px rgba(76, 111, 255, 0.18) !important;
+  border-radius: 18px;
+  padding: 26px;
+  backdrop-filter: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+/* ===== Wrapper ===== */
+.teacher-page .analytics-card {
+  width: 100%;
+   margin: 0;
+}
+
+/* ===== Form Controls ===== */
+.teacher-page .form-group {
+  margin-bottom: 20px;
+}
+
+.teacher-page .form-group label {
+  color: #4c6fff;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  font-size: 14px;
+}
+
+.teacher-page .form-group select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(76, 111, 255, 0.35);
+  background: #ffffff;
+  color: #1e293b;
+  outline: none;
+  font-size: 14px;
+  line-height: 44px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teacher-page .form-group select:focus {
+  border-color: #4c6fff;
+  box-shadow: 0 0 0 2px rgba(76, 111, 255, 0.18);
+}
+.teacher-page .form-group select:hover {
+  border-color: rgba(76, 111, 255, 0.55);
+}
+
+
+/* ===== KPI Cards ===== */
+.teacher-page .analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.teacher-page .kpi-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(76, 111, 255, 0.25);
+  box-shadow: 0 10px 26px rgba(76, 111, 255, 0.15);
+  transition: 0.2s ease;
+}
+
+.teacher-page .kpi-card span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+.teacher-page .kpi-card strong {
+  display: block;
+  font-size: 28px;
+  color: #0f172a;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.teacher-page .kpi-card.highlight {
+  background: linear-gradient(135deg, #4c6fff, #6c8cff);
+  border-color: rgba(76, 111, 255, 0.65);
+  box-shadow: 0 14px 34px rgba(76, 111, 255, 0.45);
+}
+
+.teacher-page .kpi-card.highlight span,
+.teacher-page .kpi-card.highlight strong {
+  color: #ffffff;
+}
+
+/* ===== Chart ===== */
+.teacher-page canvas#teacherChart {
+  margin-top: 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 16px;
+  box-shadow: 0 10px 28px rgba(76, 111, 255, 0.15);
+  border: 1px solid rgba(76, 111, 255, 0.2);
+}
+
+/* ===== Table ===== */
+.teacher-page .analytics-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 24px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(76, 111, 255, 0.15);
+}
+
+.teacher-page .analytics-table thead {
+  background: rgba(76, 111, 255, 0.08);
+}
+
+.teacher-page .analytics-table th,
+.teacher-page .analytics-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(76, 111, 255, 0.15);
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.teacher-page .analytics-table th {
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #4c6fff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.teacher-page .analytics-table tr:hover {
+  background: rgba(76, 111, 255, 0.06);
+}
+
+/* ===== Rating Colors ===== */
+.teacher-page .rating-low  { color: #ff5c5c; font-weight: 700; }
+.teacher-page .rating-mid  { color: #f59e0b; font-weight: 700; }
+.teacher-page .rating-high { color: #22c55e; font-weight: 700; }
+
+/* ===== Loading ===== */
+.teacher-page .loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #4c6fff;
+}
+
+.teacher-page .loading-state i {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+/* ===== Empty ===== */
+.teacher-page .no-data {
+  color: #64748b;
+  text-align: center;
+  padding: 40px;
+  font-size: 15px;
+}
+
+/* ===== HARD OVERRIDES (kill any dark parent styles) ===== */
+.teacher-page,
+.teacher-page .layout,
+.teacher-page .main-content,
+.teacher-page .content-area {
+  background: transparent !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+.section-title {
+  margin: 26px 0 12px;
+  font-size: 16px;
+  color: #4c6fff;
+  font-weight: 700;
+}
+
+.individual-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.individual-card {
+  border: 1px solid rgba(76,111,255,0.25);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(76,111,255,0.08);
+}
+
+.individual-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.individual-header strong {
+  color: #1e293b;
+}
+
+.badge {
+  background: rgba(76,111,255,0.1);
+  color: #4c6fff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.view-btn {
+  margin-top: 10px;
+  background: #4c6fff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.view-btn:hover {
+  background: #3a57de;
+}
+
+.individual-body {
+  margin-top: 12px;
+  border-top: 1px dashed rgba(76,111,255,0.25);
+  padding-top: 10px;
+}
+
+.response-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.response-row .q {
+  color: #334155;
+  max-width: 70%;
+}
+
+.response-row .a {
+  font-weight: 600;
+  color: #4c6fff;
+}
+.teacher-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.summary-btn {
+  background: #4c6fff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.summary-btn:hover {
+  background: #3a57de;
+}
+
+.pagination {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+  justify-content: center;
+}
+
+.page-btn {
+  padding: 6px 10px;
+  border: 1px solid rgba(76,111,255,0.35);
+  background: #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  background: #4c6fff;
+  color: #fff;
+}

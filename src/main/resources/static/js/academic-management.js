@@ -1320,86 +1320,72 @@ async function loadSemestersForCourseAssignments() {
         console.error('Error loading semesters for course assignments:', error);
     }
 }
+function onSemesterChanged() {
+    selectedTeacherId = null;
+    document.getElementById('selectedTeacherName').textContent = 'Select Teacher';
+
+    loadAvailableCourses();   // global unassigned
+    loadAssignedCourses();    // global assigned w/ teacher names
+}
 
 // Load available courses based on selected program and semester
 async function loadAvailableCourses() {
-    const programId = document.getElementById('courseProgramForAssignFilter').value;
     const semesterId = document.getElementById('courseSemesterForAssignFilter').value;
 
-    if (!programId || !semesterId) {
+    if (!semesterId) {
         document.getElementById('availableCourses').innerHTML = `
             <div class="empty-state">
-                <p>Please select both program and semester</p>
+                <p>Please select semester</p>
             </div>
         `;
         return;
     }
 
     try {
-        // Get courses for the selected semester
-        const response = await fetch(`/api/admin/semesters/${semesterId}/courses`);
-        if (!response.ok)
-            throw new Error('Failed to load courses');
+        const res = await fetch(`/api/admin/semesters/${semesterId}/unassigned-courses`);
+        if (!res.ok) throw new Error();
 
-        const allCourses = await response.json();
+        const courses = await res.json();
+        renderAvailableCourses(courses);
 
-        // Filter to show only active courses
-        const activeCourses = allCourses.filter(course => course.active === true);
-
-        // If a teacher is selected, filter out already assigned courses
-        if (selectedTeacherId) {
-            const assignedResponse = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
-            if (assignedResponse.ok) {
-                const assignedCourses = await assignedResponse.json();
-                const assignedCourseIds = assignedCourses.map(course => course.id);
-
-                // Remove already assigned courses
-                const availableCourses = activeCourses.filter(course =>
-                    !assignedCourseIds.includes(course.id)
-                );
-                renderAvailableCourses(availableCourses);
-            } else {
-                renderAvailableCourses(activeCourses);
-            }
-        } else {
-            // If no teacher selected, show all courses
-            renderAvailableCourses(activeCourses);
-        }
-
-    } catch (error) {
-        console.error('Error loading available courses:', error);
+    } catch (e) {
+        console.error(e);
         showError('availableCourses', 'Failed to load courses');
     }
 }
 
+
 // Load assigned courses for selected teacher
 async function loadAssignedCourses() {
-    if (!selectedTeacherId) {
-        document.getElementById('assignedCourses').innerHTML = `
-            <div class="empty-state">
-                <p>No assigned courses</p>
-            </div>
-        `;
-        document.getElementById('selectedTeacherName').textContent = 'Select Teacher';
-        return;
-    }
+    const semesterId = document.getElementById('courseSemesterForAssignFilter').value;
+    if (!semesterId) return;
 
     try {
-        const response = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
-        if (!response.ok)
-            throw new Error('Failed to load assigned courses');
 
-        const assignedCourses = await response.json();
-        renderAssignedCourses(assignedCourses);
+        // MODE 1: Teacher selected → teacher-only
+        if (selectedTeacherId) {
+            const res = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
+            if (!res.ok) throw new Error();
 
-        // Reload available courses to filter out newly assigned ones
-        loadAvailableCourses();
+            const courses = await res.json();
+            renderAssignedCoursesTeacherOnly(courses);
+        }
 
-    } catch (error) {
-        console.error('Error loading assigned courses:', error);
+        // MODE 2: No teacher selected → global assigned list
+        else {
+            const res = await fetch(`/api/admin/semesters/${semesterId}/assigned-courses`);
+            if (!res.ok) throw new Error();
+
+            const courses = await res.json();
+            renderAssignedCoursesGlobal(courses);
+        }
+
+    } catch (e) {
+        console.error(e);
         showError('assignedCourses', 'Failed to load assigned courses');
     }
 }
+
 
 // Render available courses
 function renderAvailableCourses(courses) {
@@ -1448,6 +1434,49 @@ function renderAssignedCourses(courses) {
             <div class="course-actions">
                 <small>${course.semester ? course.semester.name : 'N/A'} • ${course.credits || 3} credits</small>
                 <button class="btn-sm btn-danger" onclick="removeCourseFromTeacher(${course.id})">
+                    <i class="fas fa-times"></i> Remove
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+function renderAssignedCoursesGlobal(courses) {
+    const container = document.getElementById('assignedCourses');
+
+    if (!courses.length) {
+        container.innerHTML = `<div class="empty-state"><p>No assigned courses</p></div>`;
+        return;
+    }
+
+    container.innerHTML = courses.map(c => `
+        <div class="course-item">
+            <h6>${c.code} - ${c.name}</h6>
+            <p>${c.description || 'No description'}</p>
+            <div class="course-actions">
+                <small>${c.semester} • ${c.credits} credits</small><br>
+                <span class="badge bg-info mt-1">Teacher: ${c.teacherName}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+
+function renderAssignedCoursesTeacherOnly(courses) {
+    const container = document.getElementById('assignedCourses');
+
+    if (!courses.length) {
+        container.innerHTML = `<div class="empty-state"><p>No assigned courses</p></div>`;
+        return;
+    }
+
+    container.innerHTML = courses.map(course => `
+        <div class="course-item">
+            <h6>${course.code} - ${course.name}</h6>
+            <p>${course.description || 'No description'}</p>
+            <div class="course-actions">
+                <small>${course.semester?.name || 'N/A'} • ${course.credits || 3} credits</small>
+                <button class="btn-sm btn-danger"
+                        onclick="removeCourseFromTeacher(${course.id})">
                     <i class="fas fa-times"></i> Remove
                 </button>
             </div>

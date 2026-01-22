@@ -1,5 +1,6 @@
 package com.college.academic.evaluationsystem.controller;
 
+import com.college.academic.evaluationsystem.model.EvaluationResponse;
 import com.college.academic.evaluationsystem.model.StudentEvaluation;
 import com.college.academic.evaluationsystem.repository.EvaluationResponseRepository;
 import com.college.academic.evaluationsystem.repository.StudentEvaluationRepository;
@@ -135,4 +136,42 @@ public class AdminEvaluationController {
                 "parameterAverages", parameterAverages
         ));
     }
+    @GetMapping("/teacher/{teacherId}/course/{courseId}/week/{weekStart}/responses")
+public ResponseEntity<List<Map<String, Object>>> getIndividualEvaluations(
+        @PathVariable Long teacherId,
+        @PathVariable Long courseId,
+        @PathVariable LocalDate weekStart) {
+
+    List<StudentEvaluation> evaluations =
+            evaluationRepository.findByTeacherCourseWeek(
+                    teacherId, courseId, weekStart
+            );
+
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (StudentEvaluation eval : evaluations) {
+
+        List<EvaluationResponse> responses =
+                responseRepository.findByEvaluationId(eval.getId());
+
+        List<Map<String, String>> responseList = responses.stream()
+                .map(r -> Map.of(
+                        "questionText", r.getParameter().getQuestionText(),
+                        "value", r.getResponseValue()
+                ))
+                .toList();
+
+        result.add(Map.of(
+                "evaluationId", eval.getId(),
+                "studentId", eval.getStudentId(),
+                "submittedAt", eval.getSubmittedAt(),
+                "overallRating", eval.getOverallRating(),
+                "predictedGrade", eval.getPredictedGrade(),
+                "responses", responseList
+        ));
+    }
+
+    return ResponseEntity.ok(result);
+}
+
 }

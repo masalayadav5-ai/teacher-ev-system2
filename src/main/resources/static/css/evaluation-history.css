@@ -1,0 +1,169 @@
+/* ===============================
+   Evaluation History – Glass Neon
+================================ */
+
+/* MAIN LAYOUT */
+.evaluation-layout {
+  display: grid;
+  grid-template-columns: 36% 64%;
+  gap: 20px;
+  min-height: 460px;
+}
+
+/* LEFT PANEL – WEEK LIST */
+.evaluation-weeks {
+  padding-right: 14px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(0, 153, 255, 0.15);
+}
+
+/* WEEK TREE */
+.week-tree {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.week-tree summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.week-tree summary::before {
+  content: "▸";
+  font-size: 12px;
+  color: #00aaff;
+  transition: transform 0.2s ease;
+}
+
+.week-tree[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.week-tree summary::-webkit-details-marker {
+  display: none;
+}
+
+/* TEACHER ITEMS – GLASSY */
+.course-item {
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 8px;
+
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 153, 255, 0.15);
+
+  transition: all 0.25s ease;
+}
+
+.course-item strong {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.course-item div {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* HOVER + ACTIVE FEEL */
+.course-item:hover {
+  background: rgba(0, 153, 255, 0.08);
+  border-color: #00aaff;
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+/* RIGHT PANEL – DETAILS */
+.evaluation-details {
+  padding-left: 16px;
+  overflow-y: auto;
+}
+
+/* META INFO – GLASS BAR */
+.evaluation-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+
+  padding: 12px;
+  margin-bottom: 18px;
+
+  background: rgba(0, 153, 255, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 153, 255, 0.2);
+
+  font-size: 13px;
+  color: #0f172a;
+}
+
+/* RESPONSE CARD */
+.response-item {
+  padding: 14px;
+  margin-bottom: 12px;
+
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+
+  border-left: 4px solid #00aaff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.response-item strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.response-item div {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+/* EMPTY STATE */
+.no-data {
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+  padding: 30px;
+}
+
+/* SCROLLBAR – CLEAN */
+.evaluation-weeks::-webkit-scrollbar,
+.evaluation-details::-webkit-scrollbar {
+  width: 6px;
+}
+
+.evaluation-weeks::-webkit-scrollbar-thumb,
+.evaluation-details::-webkit-scrollbar-thumb {
+  background: rgba(0, 153, 255, 0.4);
+  border-radius: 6px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .evaluation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluation-weeks {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 153, 255, 0.15);
+    padding-bottom: 16px;
+  }
+
+  .evaluation-details {
+    padding-left: 0;
+  }
+}

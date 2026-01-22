@@ -27,6 +27,8 @@ public class AcademicManagementService {
     @Autowired
     private StudentRepository studentRepository;
 
+    @Autowired
+private TeacherCourseHistoryRepository historyRepository;
     // Program Management
     public Program createProgram(Program program) {
         return programRepository.save(program);
@@ -88,25 +90,69 @@ public class AcademicManagementService {
     }
 
     // Teacher-Course Assignment
-    public void assignCourseToTeacher(Long teacherId, Long courseId) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        
-        teacher.addCourse(course);
-        teacherRepository.save(teacher);
-    }
+public void assignCourseToTeacher(Long teacherId, Long courseId) {
+    System.out.println("🔥 [HISTORY] assignCourseToTeacher called");
 
-    public void removeCourseFromTeacher(Long teacherId, Long courseId) {
-        Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        
-        teacher.removeCourse(course);
-        teacherRepository.save(teacher);
-    }
+    Teacher teacher = teacherRepository.findById(teacherId)
+            .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+    Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new RuntimeException("Course not found"));
+
+    System.out.println("🔥 [HISTORY] Assigning course " + course.getId()
+            + " to teacher " + teacher.getId());
+
+    // Assign normally
+    teacher.addCourse(course);
+    teacherRepository.save(teacher);
+
+    // Save history
+    TeacherCourseHistory history =
+            new TeacherCourseHistory(teacher, course);
+
+    historyRepository.save(history);
+
+    System.out.println("✅ [HISTORY] Saved history row for teacher="
+            + teacherId + ", course=" + courseId);
+}
+
+
+public void removeCourseFromTeacher(Long teacherId, Long courseId) {
+    System.out.println("🔥 [HISTORY] removeCourseFromTeacher called");
+
+    Teacher teacher = teacherRepository.findById(teacherId)
+            .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+    Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new RuntimeException("Course not found"));
+
+    System.out.println("🔥 [HISTORY] Removing course " + course.getId()
+            + " from teacher " + teacher.getId());
+
+    // Remove current assignment
+    teacher.removeCourse(course);
+    teacherRepository.save(teacher);
+
+    // Mark history as removed
+    List<TeacherCourseHistory> histories =
+            historyRepository.findByTeacherId(teacherId);
+
+    System.out.println("🔥 [HISTORY] Found " + histories.size()
+            + " history rows for teacher=" + teacherId);
+
+    histories.stream()
+        .filter(h -> h.getCourse().getId().equals(courseId)
+                  && h.getRemovedAt() == null)
+        .findFirst()
+        .ifPresentOrElse(h -> {
+            h.setRemovedAt(java.time.LocalDateTime.now());
+            historyRepository.save(h);
+            System.out.println("✅ [HISTORY] Marked history removed_at");
+        }, () -> {
+            System.out.println("❌ [HISTORY] No active history row found!");
+        });
+}
+
 
     // Get statistics
     public Map<String, Long> getStatistics() {
@@ -125,4 +171,5 @@ public class AcademicManagementService {
         
         return stats;
     }
+    
 }

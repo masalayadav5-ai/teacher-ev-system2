@@ -39,6 +39,9 @@ private EntityManager entityManager;
     @Autowired
     private AcademicManagementService adminService;
 
+    @Autowired
+private TeacherCourseHistoryRepository historyRepository;
+
     // ================= PROGRAMS =================
     
     @GetMapping("/programs")
@@ -249,41 +252,25 @@ public ResponseEntity<Semester> updateSemester(@PathVariable Long id, @RequestBo
         return courseRepository.findByTeacherId(teacherId);
     }
 
-    @PostMapping("/teachers/{teacherId}/courses/{courseId}/assign")
-    public ResponseEntity<?> assignCourseToTeacher(@PathVariable Long teacherId, @PathVariable Long courseId) {
-        Optional<Teacher> teacherOptional = teacherRepository.findById(teacherId);
-        Optional<Course> courseOptional = courseRepository.findById(courseId);
+@PostMapping("/teachers/{teacherId}/courses/{courseId}/assign")
+public ResponseEntity<?> assignCourseToTeacher(
+        @PathVariable Long teacherId,
+        @PathVariable Long courseId) {
 
-        if (teacherOptional.isEmpty() || courseOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+    adminService.assignCourseToTeacher(teacherId, courseId);
+    return ResponseEntity.ok().build();
+}
 
-        Teacher teacher = teacherOptional.get();
-        Course course = courseOptional.get();
 
-        teacher.addCourse(course);
-        teacherRepository.save(teacher);
+  @PostMapping("/teachers/{teacherId}/courses/{courseId}/remove")
+public ResponseEntity<?> removeCourseFromTeacher(
+        @PathVariable Long teacherId,
+        @PathVariable Long courseId) {
 
-        return ResponseEntity.ok().build();
-    }
+    adminService.removeCourseFromTeacher(teacherId, courseId);
+    return ResponseEntity.ok().build();
+}
 
-    @PostMapping("/teachers/{teacherId}/courses/{courseId}/remove")
-    public ResponseEntity<?> removeCourseFromTeacher(@PathVariable Long teacherId, @PathVariable Long courseId) {
-        Optional<Teacher> teacherOptional = teacherRepository.findById(teacherId);
-        Optional<Course> courseOptional = courseRepository.findById(courseId);
-
-        if (teacherOptional.isEmpty() || courseOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Teacher teacher = teacherOptional.get();
-        Course course = courseOptional.get();
-
-        teacher.removeCourse(course);
-        teacherRepository.save(teacher);
-
-        return ResponseEntity.ok().build();
-    }
 
     // ================= OVERVIEW & STATS =================
     
@@ -393,5 +380,59 @@ public List<Map<String, Object>> getCoursesForSessionPlanning(@PathVariable Long
     }
     
     return courses;
+}
+@GetMapping("/semesters/{semesterId}/unassigned-courses")
+public List<Course> getUnassignedCourses(@PathVariable Long semesterId) {
+    return courseRepository.findUnassignedBySemesterId(semesterId);
+}
+
+
+@GetMapping("/semesters/{semesterId}/assigned-courses")
+public List<Map<String, Object>> getAssignedCoursesWithTeacher(@PathVariable Long semesterId) {
+
+    List<Object[]> rows = courseRepository.findAssignedWithTeacherBySemester(semesterId);
+
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (Object[] row : rows) {
+        Course c = (Course) row[0];
+        String teacherName = (String) row[1];
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", c.getId());
+        map.put("code", c.getCode());
+        map.put("name", c.getName());
+        map.put("description", c.getDescription());
+        map.put("credits", c.getCredits());
+        map.put("semester", c.getSemester().getName());
+        map.put("teacherName", teacherName);
+
+        result.add(map);
+    }
+
+    return result;
+}
+
+@GetMapping("/teachers/{teacherId}/course-history")
+public List<Map<String, Object>> getTeacherCourseHistory(
+        @PathVariable Long teacherId) {
+
+    List<TeacherCourseHistory> history =
+            historyRepository.findByTeacherId(teacherId);
+
+    List<Map<String, Object>> result = new ArrayList<>();
+
+    for (TeacherCourseHistory h : history) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("courseId", h.getCourse().getId());
+        map.put("code", h.getCourse().getCode());
+        map.put("name", h.getCourse().getName());
+        map.put("semester", h.getCourse().getSemester().getName());
+        map.put("assignedAt", h.getAssignedAt());
+        map.put("removedAt", h.getRemovedAt());
+        result.add(map);
+    }
+
+    return result;
 }
 }
