@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AcademicManagementService {
@@ -29,6 +30,9 @@ public class AcademicManagementService {
 
     @Autowired
 private TeacherCourseHistoryRepository historyRepository;
+    @Autowired
+private SessionPlanService sessionPlanService;
+
     // Program Management
     public Program createProgram(Program program) {
         return programRepository.save(program);
@@ -90,6 +94,7 @@ private TeacherCourseHistoryRepository historyRepository;
     }
 
     // Teacher-Course Assignment
+@Transactional
 public void assignCourseToTeacher(Long teacherId, Long courseId) {
     System.out.println("🔥 [HISTORY] assignCourseToTeacher called");
 
@@ -102,11 +107,11 @@ public void assignCourseToTeacher(Long teacherId, Long courseId) {
     System.out.println("🔥 [HISTORY] Assigning course " + course.getId()
             + " to teacher " + teacher.getId());
 
-    // Assign normally
+    // 1️⃣ Assign normally
     teacher.addCourse(course);
     teacherRepository.save(teacher);
 
-    // Save history
+    // 2️⃣ Save history
     TeacherCourseHistory history =
             new TeacherCourseHistory(teacher, course);
 
@@ -114,7 +119,17 @@ public void assignCourseToTeacher(Long teacherId, Long courseId) {
 
     System.out.println("✅ [HISTORY] Saved history row for teacher="
             + teacherId + ", course=" + courseId);
+
+    // 3️⃣ 🔥 REASSIGN SESSION PLANS TO NEW TEACHER
+    sessionPlanService.reassignSessionPlans(
+            teacher.getId(),
+            course.getId()
+    );
+
+    System.out.println("🔄 [SESSION PLAN] Reassigned plans for course "
+            + course.getId() + " to teacher " + teacher.getId());
 }
+
 
 
 public void removeCourseFromTeacher(Long teacherId, Long courseId) {
@@ -135,7 +150,7 @@ public void removeCourseFromTeacher(Long teacherId, Long courseId) {
 
     // Mark history as removed
     List<TeacherCourseHistory> histories =
-            historyRepository.findByTeacherId(teacherId);
+            historyRepository.findByTeacherDbId(teacherId);
 
     System.out.println("🔥 [HISTORY] Found " + histories.size()
             + " history rows for teacher=" + teacherId);

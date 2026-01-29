@@ -1,3 +1,4 @@
+
 /* Global Styles */
 * {
     margin: 0;
@@ -165,4 +166,14 @@ input:focus, textarea:focus, select:focus {
         display: block;
         overflow-x: auto;
     }
+}
+/* Prevent global.css from breaking Academic Management */
+.academic-management-page body,
+.academic-management-page * {
+  box-sizing: border-box;
+}
+
+.academic-management-page .card,
+.academic-management-page .table {
+  all: unset;
 }

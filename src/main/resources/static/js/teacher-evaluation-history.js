@@ -4,63 +4,169 @@ const EVALS_PER_PAGE = 6;
 let _latestSummaryData = null;
 let _selectedWeek = null;
 let _summaryLoading = false;
+let _evalMode = "current";
+let _overrideTeacherId = null; // ✅ admin can override teacher id
 
+const adminTeacherId = sessionStorage.getItem("adminViewingTeacherId");
+const adminTeacherName = sessionStorage.getItem("adminViewingTeacherName");
 
-async function initTeacherEvaluationHistory() {
+async function loadTeacherCoursesByMode() {
   const container = document.getElementById("teacherEvaluationHistoryContainer");
   if (!container) return;
 
   container.innerHTML = `
     <div class="loading-state">
       <i class="fas fa-spinner fa-spin"></i>
-      <p>Loading your evaluation history...</p>
+      <p>Loading ${_evalMode} courses...</p>
     </div>
   `;
 
   try {
-    // 1️⃣ Logged-in teacher info
-    const userRes = await fetch("/admin/api/userinfo");
-    const user = await userRes.json();
+   let teacherDbId = _overrideTeacherId; // ✅ admin selected teacher
 
-    if (!user.teacherId) {
-      container.innerHTML = `<p class="no-data">Teacher data not found</p>`;
-      return;
-    }
+if (!teacherDbId) {
+  const userRes = await fetch("/admin/api/userinfo");
+  const user = await userRes.json();
 
-    // 2️⃣ Load teacher + courses (READ JSON ONLY ONCE)
-    const res = await fetch("/api/admin/evaluations/teachers");
+  teacherDbId = user.teacherDbId;
+
+  if (!teacherDbId) {
+    container.innerHTML = `<p class="no-data">Teacher data not found</p>`;
+    return;
+  }
+}
+
+
+    const res = await fetch(`/api/admin/evaluations/teachers?mode=${_evalMode}`);
     if (!res.ok) throw new Error("Failed to load teachers");
 
-    const teachers = await res.json();   // ✅ only once
-
-    const teacher = teachers.find(t => t.teacherId === user.teacherId);
+    const teachers = await res.json();
+    const teacher = teachers.find(
+     t => Number(t.teacherId) === Number(teacherDbId));
 
     if (!teacher || !teacher.courses?.length) {
-      container.innerHTML = `<p class="no-data">No assigned courses</p>`;
-      return;
-    }
 
-    // 3️⃣ Render UI
-    renderTeacherEvaluationUI(container, user.teacherId, teacher);
+  renderTeacherEvaluationUI(container, teacherDbId, { courses: [] });
+
+
+  // 🔥 Show soft message inside UI
+  const list = document.getElementById("teacherIndividualList");
+  if (list) {
+    list.innerHTML = `
+      <p class="no-data">
+        No ${_evalMode} assigned courses found
+      </p>`;
+  }
+
+  // 🔥 Disable course + week selects
+  const courseSel = document.getElementById("teacherCourseSelect");
+  const weekSel   = document.getElementById("teacherWeekSelect");
+  if (courseSel) courseSel.disabled = true;
+  if (weekSel)   weekSel.disabled   = true;
+
+  return;
+}
+
+
+    renderTeacherEvaluationUI(container, teacherDbId, teacher);
+
 
   } catch (e) {
     console.error(e);
-    container.innerHTML = `<p class="no-data">Failed to load evaluation history</p>`;
+    container.innerHTML =
+      `<p class="no-data">Failed to load ${_evalMode} courses</p>`;
   }
+}
+
+async function initTeacherEvaluationHistory() {
+  const container = document.getElementById("teacherEvaluationHistoryContainer");
+  if (!container) return;
+
+  const adminHeader = document.getElementById("adminTeacherHeader");
+  const mainTitle   = document.getElementById("mainHistoryTitle");
+
+  const adminTeacherId   = sessionStorage.getItem("adminViewingTeacherId");
+  const adminTeacherName = sessionStorage.getItem("adminViewingTeacherName");
+
+  container.innerHTML = `
+    <div class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>Loading evaluation history...</p>
+    </div>
+  `;
+
+  try {
+
+   
+
+    // 🛡 ADMIN MODE
+    if (adminTeacherId && window.currentUser?.role === "ADMIN") {
+
+      if (adminHeader) adminHeader.style.display = "flex";
+
+      if (mainTitle) {
+        mainTitle.textContent = `Evaluation History – ${adminTeacherName}`;
+      }
+
+      
+
+      _overrideTeacherId = adminTeacherId;
+      await loadTeacherCoursesByMode();
+    }
+
+    // 👨‍🏫 TEACHER MODE
+    else {
+
+      if (adminHeader) adminHeader.style.display = "none";
+
+      if (mainTitle) {
+        mainTitle.textContent = "My Evaluation History";
+      }
+
+     
+
+      _overrideTeacherId = null;
+      loadTeacherCoursesByMode();
+    }
+
+  } catch (e) {
+    console.error(e);
+    container.innerHTML =
+      `<p class="no-data">Failed to load evaluation history</p>`;
+  }
+}
+
+
+
+
+function setModeButtonState(mode) {
+  const cur = document.getElementById("modeCurrentBtn");
+  const prev = document.getElementById("modePreviousBtn");
+
+  cur.classList.toggle("active", mode === "current");
+  prev.classList.toggle("active", mode === "previous");
 }
 
 function renderTeacherEvaluationUI(container, teacherId, teacherData) {
 
   container.innerHTML = `
     <div class="analytics-card glass">
+ <button id="modeCurrentBtn" class="mode-btn ${_evalMode === "current" ? "active" : ""}">
+  Current Assigned Courses
+</button>
+
+<button id="modePreviousBtn" class="mode-btn ${_evalMode === "previous" ? "active" : ""}">
+  Previous Assigned Courses
+</button>
 
       <div class="form-group">
         <label>Select Course</label>
         <select id="teacherCourseSelect">
           <option value="">-- Select Course --</option>
-          ${teacherData.courses.map(c =>
-            `<option value="${c.courseId}">${c.courseName}</option>`
-          ).join("")}
+         ${(teacherData.courses || []).map(c =>
+  `<option value="${c.courseId}">${c.courseName}</option>`
+).join("")}
+
         </select>
       </div>
 
@@ -71,6 +177,7 @@ function renderTeacherEvaluationUI(container, teacherId, teacherData) {
         </select>
       </div>
 <div class="teacher-top-actions">
+  
   <button id="toggleSummaryBtn" class="summary-btn">
     View Overall Summary
   </button>
@@ -104,6 +211,39 @@ function renderTeacherEvaluationUI(container, teacherId, teacherData) {
 
     </div>
   `;
+   document.getElementById("modeCurrentBtn").onclick = () => {
+  _evalMode = "current";
+  setModeButtonState("current");
+  reloadTeacherEvalUI();
+};
+
+document.getElementById("modePreviousBtn").onclick = () => {
+  _evalMode = "previous";
+  setModeButtonState("previous");
+  reloadTeacherEvalUI();
+};
+
+
+function reloadTeacherEvalUI() {
+
+  // Reset state
+  _latestSummaryData = null;
+  _selectedWeek = null;
+  _summaryLoading = false;
+
+  if (teacherChart) {
+    teacherChart.destroy();
+    teacherChart = null;
+  }
+const container = document.getElementById("teacherEvaluationHistoryContainer");
+if (container) {
+  container.classList.add("faded");
+}
+
+  loadTeacherCoursesByMode();   // 🔥 reload everything based on mode
+}
+
+
 document.getElementById("toggleSummaryBtn").onclick = () => {
   const summary = document.getElementById("teacherAnalyticsSummary");
   const btn = document.getElementById("toggleSummaryBtn");
@@ -145,6 +285,11 @@ document.getElementById("toggleSummaryBtn").innerText = "View Overall Summary";
 document.getElementById("toggleSummaryBtn").disabled = true;
 
   };
+  const containerWrap = document.getElementById("teacherEvaluationHistoryContainer");
+if (containerWrap) {
+  containerWrap.classList.remove("faded");
+}
+
 }
 
  
@@ -159,9 +304,10 @@ async function loadTeacherWeekSummary(teacherId, courseId, weekStart) {
   btn.innerText = "Loading Summary...";
   btn.disabled = true;
 
-  const res = await fetch(
-    `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/summary?weekStart=${weekStart}`
-  );
+ const res = await fetch(
+  `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/summary?weekStart=${weekStart}&mode=${_evalMode}`
+);
+
 
   const data = await res.json();
 
@@ -179,20 +325,62 @@ async function loadTeacherWeekSummary(teacherId, courseId, weekStart) {
 
 async function loadTeacherWeeks(teacherId, courseId) {
 
-  const res = await fetch(
-    `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/weeks`
-  );
+ const res = await fetch(
+  `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/weeks?mode=${_evalMode}`
+);
 
-  const weeks = await res.json();
+let weeks;
 
+try {
+  weeks = await res.json();
+} catch (e) {
+  console.error("❌ Invalid JSON from weeks API", e);
+  weeks = [];
+}
+
+if (!Array.isArray(weeks)) {
+  console.error("❌ Weeks API returned non-array:", weeks);
+  weeks = [];
+}
+if (weeks.length === 0) {
   const weekSelect = document.getElementById("teacherWeekSelect");
-  weekSelect.innerHTML = `<option value="">-- Select Week --</option>`;
+  weekSelect.innerHTML = `<option value="">-- No evaluations yet --</option>`;
+  weekSelect.disabled = true;
 
-  weeks.forEach(w => {
-    weekSelect.innerHTML += `<option value="${w}">${w}</option>`;
-  });
+  document.getElementById("teacherIndividualList").innerHTML =
+    `<p class="no-data">No evaluations found for this course</p>`;
 
-  weekSelect.disabled = false;
+  document.getElementById("toggleSummaryBtn").disabled = true;
+  return;
+}
+
+const weekSelect = document.getElementById("teacherWeekSelect");
+weekSelect.innerHTML = "";
+
+// 🔥 Filter out invalid / empty weeks
+const validWeeks = weeks.filter(w => !!w);
+
+if (!validWeeks.length) {
+  weekSelect.innerHTML = `<option value="">-- No evaluations yet --</option>`;
+  weekSelect.disabled = true;
+
+  document.getElementById("teacherIndividualList").innerHTML =
+    `<p class="no-data">No evaluations found for this course</p>`;
+
+  document.getElementById("toggleSummaryBtn").disabled = true;
+  return;
+}
+
+// 🔥 Only now show real dates
+weekSelect.innerHTML = `<option value="">-- Select Week --</option>`;
+
+validWeeks.forEach(w => {
+  weekSelect.innerHTML += `<option value="${w}">${w}</option>`;
+});
+
+weekSelect.disabled = false;
+
+
 
   weekSelect.onchange = () => {
   const week = weekSelect.value;
@@ -218,11 +406,18 @@ async function loadTeacherWeeks(teacherId, courseId) {
 async function loadTeacherIndividualEvaluations(teacherId, courseId, weekStart) {
 
   const res = await fetch(
-    `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/week/${weekStart}/responses`
-  );
+  `/api/admin/evaluations/teacher/${teacherId}/course/${courseId}/week/${weekStart}/responses?mode=${_evalMode}`
+);
+
 
   const allData = await res.json();
-
+console.log("🔥 API RESPONSE", {
+  teacherId,
+  courseId,
+  weekStart,
+  mode: _evalMode,
+  allData
+});
   // 🔥 store globally for pagination
   window._allEvalData = allData;
 
@@ -390,6 +585,21 @@ function renderSummaryUI(data) {
     }
   });
 }
+function goBackToAdminAnalytics() {
+  sessionStorage.removeItem("adminViewingTeacherId");
+  sessionStorage.removeItem("adminViewingTeacherName");
+
+  // 🔥 RESET TOPBAR TITLE
+  const topTitle = document.querySelector(".top-title");
+  if (topTitle) {
+    topTitle.textContent = "Admin Evaluation Analytics";
+  }
+
+  if (typeof loadPage === "function") {
+    loadPage("/pages/AdminEvaluationAnalytics.html");
+  }
+}
+
 
 
 window.initTeacherEvaluationHistory = initTeacherEvaluationHistory;

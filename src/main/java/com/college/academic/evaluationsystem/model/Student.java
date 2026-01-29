@@ -1,5 +1,6 @@
 package com.college.academic.evaluationsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 @Entity
@@ -18,11 +19,13 @@ public class Student {
 
     private String address;
     private String contact;
-    private String batch; // Keep batch as string
-    
+    @Column(name = "batch_label")
+private String batchLabel;   // Stores year like "2024"
+
+
     @Column(name = "hide", nullable = false)
     private String hide = "0";   // 0 = visible, 1 = hidden
-    
+
     @Column(nullable = false)
     private String status = "Pending";
 
@@ -30,6 +33,12 @@ public class Student {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
+
+   @ManyToOne
+@JoinColumn(name = "batch_id")
+@JsonIgnoreProperties("students")
+private Batch batch;
+
 
     // NEW: Relationship with Program (replaces faculty string)
     @ManyToOne
@@ -65,7 +74,7 @@ public class Student {
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
-    
+
     public String getAddress() {
         return address;
     }
@@ -82,13 +91,14 @@ public class Student {
         this.contact = contact;
     }
 
-    public String getBatch() {
-        return batch;
-    }
+  public String getBatchLabel() {
+    return batchLabel;
+}
 
-    public void setBatch(String batch) {
-        this.batch = batch;
-    }
+public void setBatchLabel(String batchLabel) {
+    this.batchLabel = batchLabel;
+}
+
 
     // Convenience methods to get user properties
     public String getEmail() {

@@ -1,7 +1,14 @@
 package com.college.academic.evaluationsystem.controller;
 
 import com.college.academic.evaluationsystem.model.StudentEvaluation;
+import com.college.academic.evaluationsystem.model.TeacherCourseHistory;
+import com.college.academic.evaluationsystem.repository.EvaluationResponseRepository;
 import com.college.academic.evaluationsystem.repository.StudentEvaluationRepository;
+import com.college.academic.evaluationsystem.repository.TeacherCourseHistoryRepository;
+import jakarta.persistence.EntityManager;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +19,12 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/evaluation")
 public class StudentEvaluationController {
-    
+  
     @Autowired
     private StudentEvaluationRepository evaluationRepository;
-    
+    @Autowired
+private TeacherCourseHistoryRepository historyRepository;
+
     // Get all evaluations
     @GetMapping("/evaluations")
     public ResponseEntity<List<StudentEvaluation>> getAllEvaluations() {
@@ -32,11 +41,34 @@ public class StudentEvaluationController {
     }
     
     // Get evaluations by student
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<StudentEvaluation>> getEvaluationsByStudent(@PathVariable Long studentId) {
-        List<StudentEvaluation> evaluations = evaluationRepository.findByStudentId(studentId);
-        return ResponseEntity.ok(evaluations);
+  @GetMapping("/student/{studentId}")
+public ResponseEntity<List<Map<String, Object>>> getEvaluationsByStudent(
+        @PathVariable Long studentId) {
+
+    List<StudentEvaluation> list =
+        evaluationRepository.findByStudentId(studentId);
+
+    List<Map<String, Object>> result = new java.util.ArrayList<>();
+
+    for (StudentEvaluation e : list) {
+
+        TeacherCourseHistory h =
+            historyRepository.findLatestActiveAssignment(
+                e.getTeacherId(), e.getCourseId()
+            );
+
+        result.add(Map.of(
+            "courseId", e.getCourseId(),
+            "courseName", h != null ? h.getCourse().getName() : "Course",
+            "overallRating", e.getOverallRating(),
+            "isSubmitted", e.getIsSubmitted(),
+            "weekStart", e.getWeekStart()
+        ));
     }
+
+    return ResponseEntity.ok(result);
+}
+
     
     // Get evaluations by teacher
     @GetMapping("/teacher/{teacherId}")
@@ -61,13 +93,23 @@ public class StudentEvaluationController {
     
     // Check if evaluation exists
     @GetMapping("/exists")
-    public ResponseEntity<Map<String, Boolean>> checkEvaluationExists(
+    public ResponseEntity checkEvaluationExists(
             @RequestParam Long teacherId,
             @RequestParam Long studentId,
             @RequestParam Long courseId) {
-        
-        boolean exists = evaluationRepository.existsByTeacherAndStudentAndCourse(teacherId, studentId, courseId);
-        return ResponseEntity.ok(Map.of("exists", exists));
+        // 🔥 WEEK-BASED EXIST CHECK
+LocalDate weekStart = LocalDate.now()
+    .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+
+boolean exists =
+    evaluationRepository.existsByTeacherIdAndStudentIdAndCourseIdAndWeekStart(
+        teacherId, studentId, courseId, weekStart);
+
+return ResponseEntity.ok(Map.of(
+    "exists", exists,
+    "weekStart", weekStart
+));
+
     }
     
     // Create new evaluation
@@ -77,16 +119,23 @@ public class StudentEvaluationController {
             @RequestParam Long studentId,
             @RequestParam Long courseId) {
         
-        // Check if already exists
-        if (evaluationRepository.existsByTeacherAndStudentAndCourse(teacherId, studentId, courseId)) {
-            return ResponseEntity.badRequest().body(null);
-        }
-        
-        StudentEvaluation evaluation = new StudentEvaluation();
-        evaluation.setTeacherId(teacherId);
-        evaluation.setStudentId(studentId);
-        evaluation.setCourseId(courseId);
-        evaluation.setIsSubmitted(false);
+     // 🔥 WEEK-BASED CREATE BLOCK
+LocalDate weekStart = LocalDate.now()
+    .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+
+if (evaluationRepository.existsByTeacherIdAndStudentIdAndCourseIdAndWeekStart(
+        teacherId, studentId, courseId, weekStart)) {
+
+    return ResponseEntity.badRequest().body(null);
+}
+
+StudentEvaluation evaluation = new StudentEvaluation();
+evaluation.setTeacherId(teacherId);
+evaluation.setStudentId(studentId);
+evaluation.setCourseId(courseId);
+evaluation.setWeekStart(weekStart);   // 🔥 REQUIRED
+evaluation.setIsSubmitted(false);
+
         
         StudentEvaluation saved = evaluationRepository.save(evaluation);
         return ResponseEntity.ok(saved);
@@ -147,4 +196,5 @@ public class StudentEvaluationController {
         }
         return ResponseEntity.notFound().build();
     }
+    
 }

@@ -9,14 +9,9 @@ function initStudentPage() {
     const searchStudent = document.getElementById("searchStudent");
     const studentPanel = document.getElementById("studentPanel");
     const facultySelect = document.getElementById("faculty");
-    // ===== Batch Dropdown =====
-    const batchSelect = document.getElementById("batch");
-    const currentYear = new Date().getFullYear();
-    if (!studentForm || !submitStudentBtn || !batchSelect || !facultySelect) return;
-    batchSelect.innerHTML = `<option value="">-- Select Batch --</option>`;
-    for (let y = currentYear; y >= currentYear - 10; y--) {
-        batchSelect.innerHTML += `<option value="${y}">${y}</option>`;
-    }
+   const batchSelect = document.getElementById("batch");
+loadBatchesForStudent();   // 🔥 REAL batch loader
+
 
     loadStudents();
     loadStatistics();
@@ -324,7 +319,9 @@ async function editStudent(id) {
         document.getElementById("username").value = s.username;
         document.getElementById("address").value = s.address || "";
         document.getElementById("contact").value = s.contact;
-        document.getElementById("batch").value = s.batch;
+       await loadBatchesForStudent(s.batchLabel);
+
+
         document.getElementById("email").value = s.email;
 
         // Hide password fields
@@ -484,7 +481,8 @@ function resetStudentForm() {
     
     // Load programs
     loadPrograms();
-    
+    loadBatchesForStudent();
+
     // Enable student ID field
     const studentIdInput = document.getElementById("studentId");
     studentIdInput.disabled = false;
@@ -569,6 +567,38 @@ document.querySelector(".modal-close").onclick = () => {
     editingStudentId = null;
     resetStudentForm();
 };
+async function loadBatchesForStudent(selectedBatch = null) {
+    try {
+        const res = await fetch(`${STUDENT_API_BASE_URL}/admin/batches`);
+        if (!res.ok) throw new Error("Failed to load batches");
+
+        const batches = await res.json();
+
+        const batchSelect = document.getElementById("batch");
+        batchSelect.innerHTML = `<option value="">-- Select Batch --</option>`;
+
+        // ONLY ACTIVE batches
+        const activeBatches = batches.filter(b => b.active === true);
+
+        activeBatches.forEach(b => {
+            const label = `${b.year} ${b.term}`;  // 👈 matches DB label
+            const option = document.createElement("option");
+            option.value = label;
+            option.textContent = label;
+            batchSelect.appendChild(option);
+        });
+
+        if (selectedBatch) {
+            batchSelect.value = selectedBatch;
+        }
+
+        console.log("Loaded batches for student:", activeBatches.length);
+
+    } catch (err) {
+        console.error("Failed to load batches:", err);
+        showMessage("Failed to load batches", "error");
+    }
+}
 
 // ================= RUN INIT =================
 window.initStudentPage = initStudentPage;// Add this test function at the bottom of your file

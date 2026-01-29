@@ -434,3 +434,28 @@ textarea {
     gap: 10px;          /* <-- space between checkbox and button */
     justify-content: flex-start;
 }
+
+.btn-complete {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(34, 197, 94, 0.25);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-complete:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+}
+
+.btn-complete.locked {
+    background: #e1e1e1;
+    color: #777;
+    cursor: not-allowed;
+    box-shadow: none;
+}

@@ -9,7 +9,14 @@ import java.util.List;
 @JsonIgnoreProperties(
     value = {"semester","teachers", "sessionPlans"},
     allowSetters = true
-)@Table(name = "course")
+)@Table(
+  name = "course",
+  uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"code", "semester_id"}),
+    @UniqueConstraint(columnNames = {"name", "semester_id"})
+  }
+)
+
 public class Course {
     
     @Id

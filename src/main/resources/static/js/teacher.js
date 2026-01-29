@@ -124,7 +124,9 @@ function openAddTeacher() {
     
     // Load programs for dropdown
     loadTeacherPrograms();
-    
+    // Load qualifications dropdown
+loadQualificationsForTeacher();
+
     // Update UI
     setTextContent("#teacherPanel .modal-header h2", "Add Teacher");
     setTextContent("#submitTeacherBtn", "Submit");
@@ -157,7 +159,7 @@ async function editTeacher(id) {
         setValue("username", teacher.username);
         setValue("address", teacher.address);
         setValue("contact", teacher.contact);
-        setValue("qualification", teacher.qualification);
+       
         setValue("experience", teacher.experience);
         setValue("email", teacher.email);
         
@@ -170,7 +172,9 @@ async function editTeacher(id) {
         
         // Load programs and select the current one
         await loadTeacherPrograms();
-        
+        // Load qualifications and select teacher's one
+loadQualificationsForTeacher(teacher.qualification);
+
         // Set program after loading (use setTimeout to ensure dropdown is populated)
         if (teacher.program && teacher.program.id) {
             setTimeout(() => {
@@ -350,6 +354,44 @@ async function loadTeachers() {
         console.error("Load teachers error:", error);
     }
 }
+// ================= LOAD QUALIFICATIONS FOR TEACHER =================
+async function loadQualificationsForTeacher(selected = null) {
+    try {
+        const res = await fetch(`${TEACHER_API_BASE_URL}/admin/qualifications`);
+        if (!res.ok) throw new Error("Failed to load qualifications");
+
+        const list = await res.json();
+
+        const select = document.getElementById("qualification");
+        if (!select) {
+            console.error("Qualification select not found!");
+            return;
+        }
+
+        // Reset dropdown
+        select.innerHTML = `<option value="">-- Select Qualification --</option>`;
+
+        // Add only ACTIVE qualifications
+        list.filter(q => q.active).forEach(q => {
+            const opt = document.createElement("option");
+            opt.value = q.name;        // or q.id if you want FK later
+            opt.textContent = q.name;
+            select.appendChild(opt);
+        });
+
+        // Preselect for edit mode
+        if (selected) {
+            select.value = selected;
+        }
+
+        console.log("Loaded qualifications:", list.length);
+
+    } catch (err) {
+        console.error("Error loading qualifications:", err);
+        showTeacherMessage("Failed to load qualifications", "error");
+    }
+}
+
 
 // ================= LOAD STATS =================
 async function loadTeacherStatistics() {

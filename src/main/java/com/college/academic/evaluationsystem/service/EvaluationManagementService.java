@@ -5,6 +5,9 @@ import com.college.academic.evaluationsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 import java.util.List;
 import java.util.Map;
@@ -87,51 +90,60 @@ public class EvaluationManagementService {
     /* ===================== EVALUATION SUBMIT ===================== */
 
     @Transactional
-    public StudentEvaluation submitEvaluation(
-            Long teacherId,
-            Long studentId,
-            Long courseId,
-            Map<String, Object> responses,
-            Double overallRating,
-            String predictedGrade
-    ) {
+public StudentEvaluation submitEvaluation(
+        Long teacherId,
+        Long studentId,
+        Long courseId,
+        Map<String, Object> responses,
+        Double overallRating,
+        String predictedGrade
+) {
 
-        if (evaluationRepository.existsByTeacherAndStudentAndCourse(
-                teacherId, studentId, courseId)) {
-            throw new IllegalStateException("Already evaluated");
-        }
+    // 🔥 NEW: week-based logic
+    LocalDate weekStart = LocalDate.now()
+        .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
 
-        StudentEvaluation evaluation = new StudentEvaluation();
-        evaluation.setTeacherId(teacherId);
-        evaluation.setStudentId(studentId);
-        evaluation.setCourseId(courseId);
-        evaluation.setIsSubmitted(false);
-        evaluationRepository.save(evaluation);
+    if (evaluationRepository
+        .existsByTeacherIdAndStudentIdAndCourseIdAndWeekStart(
+            teacherId, studentId, courseId, weekStart)) {
 
-        for (Map.Entry<String, Object> entry : responses.entrySet()) {
-            try {
-                Long parameterId = Long.parseLong(entry.getKey());
-                Object value = entry.getValue();
-
-                EvaluationParameter parameter = parameterRepository.findById(parameterId)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid parameter"));
-
-                EvaluationResponse response = new EvaluationResponse();
-                response.setEvaluation(evaluation);
-                response.setParameter(parameter);
-                response.setResponseValue(value);
-
-                responseRepository.save(response);
-
-            } catch (Exception ignored) {
-                // skip invalid entries
-            }
-        }
-
-        evaluation.setOverallRating(overallRating);
-        evaluation.setPredictedGrade(predictedGrade);
-        evaluation.submitEvaluation();
-
-        return evaluationRepository.save(evaluation);
+        throw new IllegalStateException("Already evaluated this week");
     }
+
+    StudentEvaluation evaluation = new StudentEvaluation();
+    evaluation.setTeacherId(teacherId);
+    evaluation.setStudentId(studentId);
+    evaluation.setCourseId(courseId);
+    evaluation.setWeekStart(weekStart);   // 🔥 REQUIRED
+    evaluation.setIsSubmitted(false);
+
+    evaluationRepository.save(evaluation);
+
+    for (Map.Entry<String, Object> entry : responses.entrySet()) {
+        try {
+            Long parameterId = Long.parseLong(entry.getKey());
+            Object value = entry.getValue();
+
+            EvaluationParameter parameter = parameterRepository.findById(parameterId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid parameter"));
+
+            EvaluationResponse response = new EvaluationResponse();
+            response.setEvaluation(evaluation);
+            response.setParameter(parameter);
+            response.setResponseValue(value);
+
+            responseRepository.save(response);
+
+        } catch (Exception ignored) {
+            // skip invalid entries
+        }
+    }
+
+    evaluation.setOverallRating(overallRating);
+    evaluation.setPredictedGrade(predictedGrade);
+    evaluation.submitEvaluation();
+
+    return evaluationRepository.save(evaluation);
+}
+
 }

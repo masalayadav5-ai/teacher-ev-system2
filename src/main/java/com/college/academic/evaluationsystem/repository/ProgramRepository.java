@@ -14,7 +14,10 @@ public interface ProgramRepository extends JpaRepository<Program, Long> {
     
     // Find program by name
     Optional<Program> findByName(String name);
-    
+  boolean existsByNameIgnoreCase(String name);
+
+boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+
     // Find program by code
     Optional<Program> findByCode(String code);
     

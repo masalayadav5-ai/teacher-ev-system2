@@ -2,7 +2,9 @@
 let selectedTeacherId = null;
 let currentProgramId = null;
 let currentSemesterId = null;
-window.preventAutoLoad = false; 
+let editingQualificationId = null;
+window.preventAutoLoad = false;
+
 // Initialize Admin Management Page
 function isAdminManagementPageLoaded() {
     return document.getElementById("programsTable") !== null;
@@ -25,17 +27,18 @@ function initAdminManagement() {
         setTimeout(initAdminManagement, 100);
         return;
     }
-protectAdminPage();
+    protectAdminPage();
     // ✅ NOW SAFE TO ACCESS DOM
     loadAllPrograms();
     loadProgramsForFilter();
     loadOverviewStats();
-
+    loadBatches();
     setupEventListeners();
 }
 
 function protectAdminPage() {
-    if (!window.currentUser) return;
+    if (!window.currentUser)
+        return;
     if (window.currentUser.role !== "ADMIN") {
         Swal.fire("Access Denied", "Admins only", "error");
         if (typeof loadPage === "function") {
@@ -67,12 +70,20 @@ function confirmAction(title, text, onConfirm) {
 function setupEventListeners() {
     // Close modals when clicking outside
     document.addEventListener('click', function (e) {
-        const modals = ['programModal', 'semesterModal', 'courseModal'];
+       const modals = [
+  'programModal',
+  'semesterModal',
+  'courseModal',
+  'batchModal',
+  'qualificationModal'
+];
+
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
-            if (modal && e.target === modal && !modal.classList.contains('hidden')) {
-                modal.classList.add('hidden');
-            }
+            if (modal && e.target === modal && modal.classList.contains('show')) {
+    modal.classList.remove('show');
+}
+
         });
     });
 }
@@ -105,6 +116,14 @@ function showTab(tabName, event) {
         case 'courses':
             loadCoursesBySemester();
             break;
+        case 'batches':
+            loadBatches();
+            break;
+
+        case 'qualifications':
+            loadQualifications();
+            break;
+
         case 'teacher-assignments':
             // Only load teachers if teacherProgramFilter is not already set
             if (!document.getElementById('teacherProgramFilter').value) {
@@ -219,6 +238,8 @@ function openAddProgramModal(program = null) {
         document.getElementById('programForm').reset();
         document.getElementById('programId').value = '';
     }
+const err = document.getElementById("programModalError");
+if (err) err.classList.add("hidden");
 
     // USE THIS:
     modal.classList.add('show');
@@ -227,52 +248,93 @@ function openAddProgramModal(program = null) {
 // Close Program Modal
 function closeProgramModal() {
     document.getElementById('programModal').classList.remove('show');
+    const toast = document.getElementById("modalToast");
+if (toast) toast.style.display = "none";
+
 }
+// 🔍 Check if program already exists (frontend pre-check)
+async function programExists(name, excludeId = null) {
+  const res = await fetch('/api/admin/programs');
+  if (!res.ok) return false;
+
+  const programs = await res.json();
+
+  return programs.some(p =>
+    p.name.toLowerCase() === name.toLowerCase() &&
+    (!excludeId || p.id != excludeId)
+  );
+}
+
+
 
 // Save Program
 async function saveProgram() {
-    const programId = document.getElementById('programId').value;
-    const programData = {
-        code: document.getElementById('programCode').value.trim(),
-        name: document.getElementById('programName').value.trim(),
-        description: document.getElementById('programDescription').value.trim(),
-        active: document.getElementById('programStatus').value === 'true'
-    };
+  const programId = document.getElementById('programId').value;
 
-    // Validation
-    if (!programData.code || !programData.name) {
-        alert('Please fill in all required fields');
+  const programData = {
+    code: document.getElementById('programCode').value.trim(),
+    name: document.getElementById('programName').value.trim(),
+    description: document.getElementById('programDescription').value.trim(),
+    active: document.getElementById('programStatus').value === 'true'
+  };
+
+  // Validation
+  if (!programData.code || !programData.name) {
+    showModalToast("Please fill in all required fields", "error");
+    return;
+  }
+
+  // 🔍 FRONTEND DUPLICATE CHECK (WORKS FOR EDIT TOO)
+const exists = await programExists(
+  programData.name,
+  programId
+);
+
+
+  if (exists) {
+    showModalToast("Program with same code or name already exists", "error");
+    return; // ❌ STOP → no request → no red console error
+  }
+
+  // ⬇️ Only send request if unique
+  try {
+    const url = programId
+      ? `/api/admin/programs/${programId}`
+      : `/api/admin/programs`;
+
+    const method = programId ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(programData)
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      if (response.status === 400 && result.message) {
+        showModalToast(result.message, "error");
         return;
+      }
+      throw new Error("Unexpected server error");
     }
 
-    try {
-        const url = programId ? `/api/admin/programs/${programId}` : '/api/admin/programs';
-        const method = programId ? 'PUT' : 'POST';
+    showSuccess(programId
+      ? 'Program updated successfully!'
+      : 'Program added successfully!');
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(programData)
-        });
+    closeProgramModal();
+    loadAllPrograms();
+    loadProgramsForFilter();
+    loadOverviewStats();
 
-        if (!response.ok)
-            throw new Error('Failed to save program');
-
-        const savedProgram = await response.json();
-        showSuccess(programId ? 'Program updated successfully!' : 'Program added successfully!');
-
-        closeProgramModal();
-        loadAllPrograms();
-        loadProgramsForFilter();
-        loadOverviewStats();
-
-    } catch (error) {
-        console.error('Error saving program:', error);
-        showError('programModal', 'Failed to save program');
-    }
+  } catch (error) {
+    showModalToast("Server error while saving program", "error");
+  }
 }
+
+
 
 // Edit Program
 // Quick test function
@@ -293,39 +355,30 @@ function testModal() {
 
 // Test on edit click
 async function editProgram(programId) {
-    try {
-        console.log('Editing program ID:', programId);
-        const response = await fetch(`/api/admin/programs/${programId}`);
+  try {
+    // Hide old modal error
+    const err = document.getElementById("programModalError");
+    if (err) err.classList.add("hidden");
 
-        if (!response.ok) {
-            console.warn('Program fetch failed, using mock program');
-            const mockProgram = {
-                id: programId,
-                code: 'TEST' + programId,
-                name: 'Test Program ' + programId,
-                description: 'Test description',
-                active: true
-            };
-            openAddProgramModal(mockProgram);
-            return;
-        }
+    // 🎯 Use single-program endpoint (now exists in backend)
+    const response = await fetch(`/api/admin/programs/${programId}`);
 
-        const program = await response.json();
-        console.log('Fetched program:', program);
-        openAddProgramModal(program);
-
-    } catch (error) {
-        console.error('Error fetching program:', error);
-        const mockProgram = {
-            id: programId,
-            code: 'TEST',
-            name: 'Test Program',
-            description: 'Test',
-            active: true
-        };
-        openAddProgramModal(mockProgram);
+    if (!response.ok) {
+      showModalToast("Failed to load program details", "error");
+      return;
     }
+
+    const program = await response.json();
+
+    // ✅ Open modal with real data
+    openAddProgramModal(program);
+
+  } catch (error) {
+    showModalToast("Network error while loading program", "error");
+  }
 }
+
+
 
 // Confirm Delete Program
 function confirmDeleteProgram(programId, programName) {
@@ -391,22 +444,22 @@ async function loadProgramsForTeacherAssignmentFilter() {
             console.error('Failed to load programs for teacher assignment filter');
             throw new Error('Failed to load programs');
         }
-        
+
         const programs = await response.json();
         console.log('Programs loaded for teacher assignment filter:', programs.length, 'programs');
         const courseProgramForAssignFilter = document.getElementById('courseProgramForAssignFilter');
-        
+
         if (courseProgramForAssignFilter) {
             console.log('Found courseProgramForAssignFilter, current options:', courseProgramForAssignFilter.options.length);
-            
+
             // Save current value if set
             const currentValue = courseProgramForAssignFilter.value;
-            
+
             // Clear existing options except the first one
             while (courseProgramForAssignFilter.options.length > 1) {
                 courseProgramForAssignFilter.remove(1);
             }
-            
+
             console.log('Adding program options...');
             // Add program options
             programs.forEach(program => {
@@ -415,12 +468,12 @@ async function loadProgramsForTeacherAssignmentFilter() {
                 option.textContent = `${program.code} - ${program.name}`;
                 courseProgramForAssignFilter.appendChild(option);
             });
-            
+
             // Restore value if it still exists
             if (currentValue) {
                 courseProgramForAssignFilter.value = currentValue;
             }
-            
+
             console.log('Total options after adding:', courseProgramForAssignFilter.options.length);
         } else {
             console.error('courseProgramForAssignFilter not found in DOM');
@@ -636,47 +689,63 @@ function closeSemesterModal() {
 
 // Save Semester
 async function saveSemester() {
-    const semesterId = document.getElementById('semesterId').value;
-    const semesterData = {
-        name: document.getElementById('semesterName').value.trim(),
-        active: document.getElementById('semesterStatus').value === 'true',
-        program: {
-            id: parseInt(document.getElementById('semesterProgram').value)
-        }
-    };
+  const semesterId = document.getElementById('semesterId').value;
+  const name = document.getElementById('semesterName').value.trim();
+  const programId = parseInt(document.getElementById('semesterProgram').value);
+  const active = document.getElementById('semesterStatus').value === 'true';
 
-    // Validation
-    if (!semesterData.name || !semesterData.program.id) {
-        alert('Please fill in all required fields');
-        return;
+  if (!name || !programId) {
+    showModalToast("Please fill in all required fields", "error");
+    return;
+  }
+
+  // 🔍 FRONTEND DUPLICATE CHECK
+  const exists = await semesterExists(name, programId, semesterId);
+  if (exists) {
+    showModalToast("Semester already exists in this program", "error");
+    return;
+  }
+
+  const payload = {
+    name,
+    active,
+    program: { id: programId }
+  };
+
+  try {
+    const url = semesterId
+      ? `/api/admin/semesters/${semesterId}`
+      : '/api/admin/semesters';
+
+    const method = semesterId ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      showModalToast(result.message || "Server error", "error");
+      return;
     }
 
-    try {
-        const url = semesterId ? `/api/admin/semesters/${semesterId}` : '/api/admin/semesters';
-        const method = semesterId ? 'PUT' : 'POST';
+    showSuccess(semesterId
+      ? 'Semester updated successfully!'
+      : 'Semester added successfully!');
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(semesterData)
-        });
+    closeSemesterModal();
+    loadSemestersByProgram();
+    loadOverviewStats();
 
-        if (!response.ok)
-            throw new Error('Failed to save semester');
-
-        showSuccess(semesterId ? 'Semester updated successfully!' : 'Semester added successfully!');
-
-        closeSemesterModal();
-        loadSemestersByProgram();
-        loadOverviewStats();
-
-    } catch (error) {
-        console.error('Error saving semester:', error);
-        showError('semesterModal', 'Failed to save semester');
-    }
+  } catch (error) {
+    console.error(error);
+    showModalToast("Server error while saving semester", "error");
+  }
 }
+
 
 // Edit Semester
 async function editSemester(semesterId) {
@@ -739,12 +808,12 @@ function viewCourses(semesterId) {
         if (option.textContent.includes(programName)) {
             currentProgramId = option.value;
             programSelect.value = currentProgramId;
-            
+
             // Store in sessionStorage so assignTeachersToCourse can access it
             sessionStorage.setItem('lastSelectedProgram', currentProgramId);
             sessionStorage.setItem('lastSelectedSemester', semesterId);
             console.log('Stored in sessionStorage - program:', currentProgramId, 'semester:', semesterId);
-            
+
             loadSemestersForCourses();
 
             // After loading semesters, select the semester
@@ -792,7 +861,7 @@ async function loadSemestersForCourses() {
 async function loadCoursesBySemester() {
     const semesterId = document.getElementById('courseSemesterFilter').value;
     const programId = document.getElementById('courseProgramFilter').value;
-    
+
     if (!semesterId) {
         document.getElementById('coursesTable').innerHTML = `
             <tr>
@@ -810,7 +879,7 @@ async function loadCoursesBySemester() {
         sessionStorage.setItem('lastSelectedProgram', programId);
         sessionStorage.setItem('lastSelectedSemester', semesterId);
         console.log('Stored current filters for teacher assignments - Program:', programId, 'Semester:', semesterId);
-        
+
         // Also store in global variables for immediate access
         currentProgramId = programId;
         currentSemesterId = semesterId;
@@ -952,50 +1021,70 @@ function closeCourseModal() {
 
 // Save Course
 async function saveCourse() {
-    const courseId = document.getElementById('courseId').value;
-    const courseData = {
-        code: document.getElementById('courseCode').value.trim(),
-        name: document.getElementById('courseName').value.trim(),
-        description: document.getElementById('courseDescription').value.trim(),
-        credits: parseInt(document.getElementById('courseCredits').value) || 3,
-        active: document.getElementById('courseStatus').value === 'true',
-        semester: {
-            id: parseInt(document.getElementById('courseSemester').value)
-        }
-    };
+  const courseId = document.getElementById('courseId').value;
 
-    // Validation
-    if (!courseData.code || !courseData.name || !courseData.semester.id) {
-        alert('Please fill in all required fields');
-        return;
+  const code = document.getElementById('courseCode').value.trim();
+  const name = document.getElementById('courseName').value.trim();
+  const description = document.getElementById('courseDescription').value.trim();
+  const credits = parseInt(document.getElementById('courseCredits').value) || 3;
+  const semesterId = parseInt(document.getElementById('courseSemester').value);
+  const active = document.getElementById('courseStatus').value === 'true';
+
+  if (!code || !name || !semesterId) {
+    showModalToast("Please fill in all required fields", "error");
+    return;
+  }
+
+  // 🔍 FRONTEND DUPLICATE CHECK
+  const exists = await courseExists(code, name, semesterId, courseId);
+  if (exists) {
+    showModalToast("Course with same code or name already exists in this semester", "error");
+    return;
+  }
+
+  const payload = {
+    code,
+    name,
+    description,
+    credits,
+    active,
+    semester: { id: semesterId }
+  };
+
+  try {
+    const url = courseId
+      ? `/api/admin/courses/${courseId}`
+      : `/api/admin/courses`;
+
+    const method = courseId ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      showModalToast(result.message || "Server error", "error");
+      return;
     }
 
-    try {
-        const url = courseId ? `/api/admin/courses/${courseId}` : '/api/admin/courses';
-        const method = courseId ? 'PUT' : 'POST';
+    showSuccess(courseId
+      ? 'Course updated successfully!'
+      : 'Course added successfully!');
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(courseData)
-        });
+    closeCourseModal();
+    loadCoursesBySemester();
+    loadOverviewStats();
 
-        if (!response.ok)
-            throw new Error('Failed to save course');
-
-        showSuccess(courseId ? 'Course updated successfully!' : 'Course added successfully!');
-
-        closeCourseModal();
-        loadCoursesBySemester();
-        loadOverviewStats();
-
-    } catch (error) {
-        console.error('Error saving course:', error);
-        showError('courseModal', 'Failed to save course');
-    }
+  } catch (error) {
+    console.error(error);
+    showModalToast("Server error while saving course", "error");
+  }
 }
+
 
 // Edit Course
 async function editCourse(courseId) {
@@ -1016,46 +1105,46 @@ async function editCourse(courseId) {
 // Assign Teachers to Course
 async function assignTeachersToCourse(courseId) {
     console.log('assignTeachersToCourse called with courseId:', courseId);
-    
+
     try {
         // First, get the course details to know its program and semester
         const response = await fetch(`/api/admin/courses/${courseId}`);
-        
+
         let programId, semesterId;
-        
+
         if (response.ok) {
             const course = await response.json();
             console.log('Course data from API:', course);
-            
+
             // DEBUG: Check the actual structure of the course object
             console.log('Course object keys:', Object.keys(course));
             console.log('Course semester property:', course.semester);
-            
+
             // Try different ways to get program and semester
             // Option 1: Check if semester is directly on course
             if (course.semester) {
                 semesterId = course.semester.id || course.semester;
                 console.log('Found semesterId from course.semester:', semesterId);
-                
+
                 // Check if semester has program property
                 if (course.semester.program) {
                     programId = course.semester.program.id || course.semester.program;
                     console.log('Found programId from course.semester.program:', programId);
                 }
             }
-            
+
             // Option 2: Check if there's a programId directly on course
             if (!programId && course.programId) {
                 programId = course.programId;
                 console.log('Found programId from course.programId:', programId);
             }
-            
+
             // Option 3: Check if there's a program object on course
             if (!programId && course.program) {
                 programId = course.program.id || course.program;
                 console.log('Found programId from course.program:', programId);
             }
-            
+
             console.log('Final extracted programId:', programId, 'semesterId:', semesterId);
         } else {
             // If API fails, use stored values from sessionStorage
@@ -1064,7 +1153,7 @@ async function assignTeachersToCourse(courseId) {
             semesterId = sessionStorage.getItem('lastSelectedSemester');
             console.log('From sessionStorage - programId:', programId, 'semesterId:', semesterId);
         }
-        
+
         // If still no programId/semesterId, get from current filters
         if (!programId || !semesterId) {
             console.log('Getting program/semester from current filters');
@@ -1081,7 +1170,7 @@ async function assignTeachersToCourse(courseId) {
 
         // Set a flag to prevent auto-loading in showTab
         window.preventAutoLoad = true;
-        
+
         // Switch to teacher assignments tab
         console.log('Switching to teacher-assignments tab');
         showTab('teacher-assignments');
@@ -1102,7 +1191,7 @@ async function assignTeachersToCourse(courseId) {
         const courseProgramForAssignFilter = document.getElementById('courseProgramForAssignFilter');
         console.log('courseProgramForAssignFilter element:', courseProgramForAssignFilter);
         console.log('courseProgramForAssignFilter options before:', courseProgramForAssignFilter ? courseProgramForAssignFilter.options.length : 'null');
-        
+
         if (courseProgramForAssignFilter && programId) {
             // Check if the option exists in the dropdown
             let optionExists = false;
@@ -1112,12 +1201,12 @@ async function assignTeachersToCourse(courseId) {
                     break;
                 }
             }
-            
+
             if (!optionExists) {
                 console.log('Program option not found, reloading programs...');
                 await loadProgramsForTeacherAssignmentFilter();
             }
-            
+
             console.log('Setting courseProgramForAssignFilter value to:', programId);
             courseProgramForAssignFilter.value = programId;
             console.log('Current value after setting:', courseProgramForAssignFilter.value);
@@ -1125,7 +1214,7 @@ async function assignTeachersToCourse(courseId) {
             // Trigger change event to load semesters
             console.log('Triggering change event on courseProgramForAssignFilter');
             courseProgramForAssignFilter.dispatchEvent(new Event('change'));
-            
+
             // Wait for semesters to load, then set semester
             setTimeout(() => {
                 const courseSemesterForAssignFilter = document.getElementById('courseSemesterForAssignFilter');
@@ -1134,7 +1223,7 @@ async function assignTeachersToCourse(courseId) {
                     console.log('Setting semester filter to:', semesterId);
                     courseSemesterForAssignFilter.value = semesterId;
                     console.log('Current semester filter value:', courseSemesterForAssignFilter.value);
-                    
+
                     // Trigger change to load available courses
                     setTimeout(() => {
                         courseSemesterForAssignFilter.dispatchEvent(new Event('change'));
@@ -1343,7 +1432,8 @@ async function loadAvailableCourses() {
 
     try {
         const res = await fetch(`/api/admin/semesters/${semesterId}/unassigned-courses`);
-        if (!res.ok) throw new Error();
+        if (!res.ok)
+            throw new Error();
 
         const courses = await res.json();
         renderAvailableCourses(courses);
@@ -1358,14 +1448,16 @@ async function loadAvailableCourses() {
 // Load assigned courses for selected teacher
 async function loadAssignedCourses() {
     const semesterId = document.getElementById('courseSemesterForAssignFilter').value;
-    if (!semesterId) return;
+    if (!semesterId)
+        return;
 
     try {
 
         // MODE 1: Teacher selected → teacher-only
         if (selectedTeacherId) {
             const res = await fetch(`/api/admin/teachers/${selectedTeacherId}/courses`);
-            if (!res.ok) throw new Error();
+            if (!res.ok)
+                throw new Error();
 
             const courses = await res.json();
             renderAssignedCoursesTeacherOnly(courses);
@@ -1374,7 +1466,8 @@ async function loadAssignedCourses() {
         // MODE 2: No teacher selected → global assigned list
         else {
             const res = await fetch(`/api/admin/semesters/${semesterId}/assigned-courses`);
-            if (!res.ok) throw new Error();
+            if (!res.ok)
+                throw new Error();
 
             const courses = await res.json();
             renderAssignedCoursesGlobal(courses);
@@ -1569,9 +1662,12 @@ async function loadOverviewStats() {
         let courses = [];
         let assignmentsCount = 0;
 
-        if (programsRes.ok) programs = await programsRes.json();
-        if (semestersRes.ok) semesters = await semestersRes.json();
-        if (coursesRes.ok) courses = await coursesRes.json();
+        if (programsRes.ok)
+            programs = await programsRes.json();
+        if (semestersRes.ok)
+            semesters = await semestersRes.json();
+        if (coursesRes.ok)
+            courses = await coursesRes.json();
         if (assignmentsRes.ok) {
             const data = await assignmentsRes.json();
             assignmentsCount = data.count || 0;
@@ -1738,4 +1834,291 @@ function showSuccess(message) {
 // Close modal
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('show');
+}
+
+// LOAD
+async function loadBatches() {
+    const res = await fetch('/api/admin/batches');
+    const batches = await res.json();
+
+    document.getElementById('batchesTable').innerHTML = batches.map(b => `
+    <tr>
+      <td>${b.id}</td>
+      <td>${b.year}</td>
+      <td>${b.term}</td>
+      <td>${b.active ? "Active" : "Inactive"}</td>
+      <td>
+        <button class="action-btn btn-edit" onclick='editBatch(${JSON.stringify(b)})'>
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn btn-delete" onclick="deleteBatch(${b.id})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// MODAL
+function openAddBatchModal() {
+    document.getElementById('batchId').value = '';
+    document.getElementById('batchModalTitle').textContent = 'Add Batch';
+    document.getElementById('batchModal').classList.add('show');
+     const err = document.getElementById("batchModalError");
+if (err) err.classList.add("hidden");
+
+}
+
+function closeBatchModal() {
+    document.getElementById('batchModal').classList.remove('show');
+}
+
+// SAVE
+async function saveBatch() {
+  const btn = document.querySelector("#batchModal .btn-primary");
+  btn.disabled = true;
+
+  try {
+    const id = document.getElementById("batchId").value;
+    const year = parseInt(document.getElementById("batchYear").value, 10);
+    const term = document.getElementById("batchTerm").value;
+    const active = document.getElementById("batchStatus").value === "true";
+
+    if (!year || !term) {
+      showModalToast("Year and term are required", "error");
+      btn.disabled = false;
+      return;
+    }
+
+    const payload = { year, term, active };
+
+    const url = id ? `/api/admin/batches/${id}` : `/api/admin/batches`;
+    const method = id ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    let data = {};
+    try { data = await res.json(); } catch (e) {}
+
+    if (!res.ok) {
+      showModalToast(data.message || "Batch already exists", "error");
+      btn.disabled = false;
+      return;
+    }
+
+    showSuccess("Batch saved successfully!");
+    closeBatchModal();
+    loadBatches();
+
+  } catch (err) {
+    console.error(err);
+    showModalToast("Server error while saving batch", "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+
+
+
+function editBatch(batch) {
+    document.getElementById('batchId').value = batch.id;
+    document.getElementById('batchYear').value = batch.year;
+    document.getElementById('batchTerm').value = batch.term;
+    document.getElementById('batchStatus').value = batch.active;
+    document.getElementById('batchModalTitle').textContent = 'Edit Batch';
+    document.getElementById('batchModal').classList.add('show');
+}
+
+async function deleteBatch(id) {
+    await fetch(`/api/admin/batches/${id}`, {method: "DELETE"});
+    loadBatches();
+}
+
+async function loadQualifications() {
+  const res = await fetch('/api/admin/qualifications');
+  const list = await res.json();
+
+  const tbody = document.getElementById("qualificationTableBody");
+  tbody.innerHTML = "";
+
+  list.forEach(q => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${q.id}</td>
+      <td>${q.name}</td>
+      <td>
+        <span class="status-badge ${q.active ? 'status-active' : 'status-inactive'}">
+          ${q.active ? "Active" : "Inactive"}
+        </span>
+      </td>
+      <td>
+        <div class="action-buttons">
+          <button class="action-btn btn-edit"
+                  onclick="editQualification(${q.id}, '${q.name}', ${q.active})"
+                  title="Edit">
+            <i class="fas fa-edit"></i>
+          </button>
+
+          <button class="action-btn btn-delete"
+                  onclick="deleteQualification(${q.id})"
+                  title="Delete">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+
+
+function openQualificationModal() {
+    editingQualificationId = null;
+    document.getElementById("qualificationModalTitle").innerText = "Add Qualification";
+    document.getElementById("qualificationId").value = "";
+    document.getElementById("qualificationName").value = "";
+    document.getElementById("qualificationStatus").value = "true";
+   const err = document.getElementById("qualificationModalError");
+if (err) err.classList.add("hidden");
+
+    document.getElementById("qualificationModal").classList.add("show");
+}
+
+
+// EDIT
+function editQualification(id, name, active) {
+    editingQualificationId = id;
+    document.getElementById("qualificationModalTitle").innerText = "Edit Qualification";
+    document.getElementById("qualificationId").value = id;
+    document.getElementById("qualificationName").value = name;
+    document.getElementById("qualificationStatus").value = active.toString();
+   document.getElementById("qualificationModal").classList.add("show");
+   const err = document.getElementById("qualificationModalError");
+if (err) err.classList.add("hidden");
+
+}
+
+function closeQualificationModal() {
+   document.getElementById("qualificationModal").classList.remove("show");
+}
+
+// SAVE
+async function saveQualification() {
+  const btn = document.querySelector("#qualificationModal .btn-primary");
+  btn.disabled = true;
+
+  try {
+    const name = document.getElementById("qualificationName").value.trim();
+    const active = document.getElementById("qualificationStatus").value === "true";
+
+    if (!name) {
+      showModalToast("Qualification name required", "error");
+      btn.disabled = false;
+      return;
+    }
+
+    const payload = { name, active };
+    const url = editingQualificationId
+      ? `/api/admin/qualifications/${editingQualificationId}`
+      : `/api/admin/qualifications`;
+
+    const method = editingQualificationId ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    let result = {};
+    try { result = await res.json(); } catch (e) {}
+
+    if (!res.ok) {
+      showModalToast(result.message || "Qualification already exists", "error");
+      btn.disabled = false;
+      return;
+    }
+
+    showModalToast("Qualification saved successfully!", "success");
+    closeQualificationModal();
+    loadQualifications();
+
+  } catch (err) {
+    console.error(err);
+    showModalToast("Server error", "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+
+// DELETE
+async function deleteQualification(id) {
+    const ok = await Swal.fire({
+        title: "Delete?",
+        text: "This qualification will be disabled",
+        icon: "warning",
+        showCancelButton: true
+    });
+
+    if (!ok.isConfirmed)
+        return;
+
+    await fetch(`/api/admin/qualifications/${id}`, {method: "DELETE"});
+    loadQualifications();
+}
+function showModalToast(msg, type = "error") {
+const box = document.querySelector(".modal-overlay.show .modal-toast");
+
+
+  if (!box) return;
+
+  box.textContent = msg;
+  box.className = `modal-toast ${type}`;
+  box.style.display = "block";
+
+  setTimeout(() => {
+    box.style.display = "none";
+  }, 3000);
+}
+
+// 🔍 Check if semester already exists in the selected program
+async function semesterExists(name, programId, excludeId = null) {
+  const res = await fetch(`/api/admin/programs/${programId}/semesters`);
+  if (!res.ok) return false;
+
+  const semesters = await res.json();
+
+  return semesters.some(s =>
+    s.name.toLowerCase() === name.toLowerCase() &&
+    (!excludeId || s.id != excludeId)
+  );
+}
+// 🔍 Check if course already exists in the selected semester
+async function courseExists(code, name, semesterId, excludeId = null) {
+  const res = await fetch(`/api/admin/semesters/${semesterId}/courses`);
+  if (!res.ok) return false;
+
+  const courses = await res.json();
+
+  return courses.some(c =>
+    (
+      c.code.toLowerCase() === code.toLowerCase() ||
+      c.name.toLowerCase() === name.toLowerCase()
+    ) &&
+    (!excludeId || c.id != excludeId)
+  );
+}
+function toggleSidebar() {
+  if (document.querySelector(".academic-management-page")) {
+    return; // ⛔ stop collapsing on this page
+  }
+
+  document.getElementById("sidebar").classList.toggle("collapsed");
 }

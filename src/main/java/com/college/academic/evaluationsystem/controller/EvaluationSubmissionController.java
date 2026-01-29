@@ -90,15 +90,26 @@ public class EvaluationSubmissionController {
             @RequestParam Long courseId) {
         
         try {
-            // Check if already evaluated
-            boolean exists = evaluationRepository.existsByTeacherAndStudentAndCourse(teacherId, studentId, courseId);
-            if (exists) {
-                return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "alreadyEvaluated", true,
-                    "message", "You have already evaluated this teacher for this course"
-                ));
-            }
+            // 🔥 NEW: week-based check
+LocalDate currentWeekStart = getCurrentWeekStart();
+
+boolean existsThisWeek =
+    evaluationRepository.existsByTeacherIdAndStudentIdAndCourseIdAndWeekStart(
+        teacherId,
+        studentId,
+        courseId,
+        currentWeekStart
+    );
+
+if (existsThisWeek) {
+    return ResponseEntity.ok(Map.of(
+        "success", false,
+        "alreadyEvaluated", true,
+        "reason", "Already evaluated this week",
+        "message", "You have already evaluated this teacher for this course this week"
+    ));
+}
+
             
             // Get form structure
             ResponseEntity<?> formStructureResponse = getEvaluationFormStructure();
@@ -131,103 +142,81 @@ public class EvaluationSubmissionController {
         }
     }
     
-    // Complete evaluation submission
-    @PostMapping("/complete-submit")
-    @Transactional
-    public ResponseEntity<Map<String, Object>> completeSubmit(
-            @RequestBody Map<String, Object> request) {
-        
-        try {
-            // Extract data
-            Long teacherId = Long.parseLong(request.get("teacherId").toString());
-            Long studentId = Long.parseLong(request.get("studentId").toString());
-            Long courseId = Long.parseLong(request.get("courseId").toString());
-            
-            Double overallRating = null;
-            if (request.get("overallRating") != null) {
-                overallRating = Double.parseDouble(request.get("overallRating").toString());
-            }
-            
-            String predictedGrade = (String) request.get("predictedGrade");
-            
-            @SuppressWarnings("unchecked")
-            Map<String, Object> responses = (Map<String, Object>) request.get("responses");
-            
-          
-            Optional<StudentEvaluation> lastEvalOpt =
-    evaluationRepository.findTopByTeacherIdAndStudentIdAndCourseIdOrderBySubmittedAtDesc(
-        teacherId, studentId, courseId
-    );
+@PostMapping("/complete-submit")
+@Transactional
+public ResponseEntity<Map<String, Object>> completeSubmit(
+        @RequestBody Map<String, Object> request) {
 
+    Long teacherId = Long.parseLong(request.get("teacherId").toString());
+    Long studentId = Long.parseLong(request.get("studentId").toString());
+    Long courseId  = Long.parseLong(request.get("courseId").toString());
 
+    Double overallRating = request.get("overallRating") != null
+            ? Double.parseDouble(request.get("overallRating").toString())
+            : null;
 
-            
-            // 1. Create evaluation
-        StudentEvaluation evaluation = new StudentEvaluation();
-evaluation.setTeacherId(teacherId);
-evaluation.setStudentId(studentId);
-evaluation.setCourseId(courseId);
-evaluation.setIsSubmitted(false);
+    String predictedGrade = (String) request.get("predictedGrade");
 
-// 🔥 FIX 1 (REQUIRED)
-evaluation.setWeekStart(getCurrentWeekStart());
+    @SuppressWarnings("unchecked")
+    Map<String, Object> responses =
+            (Map<String, Object>) request.get("responses");
 
-evaluation = evaluationRepository.save(evaluation);
+    LocalDate weekStart = getCurrentWeekStart();
 
-            
-            // 2. Save all responses
-            List<String> savedResponses = new ArrayList<>();
-            for (Map.Entry<String, Object> entry : responses.entrySet()) {
-                try {
-                    Long parameterId = Long.parseLong(entry.getKey());
-                    Object value = entry.getValue();
-                    
-                    EvaluationParameter parameter = parameterRepository.findById(parameterId)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid parameter ID: " + parameterId));
-                    
-                    EvaluationResponse response = new EvaluationResponse();
-                    response.setEvaluation(evaluation);
-                    response.setParameter(parameter);
-response.setResponseValue(String.valueOf(value));
-                    
-                    responseRepository.save(response);
-                    savedResponses.add(parameterId.toString());
-                    
-                } catch (NumberFormatException e) {
-                    // Skip invalid parameter IDs
-                    continue;
-                } catch (Exception e) {
-                    return ResponseEntity.badRequest().body(Map.of(
-                        "success", false,
-                        "message", "Error saving response for parameter " + entry.getKey() + ": " + e.getMessage()
-                    ));
-                }
-            }
-            
-            // 3. Update evaluation
-            evaluation.setOverallRating(overallRating);
-            evaluation.setPredictedGrade(predictedGrade);
-            evaluation.submitEvaluation();
-            evaluationRepository.save(evaluation);
-            
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Evaluation submitted successfully",
-                "evaluationId", evaluation.getId(),
-                "submittedAt", evaluation.getSubmittedAt(),
-                "responsesCount", savedResponses.size(),
-                "overallRating", overallRating,
-                "predictedGrade", predictedGrade
-            ));
-            
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "success", false,
-                "message", "Error submitting evaluation: " + e.getMessage()
-            ));
-        }
+    // ✅ duplicate check
+    if (evaluationRepository
+            .existsByTeacherIdAndStudentIdAndCourseIdAndWeekStart(
+                teacherId, studentId, courseId, weekStart)) {
+
+        return ResponseEntity.ok(Map.of(
+            "success", false,
+            "reason", "Already evaluated this week"
+        ));
     }
-    
+
+    // 1️⃣ Create evaluation
+    StudentEvaluation evaluation = new StudentEvaluation();
+    evaluation.setTeacherId(teacherId);
+    evaluation.setStudentId(studentId);
+    evaluation.setCourseId(courseId);
+    evaluation.setWeekStart(weekStart);
+    evaluation.setIsSubmitted(false);
+
+    evaluation = evaluationRepository.save(evaluation);
+
+    // 2️⃣ Save responses
+    for (Map.Entry<String, Object> entry : responses.entrySet()) {
+
+        Long parameterId = Long.parseLong(entry.getKey());
+        Object value = entry.getValue();
+
+        EvaluationParameter parameter =
+                parameterRepository.findById(parameterId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException("Invalid parameter ID: " + parameterId));
+
+        EvaluationResponse response = new EvaluationResponse();
+        response.setEvaluation(evaluation);
+        response.setParameter(parameter);
+        response.setResponseValue(value);
+
+        responseRepository.save(response); // 🔥 if fails → transaction FAILS loudly
+    }
+
+    // 3️⃣ Finalize
+    evaluation.setOverallRating(overallRating);
+    evaluation.setPredictedGrade(predictedGrade);
+    evaluation.submitEvaluation();
+
+    evaluationRepository.save(evaluation);
+
+    return ResponseEntity.ok(Map.of(
+        "success", true,
+        "evaluationId", evaluation.getId()
+    ));
+}
+
+
     // Check evaluation status
 @GetMapping("/status")
 public ResponseEntity<Map<String, Object>> checkEvaluationStatus(

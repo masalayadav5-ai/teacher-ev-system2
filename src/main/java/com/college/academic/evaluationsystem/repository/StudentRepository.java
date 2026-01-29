@@ -49,7 +49,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByProgramIdAndStatus(Long programId, String status);
     
     // NEW: Find students by batch
-    List<Student> findByBatch(String batch);
+    List<Student> findByBatchLabel(String batchLabel);
+
     
     // NEW: Find active students by program
     @Query("SELECT s FROM Student s WHERE s.program.id = :programId AND s.status = 'Active'")

@@ -143,7 +143,7 @@ function displayDays(days) {
                 ? `
                   <select class="method-input">
                     <option ${day.method==="Lecture"?"selected":""}>Lecture</option>
-                    <option ${day.method==="Discussion"?"selected":""}>Discussion</option>
+                    <option ${day.method==="Tutorial"?"selected":""}>Tutorial</option>
                     <option ${day.method==="Practical"?"selected":""}>Practical</option>
                   </select>
                   `
@@ -173,20 +173,24 @@ function displayDays(days) {
 
 
 
-           ${isTeacher ? `
+         ${isTeacher ? `
 <td>
   <div class="action-cell">
-    <input type="checkbox"
-      ${day.completed ? "checked" : ""}
-      ${isCompleted ? "disabled" : ""}>
 
-    <button class="btn-update ${isCompleted ? "locked" : ""}"
-      ${isCompleted ? "disabled" : ""}
+    <button class="btn-update"
       onclick="updateDay(${day.id}, this)">
-      ${isCompleted ? "Locked" : "Update"}
+      Update
     </button>
+
+    <button class="btn-complete ${isCompleted ? "locked" : ""}"
+      ${isCompleted ? "disabled" : ""}
+      onclick="completeDay(${day.id}, this)">
+      ${isCompleted ? "Completed" : "Complete"}
+    </button>
+
   </div>
 </td>` : ""}
+
 
 
         </tr>
@@ -263,7 +267,6 @@ function updateDay(dayId, btn) {
     const topic = row.querySelector(".topic-input")?.value;
     const description = row.querySelector(".desc-input")?.value;
     const method = row.querySelector(".method-input")?.value;
-    const completedDate = row.querySelector(".completed-date")?.value;
     const remarks = row.querySelector(".remarks")?.value;
 
     fetch(`/api/session-plans/day/${dayId}`, {
@@ -273,16 +276,61 @@ function updateDay(dayId, btn) {
             topic,
             description,
             method,
-            completedDate,
             remarks,
-            completed: true
+            completed: false   // ❗ DO NOT lock here
         })
     })
     .then(res => {
         if (!res.ok) throw new Error("Update failed");
         alert("Day updated successfully");
-        btn.disabled = true;
-        btn.textContent = "Locked";
+    })
+    .catch(err => alert(err.message));
+}
+
+function completeDay(dayId, btn) {
+    const row = btn.closest("tr");
+
+    const topic = row.querySelector(".topic-input")?.value;
+    const description = row.querySelector(".desc-input")?.value;
+    const method = row.querySelector(".method-input")?.value;
+    const remarks = row.querySelector(".remarks")?.value;
+
+    fetch(`/api/session-plans/day/${dayId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            topic,
+            description,
+            method,
+            remarks,
+            completed: true   // 🔒 LOCK HERE
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Complete failed");
+
+        alert("Day marked as completed");
+
+        // 🔒 Disable inputs
+        row.querySelectorAll("input, textarea, select").forEach(el => {
+            el.disabled = true;
+        });
+
+        // 🔒 Disable buttons
+        row.querySelector(".btn-complete").disabled = true;
+        row.querySelector(".btn-complete").textContent = "Completed";
+        row.querySelector(".btn-complete").classList.add("locked");
+
+        row.querySelector(".btn-update").disabled = true;
+        row.querySelector(".btn-update").classList.add("locked");
+
+        // 🔒 Update status text
+        const statusCell = row.querySelector(".status");
+        if (statusCell) {
+            statusCell.textContent = "Completed";
+            statusCell.classList.remove("pending");
+            statusCell.classList.add("completed");
+        }
     })
     .catch(err => alert(err.message));
 }

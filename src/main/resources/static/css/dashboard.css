@@ -1,3 +1,20 @@
+/* ================================
+   BLOCK DASHBOARD STYLES
+   INSIDE ACADEMIC MANAGEMENT
+================================ */
+.academic-management-page .sidebar,
+.academic-management-page .topbar,
+.academic-management-page .cards,
+.academic-management-page .panel,
+.academic-management-page .card,
+.academic-management-page .table,
+.academic-management-page .nav,
+.academic-management-page .nav-item,
+.academic-management-page .content-grid,
+.academic-management-page .dashboard-card {
+  all: unset;
+}
+
 /* Reset */
 * {
     box-sizing: border-box;
@@ -685,4 +702,18 @@ nav {
 .rating-high {
     color: #16a34a;
     font-weight: 700;
+}
+
+/* ===============================
+   CHANGE PASSWORD MODAL VISIBILITY
+   =============================== */
+
+/* Hide change password modal by default */
+.password-modal-overlay {
+  display: none !important;
+}
+
+/* Show only when JS adds .show */
+.password-modal-overlay.show {
+  display: flex !important;
 }

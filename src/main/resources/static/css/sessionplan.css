@@ -231,3 +231,15 @@
     text-align: left !important;
     vertical-align: middle;
 }
+.session-search-wrap {
+  margin-bottom: 12px;
+}
+
+#sessionSearch {
+  width: 100%;
+  max-width: 380px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d7ff;
+  font-size: 14px;
+}

@@ -14,7 +14,16 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     
     // Find course by code
     Optional<Course> findByCode(String code);
-    
+    boolean existsByCodeIgnoreCaseAndSemesterId(String code, Long semesterId);
+
+boolean existsByNameIgnoreCaseAndSemesterId(String name, Long semesterId);
+
+boolean existsByCodeIgnoreCaseAndSemesterIdAndIdNot(
+        String code, Long semesterId, Long id);
+
+boolean existsByNameIgnoreCaseAndSemesterIdAndIdNot(
+        String name, Long semesterId, Long id);
+
     // Find courses by semester
     List<Course> findBySemesterId(Long semesterId);
     

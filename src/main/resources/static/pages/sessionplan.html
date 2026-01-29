@@ -17,58 +17,58 @@
             <span class="modal-close">&times;</span>
         </div>
         <div id="formMessage" class="message-container" style="display:none;"></div>
-    <div class="modal-body">
+        <div class="modal-body">
 
-        <form id="sessionForm" class="session-form">
+            <form id="sessionForm" class="session-form">
 
-            <!-- Faculty / Course / Semester -->
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Program</label>
-                    <select id="faculty">
-                       
-                    </select>
+                <!-- Faculty / Course / Semester -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Program</label>
+                        <select id="faculty">
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select id="semester">
+
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Course</label>
+                        <input type="text" id="course" placeholder="Enter Course" class="form-control">
+                    </div>
+
                 </div>
- <div class="form-group">
-                    <label>Semester</label>
-                    <select id="semester">
-                        
-                     </select>
+
+                <!-- Day-wise Session Plan -->
+                <h4 class="day-title">Day-wise Session Plan</h4>
+
+                <div id="dayContainer">
+                    <div class="day-card">
+                        <h5 class="day-label">Day 1</h5>
+                        <input type="text" class="day-topic" placeholder="Topic / Lesson Title">
+                        <textarea class="day-desc" rows="3" placeholder="Session description for Day 1"></textarea>
+
+                        <!-- New Method Select -->
+                        <select class="day-method">
+                            <option value="Lecture">Lecture</option>
+                            <option value="Tutorial">Tutorial</option>
+                            <option value="Practical">Practical</option>
+                        </select>
+                    </div>
                 </div>
-               <div class="form-group">
-    <label>Course</label>
-    <input type="text" id="course" placeholder="Enter Course" class="form-control">
-</div>
-              
-            </div>
-
-            <!-- Day-wise Session Plan -->
-            <h4 class="day-title">Day-wise Session Plan</h4>
-
-    <div id="dayContainer">
-  <div class="day-card">
-      <h5 class="day-label">Day 1</h5>
-      <input type="text" class="day-topic" placeholder="Topic / Lesson Title">
-      <textarea class="day-desc" rows="3" placeholder="Session description for Day 1"></textarea>
-      
-      <!-- New Method Select -->
-      <select class="day-method">
-          <option value="Lecture">Lecture</option>
-          <option value="Tutorial">Tutorial</option>
-          <option value="Practical">Practical</option>
-      </select>
-  </div>
-</div>
- 
-
-<div class="day-nav">
-    <button type="button" id="prevDayBtn" disabled>← Previous</button>
-    <button type="button" id="addDayBtn">Next →</button>
-</div>
 
 
-        </form>
-    </div>
+                <div class="day-nav">
+                    <button type="button" id="prevDayBtn" disabled>← Previous</button>
+                    <button type="button" id="addDayBtn">Next →</button>
+                </div>
+
+
+            </form>
+        </div>
         <div class="modal-footer">
             <button id="savePlanBtn" class="submit-btn">
                 Save Session Plan
@@ -78,24 +78,34 @@
     </div>
 </div>
 
- 
+
 
 
 <!--     Student View Section -->
-    <div class="card">
-        <h3>Published Session Plans</h3>
+<div class="card">
+    <h3>Published Session Plans</h3>
+<!-- 🔍 ADMIN SEARCH (VISIBLE ONLY FOR ADMIN) -->
+<div id="sessionSearchWrap" class="session-search-wrap">
+  <input
+    type="text"
+    id="sessionSearch"
+    placeholder="Search by program, course, semester or teacher..."
+  />
+</div>
 
-        <table class="session-table">
-            <thead>
-                <tr>
-                    <th>Program</th>
-                    <th>Semester</th>
-                    <th>Course</th>
-                    <th>Date</th>
-                 
-                </tr>
-            </thead>
-                 <tbody></tbody>
+    <table class="session-table">
+        <thead>
+            <tr>
+                <th>Program</th>
+                <th>Semester</th>
+                <th>Course</th>
+                <th class="teacher-col not-teacher-only">Teacher</th>
 
-        </table>
-    </div>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody></tbody>
+
+    </table>
+</div>

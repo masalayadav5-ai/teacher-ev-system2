@@ -1,0 +1,70 @@
+/* 🔒 Dashboard-only scope */
+.dash-wrap .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dash-wrap .card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.dash-wrap .card .label {
+  font-size: 13px;
+  color: #666;
+}
+
+.dash-wrap .card .value {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.dash-wrap .content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.dash-wrap .panel {
+  background: white;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+}
+
+.dash-wrap .panel-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.dash-wrap .list-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.dash-wrap .list-item:last-child {
+  border-bottom: none;
+}
+
+.dash-wrap .table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dash-wrap .table th,
+.dash-wrap .table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+@media (max-width: 900px) {
+  .dash-wrap .content-grid {
+    grid-template-columns: 1fr;
+  }
+}

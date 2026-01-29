@@ -4,14 +4,18 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Academic Management - SmarTeach</title>
-        <link rel="stylesheet" href="/css/academic-management.css">
         <link rel="stylesheet" href="/css/common.css">
+        <link rel="stylesheet" href="/css/academic-management.css">
+        
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     </head>
     <body>
-        <div class="academic-management-container">
+      <div class="academic-management-page">
+  <div class="academic-management-container">
+
+
             <!-- Header -->
             <div class="page-header">
                 <h2 class="page-title">
@@ -32,6 +36,14 @@
                     <button class="tab-btn" onclick="showTab('courses', event)">
                         <i class="fas fa-book"></i> Courses
                     </button>
+                    <button class="tab-btn" onclick="showTab('batches', event)">
+                        <i class="fas fa-users"></i> Batches
+                    </button>
+                    <button class="tab-btn" onclick="showTab('qualifications')">
+                        🎓 Qualifications
+                    </button>
+
+
                     <button class="tab-btn" onclick="showTab('teacher-assignments', event)">
                         <i class="fas fa-chalkboard-teacher"></i> Teacher Assignments
                     </button>
@@ -148,47 +160,94 @@
                         </div>
                     </div>
 
-                    <!-- Teacher Assignments Tab -->
+                    <div id="batches-tab" class="tab-pane">
+                        <div class="tab-header">
+                            <h3><i class="fas fa-users me-2"></i>Batch Management</h3>
+                            <button class="btn-add" onclick="openAddBatchModal()">
+                                <i class="fas fa-plus"></i> Add Batch
+                            </button>
+                        </div>
+
+                        <table class="management-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Year</th>
+                                    <th>Term</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchesTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="qualifications-tab" class="tab-pane">
+
+                        <div class="tab-header">
+                            <h3><i class="fas fa-graduation-cap me-2"></i>Qualification Management</h3>
+                            <button class="btn-add" onclick="openQualificationModal()">
+                                <i class="fas fa-plus"></i> Add Qualification
+                            </button>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="management-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="qualificationTableBody"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+
                     <!-- In Teacher Assignments Tab -->
                     <div id="teacher-assignments-tab" class="tab-pane">
                         <div class="tab-header">
                             <h3><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Course Assignments</h3>
-                           
+
                         </div>
 
                         <div class="assignment-container">
                             <div class="teacher-list">
                                 <h4>Teachers</h4>
                                 <!-- NEW: Program filter inside teacher list -->
-    <select id="teacherProgramFilter"
-            class="form-select mb-3"
-            onchange="loadTeachersByProgram()">
-        <option value="">Select Teacher Program</option>
-    </select>
+                                <select id="teacherProgramFilter"
+                                        class="form-select mb-3"
+                                        onchange="loadTeachersByProgram()">
+                                    <option value="">Select Teacher Program</option>
+                                </select>
                                 <div id="teachersList" class="list-group">
                                     <!-- Teachers will be loaded here -->
                                 </div>
                             </div>
 
                             <div class="course-assignment">
-                             
-<h4>
-    Course Assignments —
-    <span id="selectedTeacherName">Please select a teacher</span>
-</h4>
-                                 <div class="filter-section">
-                         
-                                <!-- Course Program Filter (for fetching available courses) -->
-                                <select id="courseProgramForAssignFilter" class="form-select" onchange="loadSemestersForCourseAssignments()">
-                                    <option value="">Select Course Program</option>
-                                </select>
 
-                                <!-- Course Semester Filter (for fetching available courses) -->
-                                <select id="courseSemesterForAssignFilter" class="form-select" onchange="loadAvailableCourses()">
-                                    <option value="">Select Course Semester</option>
-                                </select>
+                                <h4>
+                                    Course Assignments —
+                                    <span id="selectedTeacherName">Please select a teacher</span>
+                                </h4>
+                                <div class="filter-section">
 
-                            </div>   
+                                    <!-- Course Program Filter (for fetching available courses) -->
+                                    <select id="courseProgramForAssignFilter" class="form-select" onchange="loadSemestersForCourseAssignments()">
+                                        <option value="">Select Course Program</option>
+                                    </select>
+
+                                    <!-- Course Semester Filter (for fetching available courses) -->
+                                    <select id="courseSemesterForAssignFilter" class="form-select" onchange="loadAvailableCourses()">
+                                        <option value="">Select Course Semester</option>
+                                    </select>
+
+                                </div>   
                                 <div class="available-courses">
                                     <h5>Available Courses</h5>
                                     <div id="availableCourses" class="courses-list">
@@ -259,13 +318,19 @@
                     </div>
                 </div>
             </div>
-        </div>
+          </div>
+</div>
+
 
         <!-- MODALS -->
 
         <!-- Add/Edit Program Modal -->
         <div id="programModal" class="modal-overlay">
+
+
             <div class="modal-content">
+<div id="modalToast" class="modal-toast"></div>
+
                 <div class="modal-header">
                     <h4><i class="fas fa-graduation-cap me-2"></i><span id="programModalTitle">Add New Program</span></h4>
                     <button class="modal-close" onclick="closeProgramModal()">&times;</button>
@@ -303,7 +368,11 @@
 
         <!-- Add/Edit Semester Modal -->
         <div id="semesterModal" class="modal-overlay">
+
+
             <div class="modal-content">
+<div id="modalToast" class="modal-toast"></div>
+
                 <div class="modal-header">
                     <h4><i class="fas fa-calendar-alt me-2"></i><span id="semesterModalTitle">Add New Semester</span></h4>
                     <button class="modal-close" onclick="closeSemesterModal()">&times;</button>
@@ -340,7 +409,11 @@
 
         <!-- Add/Edit Course Modal -->
         <div id="courseModal" class="modal-overlay">
+
+
             <div class="modal-content">
+<div id="modalToast" class="modal-toast"></div>
+
                 <div class="modal-header">
                     <h4><i class="fas fa-book me-2"></i><span id="courseModalTitle">Add New Course</span></h4>
                     <button class="modal-close" onclick="closeCourseModal()">&times;</button>
@@ -390,7 +463,95 @@
                     <button class="btn-primary" onclick="saveCourse()">Save Course</button>
                 </div>
             </div>
-        </div>    
+        </div>  
+
+        <div id="batchModal" class="modal-overlay">
+
+
+            <div class="modal-content">
+                <div id="modalToast" class="modal-toast"></div>
+
+                <div class="modal-header">
+                    <h4 id="batchModalTitle">Add Batch</h4>
+                    <button class="modal-close" onclick="closeBatchModal()">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="batchId">
+
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" id="batchYear" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Term</label>
+                        <select id="batchTerm" class="form-control">
+                            <option value="Fall">Fall</option>
+                            <option value="Spring">Spring</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="batchStatus" class="form-control">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeBatchModal()">Cancel</button>
+                    <button class="btn-primary" onclick="saveBatch()">Save</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="qualificationModal" class="modal-overlay">
+
+
+            <div class="modal-content">
+<div id="modalToast" class="modal-toast"></div>
+
+                <!-- NEW HEADER (same style as other modals) -->
+                <div class="modal-header">
+                    <h4 id="qualificationModalTitle">
+                        <i class="fas fa-graduation-cap me-2"></i>Add Qualification
+                    </h4>
+                    <button class="modal-close" onclick="closeQualificationModal()">&times;</button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+                    <input type="hidden" id="qualificationId">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="qualificationName" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="qualificationStatus" class="form-control">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeQualificationModal()">Cancel</button>
+                    <button class="btn-primary" onclick="saveQualification()">Save</button>
+                </div>
+
+            </div>
+        </div>
+
+
+
         <!-- Initialize when DOM is loaded -->
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -412,7 +573,7 @@
             });
         </script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
- 
+
 
     </body>
 </html>

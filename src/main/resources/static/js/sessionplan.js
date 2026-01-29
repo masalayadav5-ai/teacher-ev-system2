@@ -1,4 +1,29 @@
-// sessionplan.js - CLEAN & MINIMAL VERSION
+async function getCurrentUser() {
+  try {
+    const res = await fetch("/admin/api/userinfo");
+    if (!res.ok) throw new Error("Failed to load user info");
+
+    const user = await res.json();
+    if (!user.role) return null;
+
+    return {
+      role: user.role,
+      username: user.username || user.fullName || "User",
+
+      // teacher
+      teacherId: user.teacherDbId || null,
+
+      // student
+      studentId: user.studentId || null,
+      programId: user.programId || null,
+      semesterId: user.semesterId || null
+    };
+  } catch (e) {
+    console.error("Failed to fetch user info:", e);
+    return null;
+  }
+}
+
 function initSessionPlan() {
     const sessionModal = document.getElementById("sessionModal");
     if (!sessionModal)
@@ -59,37 +84,8 @@ function initSessionPlan() {
         }
     };
 
-    // Teacher Info
-    function getCurrentTeacher() {
-        if (window.currentUser) {
-            const user = {...window.currentUser};
-            if (!user.teacherId && user.userId && user.role === 'TEACHER') {
-                user.teacherId = user.userId;
-            }
-            return user;
-        }
+   
 
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            const user = JSON.parse(storedUser);
-            if (!user.teacherId && user.userId && user.role === 'TEACHER') {
-                user.teacherId = user.userId;
-            }
-            return user;
-        }
-
-        const topTitle = document.querySelector(".top-title");
-        if (topTitle && topTitle.dataset.username) {
-            return {
-                username: topTitle.dataset.username,
-                role: topTitle.dataset.role,
-                userId: topTitle.dataset.userId || '0',
-                teacherId: topTitle.dataset.teacherId || topTitle.dataset.userId || '0'
-            };
-        }
-
-        return null;
-    }
 
     // Fetch teacher courses
     async function fetchTeacherCourses(teacherId) {
@@ -104,7 +100,7 @@ function initSessionPlan() {
             processCourses(courses);
         } catch (error) {
             console.error('Error fetching courses:', error);
-            showMesssage("Failed to load your assigned courses.","error");
+            showMesssage("Failed to load your assigned courses.", "error");
             setupStaticOptions();
         }
     }
@@ -161,7 +157,7 @@ function initSessionPlan() {
     function populateFacultyDropdown(programsMap) {
         facultySelect.innerHTML = '<option value="">-- Select Your Program --</option>';
         semesterSelect.innerHTML = '<option value="">-- Select Semester --</option>';
-        
+
         resetCourseSelect();
 
         Object.keys(programsMap).forEach(programId => {
@@ -272,21 +268,27 @@ function initSessionPlan() {
 
     if (addSessionBtn) {
         addSessionBtn.addEventListener('click', async function () {
-            currentTeacher = getCurrentTeacher();
-            if (!currentTeacher) {
-             showMessage("Please login as a teacher to create session plans.", "error");
 
+           const user = await getCurrentUser();
+
+if (user?.role !== "TEACHER" || !user.teacherId) {
+  showMessage("Please login as a teacher to create session plans.", "error");
+  return;
+}
+
+currentTeacher = user;
+
+
+            if (!currentTeacher) {
+                showMessage("Please login as a teacher to create session plans.", "error");
                 return;
             }
 
-            if (!currentTeacher.teacherId && currentTeacher.userId) {
-                currentTeacher.teacherId = currentTeacher.userId;
-            }
-
             resetForm();
-            await fetchTeacherCourses(currentTeacher.teacherId);
+            await fetchTeacherCourses(currentTeacher.teacherId);   // 🔥 now correct ID
             modalOverlay.style.display = 'flex';
         });
+
     }
 
     if (modalClose) {
@@ -312,12 +314,12 @@ function initSessionPlan() {
         dayData = {};
         loadDay(currentDay);
     }
-  async function checkSessionPlanExists(programId, semesterId, courseId) {
-    const res = await fetch(
-        `/api/session-plans/exists?programId=${programId}&semesterId=${semesterId}&courseId=${courseId}`
-    );
-    return res.ok ? await res.json() : false;
-}
+    async function checkSessionPlanExists(programId, semesterId, courseId) {
+        const res = await fetch(
+                `/api/session-plans/exists?programId=${programId}&semesterId=${semesterId}&courseId=${courseId}`
+                );
+        return res.ok ? await res.json() : false;
+    }
 
 
     // Save Session Plan - SIMPLIFIED
@@ -334,13 +336,13 @@ function initSessionPlan() {
         const courseValue = courseSelect.value;
 
         if (!facultyValue || !semesterValue || !courseValue) {
-        showMessage("Please fill all required fields!", "error");
+            showMessage("Please fill all required fields!", "error");
 
             return;
         }
 
         if (!currentTeacher) {
-        showMessage("Unable to identify teacher. Please refresh the page.", "error");
+            showMessage("Unable to identify teacher. Please refresh the page.", "error");
 
             return;
         }
@@ -360,7 +362,7 @@ function initSessionPlan() {
         }
 
         if (days.length === 0) {
-          showMessage("Please add at least one session day with a topic.", "error");
+            showMessage("Please add at least one session day with a topic.", "error");
 
             return;
         }
@@ -373,19 +375,19 @@ function initSessionPlan() {
         const semesterId = parseInt(semesterValue);
 
 // 🔒 CHECK BEFORE SAVE
-       const exists = await checkSessionPlanExists(
-    programId,
-    semesterId,
-    parseInt(courseValue)
-);
+        const exists = await checkSessionPlanExists(
+                programId,
+                semesterId,
+                parseInt(courseValue)
+                );
 
-if (exists) {
-    showMessage(
-        "Session plan already exists for this Program, Semester and Course.",
-        "error"
-    );
-    return;
-}
+        if (exists) {
+            showMessage(
+                    "Session plan already exists for this Program, Semester and Course.",
+                    "error"
+                    );
+            return;
+        }
 
 
 
@@ -419,7 +421,7 @@ if (exists) {
                 })
                 .then((data) => {
                     if (data && data.id) {
-                      showMessage("Session Plan Saved Successfully!", "success");
+                        showMessage("Session Plan Saved Successfully!", "success");
 
                         modalOverlay.style.display = 'none';
                         resetForm();
@@ -440,122 +442,215 @@ if (exists) {
                 });
     };
 
-    // Load Published Plans
-    function loadPublishedPlans() {
-        const tbody = document.querySelector(".session-table tbody");
-        if (!tbody)
-            return;
+function attachSearchFilter(plans) {
+  const input = document.getElementById("sessionSearch");
+  if (!input) return;
 
-        if (!currentTeacher)
-            currentTeacher = getCurrentTeacher();
-        if (!currentTeacher) {
-            tbody.innerHTML = `<tr><td colspan="4">Please login as a teacher</td></tr>`;
-            return;
-        }
+  input.oninput = () => {
+    const term = input.value.toLowerCase();
 
-        const teacherId = currentTeacher.teacherId || currentTeacher.userId;
-        if (!teacherId) {
-            tbody.innerHTML = `<tr><td colspan="4">Unable to identify teacher ID</td></tr>`;
-            return;
-        }
+    const filtered = plans.filter(p =>
+      (p.program?.name || "").toLowerCase().includes(term) ||
+      (p.course?.name || "").toLowerCase().includes(term) ||
+      (p.semester?.name || "").toLowerCase().includes(term) ||
+      (p.teacher?.fullName || "").toLowerCase().includes(term)
+    );
 
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="loading-cell">
-                    <div class="loading-spinner"></div>
-                    Loading ${currentTeacher.username}'s session plans...
-                </td>
-            </tr>
-        `;
-
-        fetch(`/api/session-plans/teacher/${teacherId}`)
-                .then(res => {
-                    if (!res.ok)
-                        throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(plans => {
-                    displayPlans(plans);
-                })
-                .catch(err => {
-                    console.error('Error loading plans:', err);
-                    displayPlans([]);
-                });
-
-        function displayPlans(plans) {
-            tbody.innerHTML = "";
-
-            if (!plans || plans.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            <div class="empty-content">
-                                <i class="fas fa-calendar-plus"></i>
-                                <div>
-                                    <h4>No Session Plans Yet</h4>
-                                    <p><strong>${currentTeacher.username}</strong> hasn't created any session plans.</p>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            plans.forEach(plan => {
-                const tr = document.createElement("tr");
-
-                // Extract data
-                const programName = plan.program?.name || 'Unknown Program';
-                const courseName = plan.course?.name || 'Unknown Course';
-                const semesterName = plan.semester?.name || 'Unknown Semester';
-
-                const date = plan.createdDate || '';
-                const formattedDate = date ? new Date(date).toLocaleDateString() : '';
-
-
-                tr.innerHTML = `
-                    <td>${programName}</td>
-                <td>${semesterName}</td>
-    <td>${courseName}</td>
-    
-    <td>${formattedDate}</td>
-                    
-                `;
-
-                tr.style.cursor = "pointer";
-                tr.title = "Click to view details";
-
-                tr.addEventListener("click", () => {
-                    if (plan.id) {
-                        if (typeof loadPage === 'function') {
-                            loadPage(`/pages/session-details.html?id=${plan.id}`);
-                        } else {
-                            window.location.href = `/pages/session-details.html?id=${plan.id}`;
-                        }
-                    }
-                });
-
-                tbody.appendChild(tr);
-            });
-        }
-    }
-
-    // Initialize
-    loadDay(currentDay);
-    currentTeacher = getCurrentTeacher();
-    loadPublishedPlans();
+    renderSessionPlans(filtered);
+  };
 }
-document.addEventListener("DOMContentLoaded", () => {
-    protectPage(["STUDENT", "TEACHER", "ADMIN"]);
 
-    // Hide Add Session button for STUDENT + ADMIN
-    if (window.currentUser?.role !== "TEACHER") {
-        document.querySelector(".addsession")?.remove();
+
+async function loadPublishedPlans() {
+
+  const tbody = document.querySelector(".session-table tbody");
+  if (!tbody) return;
+
+  const currentUser = await getCurrentUser();
+window._currentUser = currentUser;   // 🔥 REQUIRED
+
+  if (!currentUser) {
+    tbody.innerHTML = `<tr><td colspan="5">Unauthorized</td></tr>`;
+    return;
+  }
+
+  let apiUrl = "";
+
+  if (currentUser.role === "TEACHER") {
+    apiUrl = `/api/session-plans/teacher/${currentUser.teacherId}/visible`;
+  }
+
+  else if (currentUser.role === "ADMIN") {
+    apiUrl = `/api/session-plans`;
+  }
+
+  else if (currentUser.role === "STUDENT") {
+    if (!currentUser.programId || !currentUser.semesterId) {
+      tbody.innerHTML = `<tr><td colspan="5">Student profile incomplete</td></tr>`;
+      return;
     }
 
-    initSessionPlan();
+    apiUrl = `/api/session-plans/program/${currentUser.programId}/semester/${currentUser.semesterId}`;
+  }
+
+  else {
+    tbody.innerHTML = `<tr><td colspan="5">Unauthorized</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="5" class="loading-cell">
+        Loading session plans...
+      </td>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const plans = await res.json();
+    window._allSessionPlans = plans;
+
+    displayPlans(plans);
+
+    attachSearchFilter(plans); // 🔥 ALL ROLES
+
+  } catch (err) {
+    console.error("Error loading plans:", err);
+    displayPlans([]);
+  }
+
+  function displayPlans(plans) {
+    tbody.innerHTML = "";
+
+    if (!plans || plans.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty-state">
+            No Session Plans Found
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    plans.forEach(plan => {
+
+      const programName  = plan.program?.name || "—";
+      const semesterName = plan.semester?.name || "—";
+      const courseName   = plan.course?.name || "—";
+      const teacherName  = plan.teacher?.fullName || "—";
+      const date         = plan.createdDate
+        ? new Date(plan.createdDate).toLocaleDateString()
+        : "—";
+
+      const showTeacherCol = currentUser.role !== "TEACHER";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${programName}</td>
+        <td>${semesterName}</td>
+        <td>${courseName}</td>
+        ${showTeacherCol ? `<td>${teacherName}</td>` : ``}
+        <td>${date}</td>
+      `;
+
+      tr.onclick = () => {
+        loadPage(`/pages/session-details.html?id=${plan.id}`);
+      };
+
+      tbody.appendChild(tr);
+    });
+  }
+}
+function renderSessionPlans(plans) {
+
+  const tbody = document.querySelector(".session-table tbody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  if (!plans || plans.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty-state">
+          No Session Plans Found
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  plans.forEach(plan => {
+
+    const programName  = plan.program?.name || "—";
+    const semesterName = plan.semester?.name || "—";
+    const courseName   = plan.course?.name || "—";
+    const teacherName  = plan.teacher?.fullName || "—";
+    const date         = plan.createdDate
+      ? new Date(plan.createdDate).toLocaleDateString()
+      : "—";
+
+    const showTeacherCol = window._currentUser?.role !== "TEACHER";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${programName}</td>
+      <td>${semesterName}</td>
+      <td>${courseName}</td>
+      ${showTeacherCol ? `<td>${teacherName}</td>` : ``}
+      <td>${date}</td>
+    `;
+
+    tr.onclick = () => {
+      loadPage(`/pages/session-details.html?id=${plan.id}`);
+    };
+
+    tbody.appendChild(tr);
+  });
+}
+
+
+  // Initialize
+loadDay(currentDay);
+
+(async () => {
+  const user = await getCurrentUser();
+  window._currentUser = user;
+
+  await loadPublishedPlans();
+
+  // 🔥 HIDE teacher column ONLY for TEACHER
+  if (window._currentUser?.role === "TEACHER") {
+    document.querySelectorAll(".teacher-col").forEach(el => el.remove());
+  }
+
+  // 🔍 Search box ONLY for ADMIN
+  if (window._currentUser?.role !== "ADMIN") {
+    document.getElementById("sessionSearchWrap")?.remove();
+  }
+
+})();
+
+
+
+}
+document.addEventListener("DOMContentLoaded", async () => {
+
+  protectPage(["STUDENT", "TEACHER", "ADMIN"]);
+
+  const user = await getCurrentUser();
+
+  if (user?.role !== "TEACHER") {
+    document.querySelector(".addsession")?.remove();
+  }
+
+  initSessionPlan();
 });
+
+
 window.initSessionPlan = initSessionPlan;
 
 function showMessage(msg, type) {

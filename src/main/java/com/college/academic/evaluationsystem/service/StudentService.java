@@ -104,7 +104,8 @@ public class StudentService {
         student.setFullName(data.getFullName());
         student.setAddress(data.getAddress());
         student.setContact(data.getContact());
-        student.setBatch(data.getBatch());
+       student.setBatchLabel(data.getBatchLabel());
+
 
         // Update program if provided
         if (data.getProgram() != null) {

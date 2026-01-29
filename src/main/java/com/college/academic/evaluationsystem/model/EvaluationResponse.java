@@ -1,5 +1,6 @@
 package com.college.academic.evaluationsystem.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,8 +15,10 @@ public class EvaluationResponse {
     // ================= RELATIONS =================
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evaluation_id", nullable = false)
-    private StudentEvaluation evaluation;
+@JoinColumn(name = "evaluation_id", nullable = false)
+@JsonBackReference
+private StudentEvaluation evaluation;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parameter_id", nullable = false)

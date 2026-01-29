@@ -1,19 +1,22 @@
 package com.college.academic.evaluationsystem.repository;
 
 import com.college.academic.evaluationsystem.model.SessionPlan;
+import java.time.LocalDate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 
 @Repository
 public interface SessionPlanRepository extends JpaRepository<SessionPlan, Long> {
     
     // Find session plans by program
     List<SessionPlan> findByProgramId(Long programId);
-    
+    List<SessionPlan> findByCourseIdIn(List<Long> courseIds);
+
     // Find session plans by semester
     List<SessionPlan> findBySemesterId(Long semesterId);
     
@@ -59,6 +62,18 @@ public interface SessionPlanRepository extends JpaRepository<SessionPlan, Long> 
     Long programId,
     Long semesterId,
     Long courseId
+);
+
+
+@Modifying
+@Query("""
+UPDATE SessionPlan sp
+SET sp.teacher.id = :teacherId
+WHERE sp.course.id = :courseId
+""")
+void reassignTeacherForCourse(
+    @Param("teacherId") Long teacherId,
+    @Param("courseId") Long courseId
 );
 
 }

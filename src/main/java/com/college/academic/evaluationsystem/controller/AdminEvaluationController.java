@@ -1,15 +1,20 @@
 package com.college.academic.evaluationsystem.controller;
 
+import com.college.academic.evaluationsystem.model.Course;
 import com.college.academic.evaluationsystem.model.EvaluationResponse;
 import com.college.academic.evaluationsystem.model.StudentEvaluation;
+import com.college.academic.evaluationsystem.model.Teacher;
+import com.college.academic.evaluationsystem.model.TeacherCourseHistory;
 import com.college.academic.evaluationsystem.repository.EvaluationResponseRepository;
 import com.college.academic.evaluationsystem.repository.StudentEvaluationRepository;
+import com.college.academic.evaluationsystem.repository.TeacherCourseHistoryRepository;
 import com.college.academic.evaluationsystem.repository.TeacherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,70 +34,150 @@ public class AdminEvaluationController {
     /* =========================================================
        1️⃣ GET ALL TEACHERS WITH THEIR ASSIGNED COURSES
        ========================================================= */
-    @GetMapping("/teachers")
-    public ResponseEntity<List<Map<String, Object>>> getAllTeachersWithCourses() {
+@Autowired
+private TeacherCourseHistoryRepository historyRepository;
 
-        List<Object[]> rows = teacherRepository.findTeachersWithCourses();
 
-        Map<Long, Map<String, Object>> teacherMap = new LinkedHashMap<>();
+@GetMapping("/teachers")
+public ResponseEntity<List<Map<String, Object>>> getAllTeachersWithCourses(
+        @RequestParam(defaultValue = "current") String mode) {
 
-        for (Object[] row : rows) {
-            Long teacherId = (Long) row[0];
-            String teacherName = (String) row[1];
-            Long courseId = (Long) row[2];
-            String courseName = (String) row[3];
+List<TeacherCourseHistory> history;
 
-            teacherMap.putIfAbsent(teacherId, new HashMap<>());
-            Map<String, Object> teacher = teacherMap.get(teacherId);
+if ("both".equals(mode)) {
+    history = new ArrayList<>();
+    history.addAll(historyRepository.findAllActive());
+    history.addAll(historyRepository.findAllPrevious());
+} else if ("previous".equals(mode)) {
+    history = historyRepository.findAllPrevious();
+} else {
+    history = historyRepository.findAllActive();
+}
 
-            teacher.putIfAbsent("teacherId", teacherId);
-            teacher.putIfAbsent("teacherName", teacherName);
-            teacher.putIfAbsent("courses", new ArrayList<>());
 
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> courses =
-                    (List<Map<String, Object>>) teacher.get("courses");
+    Map<Long, Map<String, Object>> teacherMap = new LinkedHashMap<>();
 
-            courses.add(Map.of(
-                    "courseId", courseId,
-                    "courseName", courseName
-            ));
-        }
+    for (TeacherCourseHistory h : history) {
+        Teacher t = h.getTeacher();
+        Course c = h.getCourse();
 
-        return ResponseEntity.ok(new ArrayList<>(teacherMap.values()));
+        teacherMap.putIfAbsent(t.getId(), new HashMap<>());
+        Map<String, Object> teacher = teacherMap.get(t.getId());
+
+       teacher.putIfAbsent("teacherId", t.getId());          // 🔥 USE DB ID ONLY
+teacher.putIfAbsent("teacherCode", t.getTeacherId()); // optional display
+       // numeric ID (optional)
+        teacher.putIfAbsent("teacherName", t.getFullName());
+        teacher.putIfAbsent("courses", new ArrayList<>());
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> courses =
+                (List<Map<String, Object>>) teacher.get("courses");
+
+        courses.add(Map.of(
+                "courseId", c.getId(),
+                "courseName", c.getName()
+        ));
     }
+System.out.println("MODE: " + mode);
+System.out.println("HISTORY SIZE: " + history.size());
+
+    return ResponseEntity.ok(new ArrayList<>(teacherMap.values()));
+}
+
+
+
 
     /* =========================================================
        2️⃣ GET AVAILABLE WEEKS (Sunday → Saturday)
        ========================================================= */
-    @GetMapping("/teacher/{teacherId}/course/{courseId}/weeks")
-    public ResponseEntity<List<LocalDate>> getAvailableWeeks(
-            @PathVariable Long teacherId,
-            @PathVariable Long courseId) {
+@GetMapping("/teacher/{teacherId}/course/{courseId}/weeks")
+public ResponseEntity<List<LocalDate>> getAvailableWeeks(
+        @PathVariable Long teacherId,
+        @PathVariable Long courseId,
+        @RequestParam(defaultValue = "current") String mode) {
+try{
+    boolean valid = mode.equals("previous")
+            ? historyRepository.findPreviousCourses(teacherId)
+                .stream().anyMatch(h -> h.getCourse().getId().equals(courseId))
+            : historyRepository.findActiveCourses(teacherId)
+                .stream().anyMatch(h -> h.getCourse().getId().equals(courseId));
 
-        List<LocalDate> weeks =
-                evaluationRepository.findDistinctWeeksForTeacherCourse(
-                        teacherId, courseId
-                );
+    if (!valid) return ResponseEntity.ok(List.of());
 
-        return ResponseEntity.ok(weeks);
-    }
+
+TeacherCourseHistory history;
+
+if ("previous".equals(mode)) {
+    history = historyRepository.findPreviousCourses(teacherId)
+        .stream()
+        .filter(h -> h.getCourse().getId().equals(courseId))
+        .max(Comparator.comparing(TeacherCourseHistory::getRemovedAt))
+        .orElse(null);
+} else {
+    history = historyRepository.findActiveCourses(teacherId)
+        .stream()
+        .filter(h -> h.getCourse().getId().equals(courseId))
+        .findFirst()
+        .orElse(null);
+}
+
+
+if (history == null) {
+    return ResponseEntity.ok(List.of());
+}
+System.out.println("======== WEEKS DEBUG ========");
+System.out.println("MODE        = " + mode);
+System.out.println("TEACHER ID  = " + teacherId);
+System.out.println("COURSE ID   = " + courseId);
+System.out.println("ASSIGNED AT = " + history.getAssignedAt());
+System.out.println("REMOVED AT  = " + history.getRemovedAt());
+List<LocalDate> rawWeeks =
+    evaluationRepository.findDistinctWeeksForTeacherCourseWindowed(
+        teacherId,
+        courseId,
+        history.getAssignedAt(),
+        history.getRemovedAt()
+    );
+
+List<LocalDate> normalizedWeeks = rawWeeks.stream()
+    .map(d -> d.with(java.time.temporal.TemporalAdjusters.previousOrSame(
+        java.time.DayOfWeek.SUNDAY)))
+    .distinct()
+    .sorted(Comparator.reverseOrder())
+    .toList();
+
+return ResponseEntity.ok(normalizedWeeks);
+}catch (Exception e) {
+    e.printStackTrace();   // 🔥 ADD THIS
+    return ResponseEntity.ok(List.of());
+  }
+}
+
+
 
     /* =========================================================
        3️⃣ COURSE + WEEK SUMMARY (CORE ANALYTICS)
        ========================================================= */
-    @GetMapping("/teacher/{teacherId}/course/{courseId}/summary")
-    public ResponseEntity<Map<String, Object>> getCourseWeekSummary(
-            @PathVariable Long teacherId,
-            @PathVariable Long courseId,
-            @RequestParam LocalDate weekStart) {
 
-        List<StudentEvaluation> evaluations =
-                evaluationRepository.findByTeacherCourseWeek(
-                        teacherId, courseId, weekStart
-                );
+@GetMapping("/teacher/{teacherId}/course/{courseId}/summary")
+public ResponseEntity<Map<String, Object>> getCourseWeekSummary(
+        @PathVariable Long teacherId,
+        @PathVariable Long courseId,
+        @RequestParam LocalDate weekStart,
+        @RequestParam(defaultValue = "current") String mode
+) {
 
-       if (evaluations.isEmpty()) {
+  boolean valid = historyRepository.findByTeacherDbId(teacherId)
+        .stream()
+        .anyMatch(h ->
+                h.getCourse().getId().equals(courseId) &&
+                ("previous".equals(mode)
+                    ? h.getRemovedAt() != null
+                    : h.getRemovedAt() == null)
+        );
+
+if (!valid) {
     return ResponseEntity.ok(Map.of(
             "teacherId", teacherId,
             "courseId", courseId,
@@ -104,48 +189,190 @@ public class AdminEvaluationController {
 }
 
 
-        /* ---------- OVERALL AVERAGE ---------- */
-        double overallAverage = evaluations.stream()
-                .map(StudentEvaluation::getOverallRating)
-                .filter(Objects::nonNull)
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0.0);
+TeacherCourseHistory history;
 
-        /* ---------- PARAMETER-WISE AVERAGE ---------- */
-        List<Object[]> paramStats =
-                responseRepository.parameterAverageForCourseWeek(
-                        teacherId, courseId, weekStart
-                );
+if ("previous".equals(mode)) {
+    history = historyRepository.findPreviousCourses(teacherId)
+        .stream()
+        .filter(h -> h.getCourse().getId().equals(courseId))
+        .max(Comparator.comparing(TeacherCourseHistory::getRemovedAt))
+        .orElse(null);
+} else {
+    history = historyRepository.findActiveCourses(teacherId)
+        .stream()
+        .filter(h -> h.getCourse().getId().equals(courseId))
+        .findFirst()
+        .orElse(null);
+}
 
-        List<Map<String, Object>> parameterAverages =
-                paramStats.stream()
-                        .map(r -> Map.of(
-                                "questionText", r[0],
-                                "average", r[1]
-                        ))
-                        .collect(Collectors.toList());
 
-        /* ---------- RESPONSE ---------- */
+if (history == null) {
+    return ResponseEntity.ok(Map.of(
+        "teacherId", teacherId,
+        "courseId", courseId,
+        "weekStart", weekStart,
+        "totalEvaluations", 0,
+        "overallAverage", 0,
+        "parameterAverages", List.of()
+    ));
+}
+
+LocalDateTime assignedAt = history.getAssignedAt();
+LocalDateTime removedAt  = history.getRemovedAt();
+LocalDateTime weekStartDT = weekStart.atStartOfDay();
+LocalDateTime weekEndDT   = weekStart.plusDays(6).atTime(23, 59, 59);
+
+if (weekEndDT.isBefore(assignedAt) ||
+    (removedAt != null && weekStartDT.isAfter(removedAt))) {
+
+    return ResponseEntity.ok(Map.of(
+        "teacherId", teacherId,
+        "courseId", courseId,
+        "weekStart", weekStart,
+        "totalEvaluations", 0,
+        "overallAverage", 0,
+        "parameterAverages", List.of()
+    ));
+}
+// null if active
+System.out.println("======== SUMMARY DEBUG ========");
+System.out.println("MODE        = " + mode);
+System.out.println("TEACHER ID  = " + teacherId);
+System.out.println("COURSE ID   = " + courseId);
+System.out.println("WEEK START  = " + weekStart);
+System.out.println("ASSIGNED AT = " + assignedAt);
+System.out.println("REMOVED AT  = " + removedAt);
+
+LocalDate weekEnd = weekStart.plusDays(6);
+
+List<StudentEvaluation> evaluations =
+  evaluationRepository.findForAssignmentWindow(
+    teacherId,
+    courseId,
+    weekStart,
+    weekEnd,
+    assignedAt,
+    removedAt
+);
+
+System.out.println("EVALUATIONS FOUND = " + evaluations.size());
+
+for (StudentEvaluation e : evaluations) {
+    System.out.println(
+        "  -> ID=" + e.getId() +
+        " | weekStart=" + e.getWeekStart() +
+        " | submittedAt=" + e.getSubmittedAt() +
+        " | isSubmitted=" + e.getIsSubmitted()
+    );
+}
+
+
+
+    if (evaluations.isEmpty()) {
         return ResponseEntity.ok(Map.of(
                 "teacherId", teacherId,
                 "courseId", courseId,
                 "weekStart", weekStart,
-                "totalEvaluations", evaluations.size(),
-                "overallAverage", Math.round(overallAverage * 100.0) / 100.0,
-                "parameterAverages", parameterAverages
+                "totalEvaluations", 0,
+                "overallAverage", 0,
+                "parameterAverages", List.of()
         ));
     }
-    @GetMapping("/teacher/{teacherId}/course/{courseId}/week/{weekStart}/responses")
+
+    /* ---------- OVERALL AVERAGE ---------- */
+    double overallAverage = evaluations.stream()
+            .map(StudentEvaluation::getOverallRating)
+            .filter(Objects::nonNull)
+            .mapToDouble(Double::doubleValue)
+            .average()
+            .orElse(0.0);
+
+    /* ---------- PARAMETER-WISE AVERAGE ---------- */
+    List<Object[]> paramStats =
+            responseRepository.parameterAverageForCourseWeek(
+                    teacherId, courseId, weekStart
+            );
+
+    List<Map<String, Object>> parameterAverages =
+            paramStats.stream()
+                    .map(r -> Map.of(
+                            "questionText", r[0],
+                            "average", r[1]
+                    ))
+                    .collect(Collectors.toList());
+
+    /* ---------- RESPONSE ---------- */
+    return ResponseEntity.ok(Map.of(
+            "teacherId", teacherId,
+            "courseId", courseId,
+            "weekStart", weekStart,
+            "totalEvaluations", evaluations.size(),
+            "overallAverage", Math.round(overallAverage * 100.0) / 100.0,
+            "parameterAverages", parameterAverages
+    ));
+}
+
+@GetMapping("/teacher/{teacherId}/course/{courseId}/week/{weekStart}/responses")
 public ResponseEntity<List<Map<String, Object>>> getIndividualEvaluations(
         @PathVariable Long teacherId,
         @PathVariable Long courseId,
-        @PathVariable LocalDate weekStart) {
+        @PathVariable LocalDate weekStart,
+        @RequestParam(defaultValue = "current") String mode
+) {
 
-    List<StudentEvaluation> evaluations =
-            evaluationRepository.findByTeacherCourseWeek(
-                    teacherId, courseId, weekStart
-            );
+    TeacherCourseHistory history;
+
+    if ("previous".equals(mode)) {
+        history = historyRepository.findPreviousCourses(teacherId)
+            .stream()
+            .filter(h -> h.getCourse().getId().equals(courseId))
+            .max(Comparator.comparing(TeacherCourseHistory::getRemovedAt))
+            .orElse(null);
+    } else {
+        history = historyRepository.findActiveCourses(teacherId)
+            .stream()
+            .filter(h -> h.getCourse().getId().equals(courseId))
+            .findFirst()
+            .orElse(null);
+    }
+
+    if (history == null) {
+        return ResponseEntity.ok(List.of());
+    }
+
+    LocalDateTime assignedAt = history.getAssignedAt();
+    LocalDateTime removedAt  = history.getRemovedAt();
+
+    // 🔥 HARD WINDOW CHECK (prevents leakage across reassignments)
+  LocalDateTime weekStartDT = weekStart.atStartOfDay();
+LocalDateTime weekEndDT   = weekStart.plusDays(6).atTime(23, 59, 59);
+
+// Only reject if ENTIRE week is outside assignment window
+if (weekEndDT.isBefore(assignedAt) ||
+    (removedAt != null && weekStartDT.isAfter(removedAt))) {
+
+    System.out.println("❌ WEEK OUTSIDE WINDOW — FILTERED");
+    return ResponseEntity.ok(List.of());
+}
+System.out.println("WEEK START DT = " + weekStartDT);
+System.out.println("WEEK END DT   = " + weekEndDT);
+System.out.println("ASSIGNED AT   = " + assignedAt);
+System.out.println("REMOVED AT    = " + removedAt);
+
+
+   LocalDate weekEnd = weekStart.plusDays(6);
+
+List<StudentEvaluation> evaluations =
+    evaluationRepository.findForAssignmentWindow(
+    teacherId,
+    courseId,
+    weekStart,
+    weekEnd,
+    assignedAt,
+    removedAt
+);
+
+
 
     List<Map<String, Object>> result = new ArrayList<>();
 

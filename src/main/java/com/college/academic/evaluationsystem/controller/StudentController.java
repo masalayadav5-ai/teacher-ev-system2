@@ -46,7 +46,7 @@ private TeacherRepository teacherRepository;
             String password = (String) requestData.get("password");
             String address = (String) requestData.get("address");
             String contact = (String) requestData.get("contact");
-            String batch = (String) requestData.get("batch");
+            String batchLabel  = (String) requestData.get("batch");
             
             // NEW: Extract programId and semesterId (as Long or Integer)
             Long programId = null;
@@ -107,7 +107,7 @@ private TeacherRepository teacherRepository;
             student.setStudentId(studentId);
             student.setAddress(address);
             student.setContact(contact);
-            student.setBatch(batch);
+            student.setBatchLabel(batchLabel);
             student.setStatus("Pending");
             student.setHide("0");
             
@@ -211,9 +211,10 @@ if (semesterId != null) {
         if (data.containsKey("contact")) {
             student.setContact((String) data.get("contact"));
         }
-        if (data.containsKey("batch")) {
-            student.setBatch((String) data.get("batch"));
-        }
+       if (data.containsKey("batch")) {
+    student.setBatchLabel((String) data.get("batch"));
+}
+
         
         // NEW: Update program relationship
         if (data.containsKey("programId")) {

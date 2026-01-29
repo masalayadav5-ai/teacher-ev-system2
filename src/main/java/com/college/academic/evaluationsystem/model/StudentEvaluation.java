@@ -1,4 +1,7 @@
 package com.college.academic.evaluationsystem.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -6,10 +9,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name="student_evaluations")
-
+@Table(name = "student_evaluation")
+@JsonIgnoreProperties({
+  "hibernateLazyInitializer",
+  "handler"
+})
 
 public class StudentEvaluation {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,8 +56,11 @@ public class StudentEvaluation {
     @Column(name="week_start", nullable=false)
 private LocalDate weekStart;
 
-    @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<EvaluationResponse> responses;
+  @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+@JsonIgnore   // 🔥 ADD THIS
+private List<EvaluationResponse> responses;
+
+
 
     @PreUpdate
     public void preUpdate() {

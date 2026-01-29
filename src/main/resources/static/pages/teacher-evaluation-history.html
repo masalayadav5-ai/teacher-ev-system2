@@ -1,5 +1,12 @@
  <link rel="stylesheet" href="/css/common.css">
 <link rel="stylesheet" href="/css/teacher-evaluation-history.css">
+<div class="page-header admin-only" id="adminTeacherHeader" style="display:none">
+  <button class="back-btn" onclick="goBackToAdminAnalytics()">
+    <i class="fas fa-arrow-left"></i> Back
+  </button>
+
+  
+</div>
 
 <div class="teacher-page">
   <div class="layout">
@@ -7,9 +14,11 @@
       <section class="content-area">
 
        <div class="page-header">
-  <h2 class="page-title">My Evaluation History</h2>
- 
+  <h2 class="page-title" id="mainHistoryTitle">
+    My Evaluation History
+  </h2>
 </div>
+
 
  <p class="page-subtitle">
     View your evaluation summary & insights

@@ -17,7 +17,11 @@ public interface SemesterRepository extends JpaRepository<Semester, Long> {
     List<Semester> findByIsActive(boolean isActive);
     List<Semester> findByProgramIdAndIsActive(Long programId, boolean isActive);
     Optional<Semester> findByProgramIdAndName(Long programId, String name);
-    
+    boolean existsByNameIgnoreCaseAndProgramId(String name, Long programId);
+
+boolean existsByNameIgnoreCaseAndProgramIdAndIdNot(
+        String name, Long programId, Long id);
+
     // Simple fetch with program
     @Query("SELECT s FROM Semester s JOIN FETCH s.program WHERE s.program.id = :programId")
     List<Semester> findSemestersWithProgram(@Param("programId") Long programId);

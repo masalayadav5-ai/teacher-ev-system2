@@ -202,6 +202,7 @@
   padding: 14px 16px;
   background: #ffffff;
   box-shadow: 0 6px 20px rgba(76,111,255,0.08);
+  margin-bottom: 20px;
 }
 
 .individual-header {
@@ -301,4 +302,38 @@
 .page-btn.active {
   background: #4c6fff;
   color: #fff;
+}
+/* ===== Mode Switch Buttons ===== */
+
+.mode-btn {
+  background: #ffffff;
+  border: 1px solid rgba(76,111,255,0.35);
+  color: #4c6fff;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.mode-btn:hover {
+  background: rgba(76,111,255,0.1);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, #4c6fff, #6c8cff);
+  color: #ffffff;
+  border-color: rgba(76,111,255,0.7);
+  box-shadow: 0 8px 22px rgba(76,111,255,0.4);
+}
+/* ===== Soft empty state ===== */
+.faded {
+  opacity: 0.6;
+}
+
+.no-data {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
 }
