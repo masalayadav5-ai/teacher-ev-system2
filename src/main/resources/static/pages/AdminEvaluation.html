@@ -34,17 +34,17 @@
             border: 1px solid #bee5eb;
         }
     </style>
-
-    <div class="container">
         <div class="back-container">
           <button onclick="parent.loadPage('/pages/AdminEvaluationAnalytics.html')">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
         </div>
-
-        <h1>Manage Evaluation Parameters</h1>
-        <p class="page-subtitle">Add, edit, or remove evaluation questions and categories</p>
-
+         <div class="page-header">
+            <h2 class="page-title">Manage Evaluation Parameters</h2>
+        </div>
+          <p class="page-subtitle">Add, edit, or remove evaluation questions and categories</p>
+        
+<div class="container">
         <!-- Message container for feedback -->
         <div id="messageContainer"></div>
 
@@ -127,17 +127,18 @@
                         <input type="number" id="sortOrder" name="sortOrder" min="0" value="0">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="isRequired" name="isRequired" checked> Required Question
-                        </label>
-                    </div>
+                   <div class="form-group checkbox-group">
+    <input type="checkbox" id="isRequired">
+    <label for="isRequired">Required Question</label>
+</div>
+
+<div class="form-group checkbox-group">
+    <input type="checkbox" id="isActive">
+    <label for="isActive">Active</label>
+</div>
+
                     
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="isActive" name="isActive" checked> Active
-                        </label>
-                    </div>
+                     
                     
                     <button type="submit" class="submit-button">
                         <i class="fas fa-plus"></i> Add Parameter

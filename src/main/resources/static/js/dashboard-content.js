@@ -1,7 +1,4 @@
-async function getCurrentUser() {
-  const res = await fetch("/admin/api/userinfo");
-  return res.ok ? await res.json() : null;
-}
+
 
 async function initDashboardContent() {
   const user = await getCurrentUser();
@@ -20,7 +17,7 @@ loadCommonCounts();
 
 
   if (user.role === "ADMIN") loadAdminData();
-  if (user.role === "TEACHER") loadTeacherData(user.teacherDbId);
+  if (user.role === "TEACHER") loadTeacherData(user.teacherId);
   if (user.role === "STUDENT") loadStudentData(user.studentId);
 }
 
@@ -40,21 +37,71 @@ function renderDashboard(role) {
     title.textContent = "Admin Dashboard";
     subtitle.textContent = "System overview & analytics";
 
-    cards.innerHTML = `
-      <div class="card"><div class="label">Total Teachers</div><div class="value" id="teachersCount">—</div></div>
-      <div class="card"><div class="label">Total Students</div><div class="value" id="studentsCount">—</div></div>
-      <div class="card"><div class="label">Session Plans</div><div class="value" id="sessionsCount">—</div></div>
-      <div class="card"><div class="label">Pending Evaluations</div><div class="value" id="pendingEvalCount">—</div></div>
-    `;
+cards.innerHTML = `
+  <div class="dash-kpi-card dash-kpi-blue">
+    <div class="dash-kpi-icon">
+      <i class="bi bi-person-badge"></i>
+    </div>
+    <div class="dash-kpi-content">
+      <div class="dash-kpi-label">Total Teachers</div>
+      <div class="dash-kpi-value" id="teachersCount">—</div>
+    </div>
+  </div>
 
-    left.innerHTML = `
-      <div class="panel-title">Teacher Performance Trend</div>
-      <canvas id="adminLineChart"></canvas>
-    `;
+  <div class="dash-kpi-card dash-kpi-green">
+    <div class="dash-kpi-icon">
+      <i class="bi bi-people"></i>
+    </div>
+    <div class="dash-kpi-content">
+      <div class="dash-kpi-label">Total Students</div>
+      <div class="dash-kpi-value" id="studentsCount">—</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi-card dash-kpi-purple">
+    <div class="dash-kpi-icon">
+      <i class="bi bi-calendar-check"></i>
+    </div>
+    <div class="dash-kpi-content">
+      <div class="dash-kpi-label">Session Plans</div>
+      <div class="dash-kpi-value" id="sessionsCount">—</div>
+    </div>
+  </div>
+
+  <div class="dash-kpi-card dash-kpi-orange">
+    <div class="dash-kpi-icon">
+      <i class="bi bi-hourglass-split"></i>
+    </div>
+    <div class="dash-kpi-content">
+      <div class="dash-kpi-label">Pending Evaluations</div>
+      <div class="dash-kpi-value" id="pendingEvalCount">—</div>
+    </div>
+  </div>
+`;
+
+
+
+left.innerHTML = `
+  <div class="dash-panel-header">
+    <div class="dash-panel-icon blue">
+      <i class="bi bi-graph-up"></i>
+    </div>
+    <span>Teacher Performance Trend</span>
+  </div>
+
+  <canvas id="adminLineChart"></canvas>
+`;
+
+
 
     right.innerHTML = `
       <div class="panel">
-        <div class="panel-title">Recent Teacher Activities</div>
+<div class="dash-panel-header">
+  <div class="dash-panel-icon purple">
+    <i class="bi bi-activity"></i>
+  </div>
+  <span>Recent Teacher Activities</span>
+</div>
         <table class="table">
           <thead>
             <tr><th>Teacher</th><th>Activity</th><th>Date</th></tr>
@@ -63,16 +110,31 @@ function renderDashboard(role) {
         </table>
       </div>
       <div class="panel">
-  <div class="panel-title">Recently Completed Sessions</div>
+<div class="dash-panel-header">
+  <div class="dash-panel-icon green">
+    <i class="bi bi-check-circle"></i>
+  </div>
+  <span>Recently Completed Sessions</span>
+</div>
   <div class="upcoming-list" id="recentSessions"></div>
 </div>
 <div class="panel">
-  <div class="panel-title">Course Progress</div>
+<div class="dash-panel-header">
+  <div class="dash-panel-icon blue">
+    <i class="bi bi-bar-chart"></i>
+  </div>
+  <span>Course Progress</span>
+</div>
   <div id="courseProgressList"></div>
 </div>
 
 <div class="panel">
-  <div class="panel-title">Teacher Leaderboard</div>
+<div class="dash-panel-header">
+  <div class="dash-panel-icon orange">
+    <i class="bi bi-trophy"></i>
+  </div>
+  <span>Teacher Leaderboard</span>
+</div>
   <div id="teacherLeaderboard"></div>
 </div>
 
@@ -83,56 +145,123 @@ function renderDashboard(role) {
     title.textContent = "Teacher Dashboard";
     subtitle.textContent = "Your teaching overview";
 
-    cards.innerHTML = `
-      <div class="card"><div class="label">Assigned Courses</div><div class="value" id="teacherCoursesCount">—</div></div>
-      <div class="card"><div class="label">Session Plans</div><div class="value" id="teacherSessionsCount">—</div></div>
-      <div class="card"><div class="label">Pending Evaluations</div><div class="value" id="teacherPendingCount">—</div></div>
-      <div class="card"><div class="label">Avg Rating</div><div class="value" id="teacherRating">—</div></div>
-    `;
+  cards.innerHTML = `
+  <div class="dash-card dash-blue">
+    <div class="dash-card-label">Assigned Courses</div>
+    <div class="dash-card-value" id="teacherCoursesCount">—</div>
+  </div>
 
-    left.innerHTML = `
-      <div class="panel-title">Your Rating Trend</div>
-      <canvas id="teacherLineChart"></canvas>
-    `;
+  <div class="dash-card dash-green">
+    <div class="dash-card-label">Session Plans</div>
+    <div class="dash-card-value" id="teacherSessionsCount">—</div>
+  </div>
 
-    right.innerHTML = `
-      <div class="panel">
-        <div class="panel-title">Your Session Plans</div>
-        <div class="list" id="teacherSessions"></div>
+  <div class="dash-card dash-orange">
+    <div class="dash-card-label">Pending Evaluations</div>
+    <div class="dash-card-value" id="teacherPendingCount">—</div>
+  </div>
+
+  <div class="dash-card dash-purple">
+    <div class="dash-card-label">Avg Rating</div>
+    <div class="dash-card-value" id="teacherRating">—</div>
+  </div>
+`;
+
+
+   left.innerHTML = `
+  <div class="dash-panel-header">
+    <div class="dash-panel-icon purple">
+      <i class="bi bi-star"></i>
+    </div>
+    <span>Your Rating Trend</span>
+  </div>
+  <canvas id="teacherLineChart"></canvas>
+`;
+
+
+   right.innerHTML = `
+  <div class="panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-icon blue">
+        <i class="bi bi-journal-text"></i>
       </div>
-      <div class="panel">
-        <div class="panel-title">Recent Feedback</div>
-        <div class="list" id="teacherFeedback"></div>
+      <span>Your Session Plans</span>
+    </div>
+    <div class="list" id="teacherSessions"></div>
+  </div>
+
+  <div class="panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-icon orange">
+        <i class="bi bi-chat-dots"></i>
       </div>
-    `;
+      <span>Recent Feedback</span>
+    </div>
+    <div class="list" id="teacherFeedback"></div>
+  </div>
+`;
+
   }
 
   if (role === "STUDENT") {
     title.textContent = "Student Dashboard";
     subtitle.textContent = "Your academic overview";
 
-    cards.innerHTML = `
-      <div class="card"><div class="label">My Courses</div><div class="value" id="studentCoursesCount">—</div></div>
-      <div class="card"><div class="label">Pending Evaluations</div><div class="value" id="studentPendingCount">—</div></div>
-      <div class="card"><div class="label">Completed Evaluations</div><div class="value" id="studentCompletedCount">—</div></div>
-      <div class="card"><div class="label">Session Plans</div><div class="value" id="studentSessionsCount">—</div></div>
-    `;
+   cards.innerHTML = `
+  <div class="dash-card dash-blue">
+    <div class="dash-card-label">My Courses</div>
+    <div class="dash-card-value" id="studentCoursesCount">—</div>
+  </div>
+
+  <div class="dash-card dash-orange">
+    <div class="dash-card-label">Pending Evaluations</div>
+    <div class="dash-card-value" id="studentPendingCount">—</div>
+  </div>
+
+  <div class="dash-card dash-green">
+    <div class="dash-card-label">Completed Evaluations</div>
+    <div class="dash-card-value" id="studentCompletedCount">—</div>
+  </div>
+
+  <div class="dash-card dash-purple">
+    <div class="dash-card-label">Session Plans</div>
+    <div class="dash-card-value" id="studentSessionsCount">—</div>
+  </div>
+`;
+ 
 
     left.innerHTML = `
-      <div class="panel-title">My Evaluation History</div>
-      <canvas id="studentBarChart"></canvas>
-    `;
+  <div class="dash-panel-header">
+    <div class="dash-panel-icon blue">
+      <i class="bi bi-bar-chart-line"></i>
+    </div>
+    <span>My Evaluation History</span>
+  </div>
+  <canvas id="studentBarChart"></canvas>
+`;
 
-    right.innerHTML = `
-      <div class="panel">
-        <div class="panel-title">My Session Plans</div>
-        <div class="list" id="studentSessions"></div>
+   right.innerHTML = `
+  <div class="panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-icon green">
+        <i class="bi bi-calendar-check"></i>
       </div>
-      <div class="panel">
-        <div class="panel-title">Courses to Evaluate</div>
-        <div class="list" id="studentPendingTeachers"></div>
+      <span>My Session Plans</span>
+    </div>
+    <div class="list" id="studentSessions"></div>
+  </div>
+
+  <div class="panel">
+    <div class="dash-panel-header">
+      <div class="dash-panel-icon orange">
+        <i class="bi bi-pencil-square"></i>
       </div>
-    `;
+      <span>Courses to Evaluate</span>
+    </div>
+    <div class="list" id="studentPendingTeachers"></div>
+  </div>
+`;
+
   }
 }
 
@@ -373,16 +502,12 @@ async function loadCourseProgress() {
   box.innerHTML = list.map(c => `
     <div class="list-item">
       <strong>${c.course}</strong><br>
-      <div style="background:#eee;border-radius:6px;overflow:hidden">
-        <div style="
-          width:${c.progress}%;
-          background:#4c6fff;
-          color:#fff;
-          padding:4px 8px;
-          font-size:12px
-        ">
-          ${c.progress}%
-        </div>
+      <div class="progress-track">
+  <div class="progress-fill" style="width:${c.progress}%">
+    ${c.progress}%
+  </div>
+</div>
+
       </div>
     </div>
   `).join("");

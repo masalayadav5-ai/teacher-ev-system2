@@ -11,9 +11,10 @@
 
 .evaluation-container {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    max-width: 900px;
+    width: 100%;
     margin: 0 auto;
     color: #333;
+ 
 }
 
 /* Header */
@@ -48,12 +49,13 @@
 }
 
 .section-title {
-    font-size: 22px;
-    color: #4c6fff;
-    margin-bottom: 10px;
+    font-size: 20px;
     font-weight: 600;
-    text-align: center;
+    color: #111827;
+    margin-bottom: 20px;
+    text-align: left;
 }
+
 
 .section-subtitle {
     font-size: 15px;
@@ -264,26 +266,27 @@
 }
 
 .submit-button {
-    background: linear-gradient(to right, #3498db, #2980b9);
-    color: white;
-    border: none;
-    padding: 16px 48px;
-    font-size: 17px;
+    background: #4c6fff;
+    color: #ffffff;
+
+    border: 1px solid #e5e7eb;   /* light grey border */
+    outline: none;
+
+    border-radius: 10px;
+    padding: 14px 36px;
+    font-size: 15px;
     font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+
+    box-shadow: 0 6px 14px rgba(76, 111, 255, 0.25);
+    transition: all 0.2s ease;
 }
 
 .submit-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
+    background: #3f5be0;
+    border-color: #c7d2fe;      /* softer hover border */
+    transform: translateY(-1px);
 }
 
-.submit-button:active {
-    transform: translateY(0);
-}
 
 .survey-note {
     font-size: 14px;
@@ -382,31 +385,25 @@
 }
 
 .parameter-card {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 15px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    transition: all 0.2s ease;
 }
 
 .parameter-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
 }
+
 
 .parameter-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
 }
-
-.parameter-type {
-    background: #ecf0f1;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-}
+ 
 
 .parameter-status {
     font-size: 12px;
@@ -414,15 +411,22 @@
     border-radius: 4px;
 }
 
+.parameter-type {
+    background: #eef2ff;
+    color: #3730a3;
+    font-weight: 600;
+}
+
 .parameter-status.active {
-    background: #d4edda;
-    color: #155724;
+    background: #dcfce7;
+    color: #166534;
 }
 
 .parameter-status.inactive {
-    background: #f8d7da;
-    color: #721c24;
+    background: #fee2e2;
+    color: #991b1b;
 }
+
 
 .parameter-body {
     margin-bottom: 15px;
@@ -456,24 +460,25 @@
 }
 
 .btn-edit {
-    background: #f8f9fa;
-    color: #495057;
-    border: 1px solid #ddd;
+    background: #f1f5f9;
+    color: #334155;
+    border-radius: 8px;
 }
 
 .btn-edit:hover {
-    background: #e9ecef;
+    background: #e2e8f0;
 }
 
 .btn-delete {
-    background: #f8f9fa;
-    color: #dc3545;
-    border: 1px solid #ddd;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 8px;
 }
 
 .btn-delete:hover {
-    background: #f8d7da;
+    background: #fecaca;
 }
+
 
 /* Form styles for admin */
 .form-group {
@@ -481,38 +486,28 @@
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 8px;
+    font-size: 14px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #374151;
 }
 
-.form-group select,
-.form-group input[type="text"],
-.form-group input[type="number"],
-.form-group textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 15px;
-    font-family: inherit;
-    transition: all 0.2s ease;
+.form-group input,
+.form-group textarea,
+.form-group select {
+    background: #ffffff;
+    border: 1.8px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 14px;
 }
 
-.form-group select:focus,
-.form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #4c6fff;
+    box-shadow: 0 0 0 3px rgba(76, 111, 255, 0.12);
 }
 
-.form-group textarea {
-    min-height: 100px;
-    resize: vertical;
-}
 
 .scale-labels-input {
     display: flex;
@@ -532,6 +527,49 @@
     color: #666;
     font-weight: 600;
 }
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 10px;
+    margin-bottom: 16px;
+}
+.checkbox-group input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+
+    width: 18px;
+    height: 18px;
+
+    border-radius: 5px;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+
+    display: grid;
+    place-content: center;
+
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.checkbox-group input[type="checkbox"]:checked {
+    background: #4c6fff;
+    border-color: #4c6fff;
+}
+.checkbox-group input[type="checkbox"]:checked::before {
+    content: "✔";
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+.checkbox-group label {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+}
+
 
 /* ============================================
    COMMON STYLES (Both forms)
@@ -749,14 +787,7 @@
         width: 100%;
     }
 }
-
-/* Page title styles for admin */
-.page-subtitle {
-    color: #7f8c8d;
-    margin-bottom: 30px;
-    font-size: 16px;
-    text-align: center;
-}
+ 
 
 /* Checkbox and radio alignment */
 .form-group label input[type="checkbox"],
@@ -780,17 +811,7 @@
     margin-bottom: 0;
     cursor: pointer;
 }
-
-/* Container padding 
-.container {
-    padding: 20px;
-}*/
-/*.container {
-    min-height: 100vh;            FULL screen height 
-    display: flex;
-    flex-direction: column;
-}*/
-/* Success/Error states */
+ 
 .success-state {
     background: #d4edda;
     border: 1px solid #c3e6cb;
@@ -813,18 +834,31 @@
 
 /* ================= ADMIN SURVEY SECTION ================= */
 .admin-survey {
-    background: linear-gradient(to right, #eef2ff, #f8faff);
-    border: 1px solid #dbeafe;
+    background: #f9fafb;        /* light form grey */
+    border-radius: 16px;
+    padding: 32px;
+
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.05),
+        0 4px 10px rgba(0, 0, 0, 0.03);
+}
+.admin-survey input,
+.admin-survey textarea,
+.admin-survey select {
+    background: #ffffff;
 }
 
-/* ================= CATEGORY LIST SECTION ================= */
+
 .admin-category-section {
-    margin-top: 50px;
-    padding: 30px;
-    background: #ffffff;
-    border-radius: 14px;
+    margin-top: 40px;
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 32px;
     border: 1px solid #e5e7eb;
 }
+
+
 
 /* Category header */
 .category-section {

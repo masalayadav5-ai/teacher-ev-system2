@@ -1,19 +1,4 @@
-/* ================================
-   BLOCK DASHBOARD STYLES
-   INSIDE ACADEMIC MANAGEMENT
-================================ */
-.academic-management-page .sidebar,
-.academic-management-page .topbar,
-.academic-management-page .cards,
-.academic-management-page .panel,
-.academic-management-page .card,
-.academic-management-page .table,
-.academic-management-page .nav,
-.academic-management-page .nav-item,
-.academic-management-page .content-grid,
-.academic-management-page .dashboard-card {
-  all: unset;
-}
+ 
 
 /* Reset */
 * {
@@ -63,19 +48,39 @@ a {
 
 /* Hide text when collapsed */
 .sidebar.collapsed .nav-link {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+  width: 44px;
+  height: 44px;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px;
+}
+.sidebar.collapsed nav {
+  align-items: center;
 }
 
+/* Nav item container */
+.sidebar.collapsed .nav-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 .sidebar.collapsed .nav-link i {
-    margin: 0 !important;
+  margin: 0 !important;
+  font-size: 18px;
+}
+.sidebar.collapsed .nav-item.active .nav-link {
+  background: #eef2ff;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
 }
 
-.sidebar.collapsed .nav-link i {
-    margin-right: 0;
+/* Optional: stronger visual cue */
+.sidebar.collapsed .nav-item.active .nav-link i {
+  color: #4c6fff;
 }
-
 /* Hide title text in collapsed mode */
 .sidebar:not(.collapsed) .nav-link span {
     display: inline;
@@ -125,7 +130,7 @@ nav ul,
 }
 
 .sidebar {
-    width: 250px;
+    width: 305px;
     background: white;
     border-radius: 14px;
     padding: 22px;
@@ -179,6 +184,43 @@ nav {
 
 .nav-item.active {
     background: #eef2ff;
+}
+/* ===============================
+   SIDEBAR ACTIVE STATE
+   =============================== */
+
+.nav-item .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* Hover */
+.nav-item .nav-link:hover {
+  background: #f1f5ff;
+  color: #4c6fff;
+}
+
+/* ACTIVE */
+.nav-item.active .nav-link {
+  background: #eef2ff;
+  color: #4c6fff;
+  font-weight: 600;
+}
+
+/* Icon color when active */
+.nav-item.active .nav-link i {
+  color: #4c6fff;
+}
+/* Prevent sidebar text wrapping */
+.nav-link span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Main Section */
@@ -708,12 +750,15 @@ nav {
    CHANGE PASSWORD MODAL VISIBILITY
    =============================== */
 
-/* Hide change password modal by default */
 .password-modal-overlay {
-  display: none !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-/* Show only when JS adds .show */
 .password-modal-overlay.show {
-  display: flex !important;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
+

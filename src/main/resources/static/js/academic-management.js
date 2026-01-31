@@ -2116,9 +2116,11 @@ async function courseExists(code, name, semesterId, excludeId = null) {
   );
 }
 function toggleSidebar() {
-  if (document.querySelector(".academic-management-page")) {
-    return; // ⛔ stop collapsing on this page
-  }
+  const sidebar = document.getElementById("sidebar");
 
-  document.getElementById("sidebar").classList.toggle("collapsed");
+  // force reflow-safe toggle
+  requestAnimationFrame(() => {
+    sidebar.classList.toggle("collapsed");
+  });
 }
+

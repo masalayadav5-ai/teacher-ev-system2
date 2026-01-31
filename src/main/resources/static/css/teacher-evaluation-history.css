@@ -3,12 +3,12 @@
    Fully isolated (does NOT touch common.css)
 ========================================== */
 
-.teacher-page {
+.ev-teacher-page {
   background: transparent !important;
 }
 
 /* ===== Main Card ===== */
-.teacher-page .analytics-card.glass {
+.ev-teacher-page .analytics-card.glass {
   background: linear-gradient(180deg, #f9fbff, #eef3ff) !important;
   border: 1px solid rgba(76, 111, 255, 0.28) !important;
   box-shadow: 0 14px 38px rgba(76, 111, 255, 0.18) !important;
@@ -20,17 +20,17 @@
 }
 
 /* ===== Wrapper ===== */
-.teacher-page .analytics-card {
+.ev-teacher-page .analytics-card {
   width: 100%;
    margin: 0;
 }
 
 /* ===== Form Controls ===== */
-.teacher-page .form-group {
+.ev-teacher-page .form-group {
   margin-bottom: 20px;
 }
 
-.teacher-page .form-group label {
+.ev-teacher-page .form-group label {
   color: #4c6fff;
   font-weight: 600;
   margin-bottom: 6px;
@@ -38,7 +38,7 @@
   font-size: 14px;
 }
 
-.teacher-page .form-group select {
+.ev-teacher-page .form-group select {
   width: 100%;
   height: 44px;
   padding: 0 14px;
@@ -52,24 +52,24 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.teacher-page .form-group select:focus {
+.ev-teacher-page .form-group select:focus {
   border-color: #4c6fff;
   box-shadow: 0 0 0 2px rgba(76, 111, 255, 0.18);
 }
-.teacher-page .form-group select:hover {
+.ev-teacher-page .form-group select:hover {
   border-color: rgba(76, 111, 255, 0.55);
 }
 
 
 /* ===== KPI Cards ===== */
-.teacher-page .analytics-kpis {
+.ev-teacher-page .analytics-kpis {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
   margin-bottom: 22px;
 }
 
-.teacher-page .kpi-card {
+.ev-teacher-page .kpi-card {
   padding: 18px;
   border-radius: 14px;
   background: #ffffff;
@@ -78,14 +78,14 @@
   transition: 0.2s ease;
 }
 
-.teacher-page .kpi-card span {
+.ev-teacher-page .kpi-card span {
   display: block;
   color: #64748b;
   font-size: 13px;
   letter-spacing: 0.4px;
 }
 
-.teacher-page .kpi-card strong {
+.ev-teacher-page .kpi-card strong {
   display: block;
   font-size: 28px;
   color: #0f172a;
@@ -93,19 +93,19 @@
   font-weight: 700;
 }
 
-.teacher-page .kpi-card.highlight {
+.ev-teacher-page .kpi-card.highlight {
   background: linear-gradient(135deg, #4c6fff, #6c8cff);
   border-color: rgba(76, 111, 255, 0.65);
   box-shadow: 0 14px 34px rgba(76, 111, 255, 0.45);
 }
 
-.teacher-page .kpi-card.highlight span,
-.teacher-page .kpi-card.highlight strong {
+.ev-teacher-page .kpi-card.highlight span,
+.ev-teacher-page .kpi-card.highlight strong {
   color: #ffffff;
 }
 
 /* ===== Chart ===== */
-.teacher-page canvas#teacherChart {
+.ev-teacher-page canvas#teacherChart {
   margin-top: 18px;
   border-radius: 14px;
   background: #ffffff;
@@ -115,7 +115,7 @@
 }
 
 /* ===== Table ===== */
-.teacher-page .analytics-table {
+.ev-teacher-page .analytics-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 24px;
@@ -125,19 +125,19 @@
   box-shadow: 0 10px 28px rgba(76, 111, 255, 0.15);
 }
 
-.teacher-page .analytics-table thead {
+.ev-teacher-page .analytics-table thead {
   background: rgba(76, 111, 255, 0.08);
 }
 
-.teacher-page .analytics-table th,
-.teacher-page .analytics-table td {
+.ev-teacher-page .analytics-table th,
+.ev-teacher-page .analytics-table td {
   padding: 14px 16px;
   border-bottom: 1px solid rgba(76, 111, 255, 0.15);
   color: #1e293b;
   font-size: 14px;
 }
 
-.teacher-page .analytics-table th {
+.ev-teacher-page .analytics-table th {
   font-weight: 700;
   letter-spacing: 0.6px;
   color: #4c6fff;
@@ -145,29 +145,29 @@
   text-transform: uppercase;
 }
 
-.teacher-page .analytics-table tr:hover {
+.ev-teacher-page .analytics-table tr:hover {
   background: rgba(76, 111, 255, 0.06);
 }
 
 /* ===== Rating Colors ===== */
-.teacher-page .rating-low  { color: #ff5c5c; font-weight: 700; }
-.teacher-page .rating-mid  { color: #f59e0b; font-weight: 700; }
-.teacher-page .rating-high { color: #22c55e; font-weight: 700; }
+.ev-teacher-page .rating-low  { color: #ff5c5c; font-weight: 700; }
+.ev-teacher-page .rating-mid  { color: #f59e0b; font-weight: 700; }
+.ev-teacher-page .rating-high { color: #22c55e; font-weight: 700; }
 
 /* ===== Loading ===== */
-.teacher-page .loading-state {
+.ev-teacher-page .loading-state {
   text-align: center;
   padding: 60px 20px;
   color: #4c6fff;
 }
 
-.teacher-page .loading-state i {
+.ev-teacher-page .loading-state i {
   font-size: 28px;
   margin-bottom: 10px;
 }
 
 /* ===== Empty ===== */
-.teacher-page .no-data {
+.ev-teacher-page .no-data {
   color: #64748b;
   text-align: center;
   padding: 40px;
@@ -175,10 +175,10 @@
 }
 
 /* ===== HARD OVERRIDES (kill any dark parent styles) ===== */
-.teacher-page,
-.teacher-page .layout,
-.teacher-page .main-content,
-.teacher-page .content-area {
+.ev-teacher-page,
+.ev-teacher-page .layout,
+.ev-teacher-page .main-content,
+.ev-teacher-page .content-area {
   background: transparent !important;
   filter: none !important;
   opacity: 1 !important;
@@ -225,7 +225,16 @@
   border-radius: 999px;
   font-weight: 600;
 }
-
+.back-btn {
+    padding: 8px 16px;
+    background: #4c6fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: white;
+    transition: all 0.2s ease;
+}
 .view-btn {
   margin-top: 10px;
   background: #4c6fff;

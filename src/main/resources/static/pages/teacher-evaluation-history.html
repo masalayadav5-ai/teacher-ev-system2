@@ -1,33 +1,36 @@
- <link rel="stylesheet" href="/css/common.css">
+<link rel="stylesheet" href="/css/common.css">
 <link rel="stylesheet" href="/css/teacher-evaluation-history.css">
+
+
 <div class="page-header admin-only" id="adminTeacherHeader" style="display:none">
-  <button class="back-btn" onclick="goBackToAdminAnalytics()">
-    <i class="fas fa-arrow-left"></i> Back
-  </button>
+   
+    <button class="back-btn" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
+        <i class="fas fa-arrow-left"></i> Back
+    </button>
 
-  
+
 </div>
 
-<div class="teacher-page">
-  <div class="layout">
-    <main class="main-content">
-      <section class="content-area">
+<div class="ev-teacher-page">
+    <div class="layout">
+        <main class="main-content">
+            <section class="content-area">
 
-       <div class="page-header">
-  <h2 class="page-title" id="mainHistoryTitle">
-    My Evaluation History
-  </h2>
-</div>
+                <div class="page-header">
+                    <h2 class="page-title" id="mainHistoryTitle">
+                        My Evaluation History
+                    </h2>
+                </div>
 
 
- <p class="page-subtitle">
-    View your evaluation summary & insights
-  </p>
-        <div id="teacherEvaluationHistoryContainer"></div>
+                <p class="page-subtitle">
+                    View your evaluation summary & insights
+                </p>
+                <div id="teacherEvaluationHistoryContainer"></div>
 
-      </section>
-    </main>
-  </div>
+            </section>
+        </main>
+    </div>
 </div>
 
 <script src="/js/teacher-evaluation-history.js"></script>

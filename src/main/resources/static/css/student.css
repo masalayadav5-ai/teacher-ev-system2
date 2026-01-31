@@ -141,9 +141,8 @@
     color: white;
 }
 
-/* ================= ACTION BUTTONS ================= */
-/* ================= ACTION BUTTONS (Edit / View) ================= */
-.action-btn {
+ /* ================= ACTION BUTTONS (Edit / View) ================= */
+.student-page .action-btn {
     background: #3b82f6;          /* BLUE */
     color: #fff;
     padding: 9px 18px;
@@ -157,12 +156,12 @@
     transition: background 0.3s ease;
 }
 
-.action-btn:hover {
+.student-page .action-btn:hover {
     background: #2563eb;
 }
 
 /* ================= STATUS BUTTON BASE ================= */
-.status-btn {
+.student-page .status-btn {
     padding: 6px 14px;
     border-radius: 16px;
     font-size: 12px;
@@ -176,20 +175,20 @@
 /* ================= STATUS COLORS ================= */
 
 /* PENDING → YELLOW */
-.pending-btn {
+.student-page .pending-btn {
     background: #f59e0b;
     color: #fff;
 }
-.pending-btn:hover {
+.student-page .pending-btn:hover {
     background: #d97706;
 }
 
 /* ACTIVE → GREEN */
-.approve-btn {
+.student-page .approve-btn {
     background: #22c55e;
     color: #fff;
 }
-.approve-btn:hover {
+.student-page .approve-btn:hover {
     background: #16a34a;
 }
 
@@ -212,7 +211,7 @@
 
 /* ================= MESSAGE POPUP ================= */
 
-.message-container {
+.student-page .message-container {
     position: fixed;
     top: 20px;
     left: 50%;
@@ -229,13 +228,40 @@
 }
 
 /* SUCCESS MESSAGE */
-.message-container.success {
+.student-page .message-container.success {
     background-color: #28a745;
     color: #ffffff;
 }
 
 /* ERROR MESSAGE */
-.message-container.error {
+.student-page .message-container.error {
     background-color: #dc3545;
     color: #ffffff;
+}
+/* ===== STUDENT MODAL ===== */
+
+.student-modal-card {
+  width: 640px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.student-modal .modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.student-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 30px 20px 25px;   /* ✅ extra right padding */
+}
+
+.student-modal .modal-footer {
+  padding: 16px 25px;
+  border-top: 1px solid #eee;
+  background: #fff;
 }

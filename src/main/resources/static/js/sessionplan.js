@@ -1,28 +1,3 @@
-async function getCurrentUser() {
-  try {
-    const res = await fetch("/admin/api/userinfo");
-    if (!res.ok) throw new Error("Failed to load user info");
-
-    const user = await res.json();
-    if (!user.role) return null;
-
-    return {
-      role: user.role,
-      username: user.username || user.fullName || "User",
-
-      // teacher
-      teacherId: user.teacherDbId || null,
-
-      // student
-      studentId: user.studentId || null,
-      programId: user.programId || null,
-      semesterId: user.semesterId || null
-    };
-  } catch (e) {
-    console.error("Failed to fetch user info:", e);
-    return null;
-  }
-}
 
 function initSessionPlan() {
     const sessionModal = document.getElementById("sessionModal");
@@ -267,29 +242,32 @@ function initSessionPlan() {
     const modalClose = document.querySelector('.modal-close');
 
     if (addSessionBtn) {
-        addSessionBtn.addEventListener('click', async function () {
+      addSessionBtn.addEventListener('click', async function () {
 
-           const user = await getCurrentUser();
+  const currentUser = await Auth.getCurrentUser();
 
-if (user?.role !== "TEACHER" || !user.teacherId) {
-  showMessage("Please login as a teacher to create session plans.", "error");
-  return;
-}
+  console.log("NORMALIZED USER:", currentUser);
 
-currentTeacher = user;
+  if (currentUser?.role !== "TEACHER") {
+    showMessage("Only teachers can create session plans.", "error");
+    return;
+  }
 
+  if (!currentUser.teacherId) {
+    showMessage("Teacher profile not linked. Contact admin.", "error");
+    return;
+  }
 
-            if (!currentTeacher) {
-                showMessage("Please login as a teacher to create session plans.", "error");
-                return;
-            }
+  currentTeacher = { teacherId: currentUser.teacherId };
 
-            resetForm();
-            await fetchTeacherCourses(currentTeacher.teacherId);   // 🔥 now correct ID
-            modalOverlay.style.display = 'flex';
-        });
+  resetForm();
+  await fetchTeacherCourses(currentTeacher.teacherId);
+  modalOverlay.style.display = 'flex';
+});
+
 
     }
+
 
     if (modalClose) {
         modalClose.addEventListener('click', () => {
@@ -466,7 +444,7 @@ async function loadPublishedPlans() {
   const tbody = document.querySelector(".session-table tbody");
   if (!tbody) return;
 
-  const currentUser = await getCurrentUser();
+  const currentUser = await Auth.getCurrentUser();
 window._currentUser = currentUser;   // 🔥 REQUIRED
 
   if (!currentUser) {
@@ -476,9 +454,20 @@ window._currentUser = currentUser;   // 🔥 REQUIRED
 
   let apiUrl = "";
 
-  if (currentUser.role === "TEACHER") {
-    apiUrl = `/api/session-plans/teacher/${currentUser.teacherId}/visible`;
+ if (currentUser.role === "TEACHER") {
+
+  if (!currentUser.teacherId) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5">Teacher profile not linked properly</td>
+      </tr>
+    `;
+    return;
   }
+
+  apiUrl = `/api/session-plans/teacher/${currentUser.teacherId}/visible`;
+}
+
 
   else if (currentUser.role === "ADMIN") {
     apiUrl = `/api/session-plans`;

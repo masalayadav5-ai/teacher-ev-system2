@@ -132,11 +132,8 @@ loadQualificationsForTeacher();
     setTextContent("#submitTeacherBtn", "Submit");
     
     // Show modal
-    const panel = document.getElementById("teacherPanel");
-    if (panel) {
-        panel.style.display = "flex";
-        panel.classList.add("show");
-    }
+     document.getElementById("teacherPanel").classList.add("show");
+    document.body.style.overflow = "hidden";
 }
 
 // ================= EDIT TEACHER =================
@@ -491,11 +488,8 @@ async function hideTeacher(id) {
 // ================= CLOSE MODAL =================
 function closeTeacherPanel() {
     const panel = document.getElementById("teacherPanel");
-    if (panel) {
-        panel.style.display = "none";
-        panel.classList.remove("show");
-    }
-    
+    panel.classList.remove("show");
+    document.body.style.overflow = "";
     resetTeacherForm();
     editingTeacherId = null;
 }

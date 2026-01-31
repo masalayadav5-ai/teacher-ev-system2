@@ -1,26 +1,11 @@
+.academic-management-page {
+  width: 100%;
+}
 .academic-management-container {
 
-    padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-
-/* Page Header */
-.academic-management-page .page-header {
-    margin-bottom: 30px;
-}
-
-.academic-management-page .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.academic-management-page .page-subtitle {
-    color: #666;
-    font-size: 14px;
+   width: 100%;
+  margin: 0 auto;
+  padding: 24px;
 }
 
 /* Tabs */
@@ -164,6 +149,8 @@
 
 /* Tables */
 .academic-management-page .table-container {
+     width: 100%;
+     table-layout: auto;
     overflow-x: auto;
 }
 
@@ -414,7 +401,7 @@
 
 /* Modals */
 /* ===== ADMIN MODALS ONLY ===== */
-.academic-management-page .modal-overlay {
+.am-modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -424,11 +411,11 @@
   justify-content: center;
 }
 
-.academic-management-page .modal-overlay.show {
+.am-modal-overlay.show {
   display: flex !important;
 }
 
-.academic-management-page .modal-content {
+ .am-modal{
   background: #fff;
   border-radius: 12px;
   width: 90%;
@@ -438,7 +425,7 @@
   position: relative;
 }
 
-.academic-management-page .modal-header {
+.am-modal-header {
   padding: 20px;
   border-bottom: 1px solid #dee2e6;
   display: flex;
@@ -447,12 +434,12 @@
 }
 
 
-.academic-management-page .modal-header h4 {
+.am-modal-header h4 {
     margin: 0;
     font-size: 18px;
 }
 
-.academic-management-page .modal-close {
+.am-modal-close {
     background: none;
     border: none;
     font-size: 24px;
@@ -460,11 +447,11 @@
     color: #666;
 }
 
-.academic-management-page .modal-body {
+.am-modal-body {
   padding: 20px;
 }
 
-.academic-management-page .modal-footer {
+.am-modal-footer {
   padding: 15px 20px;
   border-top: 1px solid #dee2e6;
   display: flex;
@@ -586,19 +573,7 @@
   from { opacity: 0; transform: translate(-50%, -15px); }
   to   { opacity: 1; transform: translate(-50%, 0); }
 }
-
-
-/* === SAFE ISOLATION ONLY === */
-.academic-management-page .management-tabs,
-.academic-management-page .tab-content,
-.academic-management-page .tab-pane,
-.academic-management-page .management-table,
-.academic-management-page .modal-overlay,
-.academic-management-page .modal-content {
-  all: unset;
-  display: revert;
-}
-
+ 
 .academic-management-page,
 .academic-management-page * {
   box-sizing: border-box;

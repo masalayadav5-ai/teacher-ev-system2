@@ -286,6 +286,7 @@ function openAddStudent() {
     document.getElementById("confirmPasswordRow").style.display = "block";
 
     document.getElementById("studentPanel").classList.add("show");
+    document.body.style.overflow = "hidden";
 }
 
 // ================= EDIT STUDENT =================
@@ -562,11 +563,13 @@ function showMessage(msg, type) {
 }
 
 // ================= CLOSE MODAL =================
-document.querySelector(".modal-close").onclick = () => {
+document.querySelector("#studentPanel .modal-close").onclick = () => {
     document.getElementById("studentPanel").classList.remove("show");
-    editingStudentId = null;
+    document.body.style.overflow = "";
+        editingStudentId = null;
     resetStudentForm();
 };
+
 async function loadBatchesForStudent(selectedBatch = null) {
     try {
         const res = await fetch(`${STUDENT_API_BASE_URL}/admin/batches`);

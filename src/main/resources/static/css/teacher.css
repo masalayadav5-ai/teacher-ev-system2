@@ -134,7 +134,7 @@
 
 /* ================= ACTION BUTTONS ================= */
 
-.action-btn {
+.teacher-page .action-btn {
     padding: 9px 18px;
     border: none;
     border-radius: 10px;
@@ -147,34 +147,43 @@
 }
 
 /* DEFAULT BUTTON (fallback) */
-.action-btn {
+.teacher-page .action-btn {
     background: #4c6fff;
     color: #ffffff;
 }
 
-.action-btn:hover {
+.teacher-page .action-btn:hover {
     background: #3a57de;
 }
 
 /* ================= STATUS BUTTONS ================= */
 
 /* APPROVE BUTTON (status = Pending) */
-.approve-btn {
+.teacher-page .approve-btn {
     background: #22c55e;
     color: white;
 }
 
-.approve-btn:hover {
+.teacher-page .approve-btn:hover {
     background: #16a34a;
 }
-
+.teacher-page .status-btn {
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    min-width: 90px;
+    transition: all 0.2s ease;
+}
 /* PENDING BUTTON (status = Active) */
-.pending-btn {
+.teacher-page .pending-btn {
     background: #facc15;
     color: #000;
 }
 
-.pending-btn:hover {
+.teacher-page .pending-btn:hover {
     background: #eab308;
 }
 
@@ -196,7 +205,7 @@
 
 /* ================= MESSAGE POPUP ================= */
 
-.message-container {
+.teacher-page .message-container {
     position: fixed;
     top: 20px;
     left: 50%;
@@ -213,31 +222,64 @@
 }
 
 /* SUCCESS MESSAGE */
-.message-container.success {
+.teacher-page .message-container.success {
     background-color: #28a745;
     color: #ffffff;
 }
 
 /* ERROR MESSAGE */
-.message-container.error {
+.teacher-page .message-container.error {
     background-color: #dc3545;
     color: #ffffff;
 }
-.message-container {
+.teacher-page .message-container {
     padding: 12px 20px;
     border-radius: 8px;
     margin-top: 10px;
     font-weight: 500;
 }
 
-.message-success {
+.teacher-page .message-success {
     background: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
 }
 
-.message-error {
+.teacher-page .message-error {
     background: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+ 
+ 
+/* ===== TEACHER MODAL ===== */
+
+/* ===== TEACHER MODAL CARD ===== */
+.teacher-modal-card {
+  width: 640px;                 /* same visual size as student */
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 18px;          /* ✅ rounded corners */
+  overflow: hidden;             /* ✅ keeps rounding clean */
+}
+
+
+.teacher-modal .modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.teacher-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 30px 20px 25px;   /* ✅ same fix */
+}
+
+.teacher-modal .modal-footer {
+  padding: 16px 25px;
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+

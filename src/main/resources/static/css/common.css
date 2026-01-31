@@ -1,63 +1,71 @@
 /* ================= COMMON STYLES ================= */
-:not(.academic-management-page) .page-header {
+.page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 6px;
 }
-
-:not(.academic-management-page) .page-title {
+.page-title {
     font-size: 26px;
     font-weight: 700;
     margin-bottom: 6px;
     color: #4c6fff;
 }
 
-:not(.academic-management-page) .page-subtitle {
+.page-subtitle {
     font-size: 15px;
     color: #777;
     margin-bottom: 24px;
 }
 /* Modal Background */
-:not(.academic-management-page) .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.35);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-top: 0;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: 0.3s ease;
-    z-index: 1000;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: 0.3s ease;
+  z-index: 3000;
 }
 
-:not(.academic-management-page) .modal-overlay.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
-/* Modal Card */
-:not(.academic-management-page) .modal-card {
-    background: #fff;
-    width: 600px;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transform: translateY(-30px);
-    transition: 0.3s ease;
-    max-width: 95%;
+.modal-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: 0.3s ease;
 }
 
-:not(.academic-management-page) .modal-overlay.show .modal-card {
+.modal-body {
+  flex: 1;
+ }
+
+.modal-overlay.show .modal-card {
     transform: translateY(0);
+}
+.modal-header,
+.modal-footer {
+   background: #fff;
+  z-index: 2;
+}
+.modal-header {
+  top: 0;
+}
+.modal-footer {
+  bottom: 0;
 }
 
 /* Close Button */
-:not(.academic-management-page) .modal-close {
+ .modal-close {
     position: absolute;
     top: 12px;
     right: 18px;
@@ -66,7 +74,7 @@
     color: #666;
 }
 
-.modal-close:hover { color: #000; }
+.modal-close:hover { color: Red; }
 
 /* Submit Button */
 .submit-btn {
@@ -138,60 +146,4 @@ input:focus {
   from { opacity: 0; transform: translate(-50%, -20px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
-/* ================================
-   ACADEMIC MANAGEMENT – SIDEBAR FIX
-   ================================ */
-
-/* ⛔ Block dashboard sidebar styles */
-.academic-management-page .sidebar,
-.academic-management-page .nav,
-.academic-management-page .nav-item,
-.academic-management-page .nav-link,
-.academic-management-page .brand,
-.academic-management-page .logo,
-.academic-management-page .toggle-btn {
-  all: unset;
-  display: revert;
-}
-
-/* ✅ Restore sidebar layout ONLY for Academic Management */
-.academic-management-page .sidebar {
-  width: 250px;
-  background: white;
-  border-radius: 14px;
-  padding: 22px;
-  margin-right: 20px;
-  box-shadow: 0 6px 20px rgba(15, 23, 36, 0.06);
-}
-
-.academic-management-page .brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.academic-management-page .nav {
-  display: flex;
-  flex-direction: column;
-  margin-top: 18px;
-  gap: 8px;
-}
-
-.academic-management-page .nav-item {
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #334155;
-  font-weight: 600;
-}
-
-.academic-management-page .nav-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #334155;
-}
-
-.academic-management-page .nav-link:hover {
-  background: #eef2ff;
-}
+ 

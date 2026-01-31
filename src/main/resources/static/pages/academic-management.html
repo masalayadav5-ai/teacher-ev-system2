@@ -1,341 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Academic Management - SmarTeach</title>
-        <link rel="stylesheet" href="/css/common.css">
-        <link rel="stylesheet" href="/css/academic-management.css">
-        
+<link rel="stylesheet" href="css/academic-management.css">
 
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    </head>
-    <body>
-      <div class="academic-management-page">
-  <div class="academic-management-container">
+        <!-- Header -->
+        <div class="page-header">
+            <h2 class="page-title">
+                <i class="fas fa-cogs me-2"></i>Academic Management
+            </h2>
+        </div>
+        <p class="page-subtitle">Manage Programs, Semesters, Courses & Teacher Assignments</p>
 
-
-            <!-- Header -->
-            <div class="page-header">
-                <h2 class="page-title">
-                    <i class="fas fa-cogs me-2"></i>Academic Management
-                </h2>
-            </div>
-            <p class="page-subtitle">Manage Programs, Semesters, Courses & Teacher Assignments</p>
-
-            <!-- Tabs Navigation -->
-            <div class="management-tabs">
-                <div class="tabs-header">
-                    <button class="tab-btn active" onclick="showTab('programs', event)">
-                        <i class="fas fa-graduation-cap"></i> Programs
-                    </button>
-                    <button class="tab-btn" onclick="showTab('semesters', event)">
-                        <i class="fas fa-calendar-alt"></i> Semesters
-                    </button>
-                    <button class="tab-btn" onclick="showTab('courses', event)">
-                        <i class="fas fa-book"></i> Courses
-                    </button>
-                    <button class="tab-btn" onclick="showTab('batches', event)">
-                        <i class="fas fa-users"></i> Batches
-                    </button>
-                    <button class="tab-btn" onclick="showTab('qualifications')">
-                        🎓 Qualifications
-                    </button>
+        <div class="academic-management-page">
+            <div class="academic-management-container">
+                <!-- Tabs Navigation -->
+                <div class="management-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="showTab('programs', event)">
+                            <i class="fas fa-graduation-cap"></i> Programs
+                        </button>
+                        <button class="tab-btn" onclick="showTab('semesters', event)">
+                            <i class="fas fa-calendar-alt"></i> Semesters
+                        </button>
+                        <button class="tab-btn" onclick="showTab('courses', event)">
+                            <i class="fas fa-book"></i> Courses
+                        </button>
+                        <button class="tab-btn" onclick="showTab('batches', event)">
+                            <i class="fas fa-users"></i> Batches
+                        </button>
+                        <button class="tab-btn" onclick="showTab('qualifications')">
+                            🎓 Qualifications
+                        </button>
 
 
-                    <button class="tab-btn" onclick="showTab('teacher-assignments', event)">
-                        <i class="fas fa-chalkboard-teacher"></i> Teacher Assignments
-                    </button>
-                    <button class="tab-btn" onclick="showTab('overview', event)">
-                        <i class="fas fa-eye"></i> Overview
-                    </button>
-                </div>
-
-                <!-- Tab Contents -->
-                <div class="tab-content">
-                    <!-- Programs Tab -->
-                    <div id="programs-tab" class="tab-pane active">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-graduation-cap me-2"></i>Programs Management</h3>
-                            <button class="btn-add programAdd" onclick="openAddProgramModal()">
-                                <i class="fas fa-plus"></i> Add Program
-                            </button>
-                        </div>
-
-                        <div class="table-container">
-                            <table class="management-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Code</th>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Semesters</th>
-                                        <th>Students</th>
-                                        <th>Teachers</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="programsTable">
-                                    <!-- Programs will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
+                        <button class="tab-btn" onclick="showTab('teacher-assignments', event)">
+                            <i class="fas fa-chalkboard-teacher"></i> Teacher Assignments
+                        </button>
+                        <button class="tab-btn" onclick="showTab('overview', event)">
+                            <i class="fas fa-eye"></i> Overview
+                        </button>
                     </div>
 
-                    <!-- Semesters Tab -->
-                    <div id="semesters-tab" class="tab-pane">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-calendar-alt me-2"></i>Semesters Management</h3>
-                            <div class="filter-section">
-                                <select id="programFilter" class="form-select" onchange="loadSemestersByProgram()">
-                                    <option value="">Select Program</option>
-                                    <!-- Programs will be loaded here -->
-                                </select>
-                                <button class="btn-add semesterAdd" onclick="openAddSemesterModal()">
-                                    <i class="fas fa-plus"></i> Add Semester
+                    <!-- Tab Contents -->
+                    <div class="tab-content">
+                        <!-- Programs Tab -->
+                        <div id="programs-tab" class="tab-pane active">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-graduation-cap me-2"></i>Programs Management</h3>
+                                <button class="btn-add programAdd" onclick="openAddProgramModal()">
+                                    <i class="fas fa-plus"></i> Add Program
                                 </button>
                             </div>
-                        </div>
 
-                        <div class="table-container">
-                            <table class="management-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Program</th>
-
-                                        <th>Courses</th>
-                                        <th>Students</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="semestersTable">
-                                    <!-- Semesters will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Courses Tab -->
-                    <div id="courses-tab" class="tab-pane">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-book me-2"></i>Courses Management</h3>
-                            <div class="filter-section">
-                                <select id="courseProgramFilter" class="form-select" onchange="loadSemestersForCourses()">
-                                    <option value="">Select Program</option>
-                                </select>
-                                <select id="courseSemesterFilter" class="form-select" onchange="loadCoursesBySemester()">
-                                    <option value="">Select Semester</option>
-                                </select>
-                                <button class="btn-add courseAdd" onclick="openAddCourseModal()">
-                                    <i class="fas fa-plus"></i> Add Course
-                                </button>
+                            <div class="table-container">
+                                <table class="management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Semesters</th>
+                                            <th>Students</th>
+                                            <th>Teachers</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="programsTable">
+                                        <!-- Programs will be loaded here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
-                        <div class="table-container">
-                            <table class="management-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Code</th>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Credits</th>
-                                        <th>Semester</th>
-                                        <th>Teachers</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="coursesTable">
-                                    <!-- Courses will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="batches-tab" class="tab-pane">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-users me-2"></i>Batch Management</h3>
-                            <button class="btn-add" onclick="openAddBatchModal()">
-                                <i class="fas fa-plus"></i> Add Batch
-                            </button>
-                        </div>
-
-                        <table class="management-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Year</th>
-                                    <th>Term</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="batchesTable"></tbody>
-                        </table>
-                    </div>
-
-                    <div id="qualifications-tab" class="tab-pane">
-
-                        <div class="tab-header">
-                            <h3><i class="fas fa-graduation-cap me-2"></i>Qualification Management</h3>
-                            <button class="btn-add" onclick="openQualificationModal()">
-                                <i class="fas fa-plus"></i> Add Qualification
-                            </button>
-                        </div>
-
-                        <div class="table-container">
-                            <table class="management-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="qualificationTableBody"></tbody>
-                            </table>
-                        </div>
-
-                    </div>
-
-
-                    <!-- In Teacher Assignments Tab -->
-                    <div id="teacher-assignments-tab" class="tab-pane">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Course Assignments</h3>
-
-                        </div>
-
-                        <div class="assignment-container">
-                            <div class="teacher-list">
-                                <h4>Teachers</h4>
-                                <!-- NEW: Program filter inside teacher list -->
-                                <select id="teacherProgramFilter"
-                                        class="form-select mb-3"
-                                        onchange="loadTeachersByProgram()">
-                                    <option value="">Select Teacher Program</option>
-                                </select>
-                                <div id="teachersList" class="list-group">
-                                    <!-- Teachers will be loaded here -->
-                                </div>
-                            </div>
-
-                            <div class="course-assignment">
-
-                                <h4>
-                                    Course Assignments —
-                                    <span id="selectedTeacherName">Please select a teacher</span>
-                                </h4>
+                        <!-- Semesters Tab -->
+                        <div id="semesters-tab" class="tab-pane">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-calendar-alt me-2"></i>Semesters Management</h3>
                                 <div class="filter-section">
-
-                                    <!-- Course Program Filter (for fetching available courses) -->
-                                    <select id="courseProgramForAssignFilter" class="form-select" onchange="loadSemestersForCourseAssignments()">
-                                        <option value="">Select Course Program</option>
+                                    <select id="programFilter" class="form-select" onchange="loadSemestersByProgram()">
+                                        <option value="">Select Program</option>
+                                        <!-- Programs will be loaded here -->
                                     </select>
+                                    <button class="btn-add semesterAdd" onclick="openAddSemesterModal()">
+                                        <i class="fas fa-plus"></i> Add Semester
+                                    </button>
+                                </div>
+                            </div>
 
-                                    <!-- Course Semester Filter (for fetching available courses) -->
-                                    <select id="courseSemesterForAssignFilter" class="form-select" onchange="loadAvailableCourses()">
-                                        <option value="">Select Course Semester</option>
+                            <div class="table-container">
+                                <table class="management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Program</th>
+
+                                            <th>Courses</th>
+                                            <th>Students</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="semestersTable">
+                                        <!-- Semesters will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Courses Tab -->
+                        <div id="courses-tab" class="tab-pane">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-book me-2"></i>Courses Management</h3>
+                                <div class="filter-section">
+                                    <select id="courseProgramFilter" class="form-select" onchange="loadSemestersForCourses()">
+                                        <option value="">Select Program</option>
                                     </select>
+                                    <select id="courseSemesterFilter" class="form-select" onchange="loadCoursesBySemester()">
+                                        <option value="">Select Semester</option>
+                                    </select>
+                                    <button class="btn-add courseAdd" onclick="openAddCourseModal()">
+                                        <i class="fas fa-plus"></i> Add Course
+                                    </button>
+                                </div>
+                            </div>
 
-                                </div>   
-                                <div class="available-courses">
-                                    <h5>Available Courses</h5>
-                                    <div id="availableCourses" class="courses-list">
-                                        <!-- Available courses will be loaded here -->
+                            <div class="table-container">
+                                <table class="management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Code</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Credits</th>
+                                            <th>Semester</th>
+                                            <th>Teachers</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="coursesTable">
+                                        <!-- Courses will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="batches-tab" class="tab-pane">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-users me-2"></i>Batch Management</h3>
+                                <button class="btn-add" onclick="openAddBatchModal()">
+                                    <i class="fas fa-plus"></i> Add Batch
+                                </button>
+                            </div>
+
+                            <table class="management-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Year</th>
+                                        <th>Term</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batchesTable"></tbody>
+                            </table>
+                        </div>
+
+                        <div id="qualifications-tab" class="tab-pane">
+
+                            <div class="tab-header">
+                                <h3><i class="fas fa-graduation-cap me-2"></i>Qualification Management</h3>
+                                <button class="btn-add" onclick="openQualificationModal()">
+                                    <i class="fas fa-plus"></i> Add Qualification
+                                </button>
+                            </div>
+
+                            <div class="table-container">
+                                <table class="management-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="qualificationTableBody"></tbody>
+                                </table>
+                            </div>
+
+                        </div>
+
+
+                        <!-- In Teacher Assignments Tab -->
+                        <div id="teacher-assignments-tab" class="tab-pane">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-chalkboard-teacher me-2"></i>Teacher Course Assignments</h3>
+
+                            </div>
+
+                            <div class="assignment-container">
+                                <div class="teacher-list">
+                                    <h4>Teachers</h4>
+                                    <!-- NEW: Program filter inside teacher list -->
+                                    <select id="teacherProgramFilter"
+                                            class="form-select mb-3"
+                                            onchange="loadTeachersByProgram()">
+                                        <option value="">Select Teacher Program</option>
+                                    </select>
+                                    <div id="teachersList" class="list-group">
+                                        <!-- Teachers will be loaded here -->
                                     </div>
                                 </div>
-                                <div class="assigned-courses">
-                                    <h5>Assigned Courses</h5>
-                                    <div id="assignedCourses" class="courses-list">
-                                        <!-- Assigned courses will be loaded here -->
+
+                                <div class="course-assignment">
+
+                                    <h4>
+                                        Course Assignments —
+                                        <span id="selectedTeacherName">Please select a teacher</span>
+                                    </h4>
+                                    <div class="filter-section">
+
+                                        <!-- Course Program Filter (for fetching available courses) -->
+                                        <select id="courseProgramForAssignFilter" class="form-select" onchange="loadSemestersForCourseAssignments()">
+                                            <option value="">Select Course Program</option>
+                                        </select>
+
+                                        <!-- Course Semester Filter (for fetching available courses) -->
+                                        <select id="courseSemesterForAssignFilter" class="form-select" onchange="loadAvailableCourses()">
+                                            <option value="">Select Course Semester</option>
+                                        </select>
+
+                                    </div>   
+                                    <div class="available-courses">
+                                        <h5>Available Courses</h5>
+                                        <div id="availableCourses" class="courses-list">
+                                            <!-- Available courses will be loaded here -->
+                                        </div>
+                                    </div>
+                                    <div class="assigned-courses">
+                                        <h5>Assigned Courses</h5>
+                                        <div id="assignedCourses" class="courses-list">
+                                            <!-- Assigned courses will be loaded here -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Overview Tab -->
-                    <div id="overview-tab" class="tab-pane">
-                        <div class="tab-header">
-                            <h3><i class="fas fa-eye me-2"></i>Academic Structure Overview</h3>
-                        </div>
+                        <!-- Overview Tab -->
+                        <div id="overview-tab" class="tab-pane">
+                            <div class="tab-header">
+                                <h3><i class="fas fa-eye me-2"></i>Academic Structure Overview</h3>
+                            </div>
 
-                        <div class="overview-stats">
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-graduation-cap"></i>
+                            <div class="overview-stats">
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalPrograms">0</div>
+                                        <div class="stat-label">Programs</div>
+                                    </div>
                                 </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalPrograms">0</div>
-                                    <div class="stat-label">Programs</div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalSemesters">0</div>
+                                        <div class="stat-label">Semesters</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalCourses">0</div>
+                                        <div class="stat-label">Courses</div>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <div class="stat-info">
+                                        <div class="stat-value" id="totalAssignments">0</div>
+                                        <div class="stat-label">Assignments</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalSemesters">0</div>
-                                    <div class="stat-label">Semesters</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalCourses">0</div>
-                                    <div class="stat-label">Courses</div>
-                                </div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-icon">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </div>
-                                <div class="stat-info">
-                                    <div class="stat-value" id="totalAssignments">0</div>
-                                    <div class="stat-label">Assignments</div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="structure-tree">
-                            <h4>Academic Structure Tree</h4>
-                            <div id="structureTree" class="tree-view">
-                                <!-- Tree structure will be loaded here -->
+                            <div class="structure-tree">
+                                <h4>Academic Structure Tree</h4>
+                                <div id="structureTree" class="tree-view">
+                                    <!-- Tree structure will be loaded here -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-          </div>
-</div>
+            
+        </div>
 
 
         <!-- MODALS -->
 
         <!-- Add/Edit Program Modal -->
-        <div id="programModal" class="modal-overlay">
+        <div id="programModal" class="am-modal-overlay">
+<div class="am-modal">
 
+ <div class="modal-toast"></div>
 
-            <div class="modal-content">
-<div id="modalToast" class="modal-toast"></div>
-
-                <div class="modal-header">
+               <div class="am-modal-header">
                     <h4><i class="fas fa-graduation-cap me-2"></i><span id="programModalTitle">Add New Program</span></h4>
-                    <button class="modal-close" onclick="closeProgramModal()">&times;</button>
+                    <button class="am-modal-close" onclick="closeProgramModal()">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="am-modal-body">
                     <form id="programForm">
                         <input type="hidden" id="programId">
                         <div class="form-group">
@@ -359,25 +345,24 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="am-modal-footer">
                     <button class="btn-secondary" onclick="closeProgramModal()">Cancel</button>
                     <button class="btn-primary" onclick="saveProgram()">Save Program</button>
                 </div>
-            </div>
-        </div>
+         </div>
+             </div>
 
         <!-- Add/Edit Semester Modal -->
-        <div id="semesterModal" class="modal-overlay">
+        <div id="semesterModal" class="am-modal-overlay">
+            <div class="am-modal">
 
+ <div class="modal-toast"></div>
 
-            <div class="modal-content">
-<div id="modalToast" class="modal-toast"></div>
-
-                <div class="modal-header">
+                <div class="am-modal-header">
                     <h4><i class="fas fa-calendar-alt me-2"></i><span id="semesterModalTitle">Add New Semester</span></h4>
-                    <button class="modal-close" onclick="closeSemesterModal()">&times;</button>
+                    <button class="am-modal-close" onclick="closeSemesterModal()">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="am-modal-body">
                     <form id="semesterForm">
                         <input type="hidden" id="semesterId">
                         <div class="form-group">
@@ -400,25 +385,24 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="am-modal-footer">
                     <button class="btn-secondary" onclick="closeSemesterModal()">Cancel</button>
                     <button class="btn-primary" onclick="saveSemester()">Save Semester</button>
                 </div>
             </div>
         </div>
-
+ 
         <!-- Add/Edit Course Modal -->
-        <div id="courseModal" class="modal-overlay">
+        <div id="courseModal" class="am-modal-overlay">
+        <div class="am-modal">
 
+ <div class="modal-toast"></div>
 
-            <div class="modal-content">
-<div id="modalToast" class="modal-toast"></div>
-
-                <div class="modal-header">
+                <div class="am-modal-header">
                     <h4><i class="fas fa-book me-2"></i><span id="courseModalTitle">Add New Course</span></h4>
-                    <button class="modal-close" onclick="closeCourseModal()">&times;</button>
+                    <button class="am-modal-close" onclick="closeCourseModal()">&times;</button>
                 </div>
-                <div class="modal-body">
+                <div class="am-modal-body">
                     <form id="courseForm">
                         <input type="hidden" id="courseId">
                         <div class="form-group">
@@ -458,25 +442,24 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
+                <div class="am-modal-footer">
                     <button class="btn-secondary" onclick="closeCourseModal()">Cancel</button>
                     <button class="btn-primary" onclick="saveCourse()">Save Course</button>
                 </div>
             </div>
         </div>  
+ 
+        <div id="batchModal" class="am-modal-overlay">
+<div class="am-modal">
 
-        <div id="batchModal" class="modal-overlay">
+ <div class="modal-toast"></div>
 
-
-            <div class="modal-content">
-                <div id="modalToast" class="modal-toast"></div>
-
-                <div class="modal-header">
+                <div class="am-modal-header">
                     <h4 id="batchModalTitle">Add Batch</h4>
-                    <button class="modal-close" onclick="closeBatchModal()">&times;</button>
+                    <button class="am-modal-close" onclick="closeBatchModal()">&times;</button>
                 </div>
 
-                <div class="modal-body">
+                <div class="am-modal-body">
                     <input type="hidden" id="batchId">
 
                     <div class="form-group">
@@ -501,30 +484,30 @@
                     </div>
                 </div>
 
-                <div class="modal-footer">
+                <div class="am-modal-footer">
                     <button class="btn-secondary" onclick="closeBatchModal()">Cancel</button>
                     <button class="btn-primary" onclick="saveBatch()">Save</button>
                 </div>
             </div>
         </div>
+  
 
 
-        <div id="qualificationModal" class="modal-overlay">
+        <div id="qualificationModal" class="am-modal-overlay">
+<div class="am-modal">
 
-
-            <div class="modal-content">
-<div id="modalToast" class="modal-toast"></div>
+ <div class="modal-toast"></div>
 
                 <!-- NEW HEADER (same style as other modals) -->
-                <div class="modal-header">
+                <div class="am-modal-header">
                     <h4 id="qualificationModalTitle">
                         <i class="fas fa-graduation-cap me-2"></i>Add Qualification
                     </h4>
-                    <button class="modal-close" onclick="closeQualificationModal()">&times;</button>
+                    <button class="am-modal-close" onclick="closeQualificationModal()">&times;</button>
                 </div>
 
                 <!-- BODY -->
-                <div class="modal-body">
+                <div class="am-modal-body">
                     <input type="hidden" id="qualificationId">
 
                     <div class="form-group">
@@ -542,14 +525,14 @@
                 </div>
 
                 <!-- FOOTER -->
-                <div class="modal-footer">
+                <div class="am-modal-footer">
                     <button class="btn-secondary" onclick="closeQualificationModal()">Cancel</button>
                     <button class="btn-primary" onclick="saveQualification()">Save</button>
                 </div>
 
             </div>
         </div>
-
+ 
 
 
         <!-- Initialize when DOM is loaded -->

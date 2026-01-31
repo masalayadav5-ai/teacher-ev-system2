@@ -4,13 +4,17 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>SmarTeach | Admin Dashboard</title>
-       <link rel="stylesheet" href="/css/common.css">
-<link rel="stylesheet" href="/css/dashboard.css">
+        <link rel="stylesheet" href="/css/common.css">
+        <link rel="stylesheet" href="/css/dashboard.css">
+        <link rel="stylesheet" href="/css/dashboard-content.css">
+        <link rel="stylesheet" href="/css/setting.css"> <!-- since settings modal exists in dashboard.html -->
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     </head>
 
@@ -41,67 +45,67 @@
 
                     <ul class="nav flex-column">
                         <li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/dashboard-content.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/dashboard-content.html')">
                                 <i class="bi bi-speedometer2"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
 
                         <li class="nav-item" data-role="ADMIN">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/academic-management.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/academic-management.html')">
                                 <i class="fas fa-cogs"></i>
                                 <span>Academic Management</span>
                             </a>
                         </li>
 
                         <li class="nav-item" data-role="STUDENT">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/evaldashboard.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/evaldashboard.html')">
                                 <i class="bi bi-journal-text"></i>
                                 <span>Evaluation</span>
                             </a>
                         </li>
                         <li class="nav-item" data-role="STUDENT">
-  <a class="nav-link" href="#"
-     onclick="loadPage('/pages/student-evaluation-history.html')">
-    <i class="bi bi-clock-history"></i>
-    <span>Evaluation History</span>
-  </a>
-</li>
-          <li class="nav-item" data-role="TEACHER">
-  <a class="nav-link" href="#"
-     onclick="loadPage('/pages/teacher-evaluation-history.html')">
-    <i class="bi bi-clock-history"></i>
-    <span>Evaluation History</span>
-  </a>
-</li>
+                            <a class="nav-link" href="#"
+                               onclick="setActiveSidebar(this); loadPage('/pages/student-evaluation-history.html')">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Evaluation History</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" data-role="TEACHER">
+                            <a class="nav-link" href="#"
+                               onclick="setActiveSidebar(this); loadPage('/pages/teacher-evaluation-history.html')">
+                                <i class="bi bi-clock-history"></i>
+                                <span>Evaluation History</span>
+                            </a>
+                        </li>
 
 
 
                         <li class="nav-item" data-role="ADMIN,STUDENT,TEACHER">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/sessionplan.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/sessionplan.html')">
                                 <i class="bi bi-calendar-week"></i>
                                 <span>Session Planner</span>
                             </a>
                         </li>
 
                         <li class="nav-item" data-role="ADMIN">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/student.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/student.html')">
                                 <i class="bi bi-people"></i>
                                 <span>Students</span>
                             </a>
                         </li>
 
                         <li class="nav-item" data-role="ADMIN">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/teacher.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/teacher.html')">
                                 <i class="bi bi-person-lines-fill"></i>
                                 <span>Teachers</span>
                             </a>
                         </li>
 
                         <li class="nav-item" data-role="ADMIN">
-                            <a class="nav-link" href="#" onclick="loadPage('/pages/AdminEvaluationAnalytics.html')">
+                            <a class="nav-link" href="#" onclick="setActiveSidebar(this); loadPage('/pages/AdminEvaluationAnalytics.html')">
                                 <i class="bi bi-journal-text"></i>
-                                <span>Admin Evaluation Analytics</span>
+                                <span>Evaluation Analytics</span>
                             </a>
                         </li>
 
@@ -318,27 +322,40 @@
         </div>
         <!-- JS FUNCTIONS -->
         <script>
-  const loadedCSS = new Set();
+            const loadedCSS = new Set();
 
-  function loadCSSOnce(href) {
-    if (loadedCSS.has(href)) return;
+            function loadCSSOnce(href, dynamic = true) {
+                if (loadedCSS.has(href))
+                    return;
 
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = href;
-    link.dataset.dynamic = "true";
-    document.head.appendChild(link);
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href = href;
 
-    loadedCSS.add(href);
-  }
+                if (dynamic) {
+                    link.dataset.dynamic = "true";
+                }
 
-  function unloadAllDynamicCSS() {
-    document.querySelectorAll('link[data-dynamic="true"]').forEach(link => {
-      link.remove();
-      loadedCSS.delete(link.href);
-    });
-  }
-</script>
+                document.head.appendChild(link);
+                loadedCSS.add(href);
+            }
+
+
+           function unloadAllDynamicCSS() {
+  document.querySelectorAll('link[data-dynamic="true"]').forEach(link => {
+
+    // 🚫 NEVER remove global CSS
+    if (link.href.includes("common.css")) return;
+    if (link.href.includes("dashboard.css")) return;
+
+    const href = link.getAttribute("href"); // 👈 RELATIVE path
+    link.remove();
+    loadedCSS.delete(href); // ✅ THIS FIXES IT
+  });
+}
+
+
+        </script>
 
         <script>
             let suppressNextModalClose = false;
@@ -353,13 +370,13 @@
 
             function loadPage(pageUrl) {
                 const changePasswordModal = document.getElementById("changePasswordModal");
-  if (changePasswordModal) {
-    changePasswordModal.classList.remove("show");
-  }
+                if (changePasswordModal) {
+                    changePasswordModal.classList.remove("show");
+                }
                 const area = document.getElementById("content-area");
                 area.classList.remove("loaded");
- // 🔥 REMOVE OLD PAGE CSS
-  unloadAllDynamicCSS();
+                // 🔥 REMOVE OLD PAGE CSS
+                unloadAllDynamicCSS();
                 fetch(pageUrl)
                         .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
                         .then(html => {
@@ -424,60 +441,55 @@
             // Separate function to handle page-specific initialization
             function handlePageSpecificFunctions(pageUrl) {
                 console.log('Handling page:', pageUrl);
-                
-  // 🔥 DASHBOARD
- // 🔥 DASHBOARD
-if (pageUrl.includes("dashboard-content.html")) {
-  loadCSSOnce("/css/dashboard-content.css");
 
-  loadScriptOnce("/js/dashboard-content.js");   // ✅ ADD THIS LINE
+                // 🔥 DASHBOARD
+                if (pageUrl.includes("dashboard-content.html")) {
+                    // Do NOT unload CSS
+                    loadScriptOnce("/js/dashboard-content.js");
 
-  setTimeout(() => {
-    if (typeof window.initDashboardContent === "function") {
-      window.initDashboardContent();
-    } else {
-      console.error("initDashboardContent not found");
-    }
-  }, 200);
-}
+                    requestAnimationFrame(() => {
+                        window.initDashboardContent?.();
+                    });
+                }
 
 
 
-  // 🔥 SESSION PLAN
-  if (pageUrl.includes("sessionplan.html")) {
-    loadCSSOnce("/css/sessionplan.css");
-  }
 
-  // 🔥 EVALUATION DASHBOARD
-  if (pageUrl.includes("evaldashboard.html")) {
-    loadCSSOnce("/css/evaldashboard.css");
-  }
+                // 🔥 SESSION PLAN
+                if (pageUrl.includes("sessionplan.html")) {
+                    loadCSSOnce("/css/sessionplan.css");
+                }
 
-  // 🔥 STUDENT PAGE
-  if (pageUrl.includes("student.html")) {
-    loadCSSOnce("/css/student.css");
-    loadCSSOnce("/css/register_stu.css");
-  }
+                // 🔥 EVALUATION DASHBOARD
+                if (pageUrl.includes("evaldashboard.html")) {
+                    loadCSSOnce("/css/evaldashboard.css");
+                }
 
-  // 🔥 TEACHER PAGE
-  if (pageUrl.includes("teacher.html")) {
-    loadCSSOnce("/css/teacher.css");
-  }
+                // 🔥 STUDENT PAGE
+                if (pageUrl.includes("student.html")) {
+                    loadCSSOnce("/css/student.css");
+                    loadCSSOnce("/css/register_stu.css");
+                }
 
-  // 🔥 ADMIN ANALYTICS
-  if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
-    loadCSSOnce("/css/evaldashboard.css");
-  }
+                // 🔥 TEACHER PAGE
+                if (pageUrl.includes("teacher.html")) {
+                    loadCSSOnce("/css/teacher.css");
+                }
 
-  // 🔥 ACADEMIC MANAGEMENT
-  if (pageUrl.includes("academic-management.html")) {
-    loadCSSOnce("/css/academic-management.css");
-  }
+                // 🔥 ADMIN ANALYTICS
+                if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
+                    loadCSSOnce("/css/evaldashboard.css");
+                }
 
-  // 🔥 SETTINGS
-  if (pageUrl.includes("settings.html")) {
-    loadCSSOnce("/css/setting.css");
-  }
+                // 🔥 ACADEMIC MANAGEMENT
+                if (pageUrl.includes("academic-management.html")) {
+                    loadCSSOnce("/css/academic-management.css");
+                }
+
+                // 🔥 SETTINGS
+                if (pageUrl.includes("settings.html")) {
+                    loadCSSOnce("/css/setting.css");
+                }
                 if (pageUrl.includes("EvaluationForm.html")) {
                     setTimeout(() => {
                         if (typeof window.initEvaluationForm === "function") {
@@ -570,23 +582,23 @@ if (pageUrl.includes("dashboard-content.html")) {
                     }, 200);
                 }
 // ✅ Student Evaluation History
-if (pageUrl.includes("student-evaluation-history.html")) {
-    console.log("Initializing Student Evaluation History");
+                if (pageUrl.includes("student-evaluation-history.html")) {
+                    console.log("Initializing Student Evaluation History");
 
-    setTimeout(() => {
-        if (typeof window.initStudentEvaluationHistory === "function") {
-            window.initStudentEvaluationHistory();
-        } else {
-            console.error("initStudentEvaluationHistory not found");
-        }
-    }, 200);
-}
+                    setTimeout(() => {
+                        if (typeof window.initStudentEvaluationHistory === "function") {
+                            window.initStudentEvaluationHistory();
+                        } else {
+                            console.error("initStudentEvaluationHistory not found");
+                        }
+                    }, 200);
+                }
 
-if (pageUrl.includes("teacher-evaluation-history.html")) {
-  setTimeout(() => {
-    window.initTeacherEvaluationHistory?.();
-  }, 200);
-}
+                if (pageUrl.includes("teacher-evaluation-history.html")) {
+                    setTimeout(() => {
+                        window.initTeacherEvaluationHistory?.();
+                    }, 200);
+                }
 
                 // Handle session details page
                 if (pageUrl.includes("session-details.html")) {
@@ -623,14 +635,18 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
             window.addEventListener("error", function (e) {
                 console.error("GLOBAL JS ERROR:", e.message);
             });
-           window.onload = function () {
-  const changePasswordModal = document.getElementById("changePasswordModal");
-  if (changePasswordModal) {
-    changePasswordModal.classList.remove("show");
-  }
+            window.onload = function () {
+                const changePasswordModal = document.getElementById("changePasswordModal");
+                if (changePasswordModal) {
+                    changePasswordModal.classList.remove("show");
+                }
 
-  loadPage('/pages/dashboard-content.html');
-};
+                loadPage('/pages/dashboard-content.html');
+                const dashboardLink = document.querySelector('.nav-link[onclick*="dashboard-content"]');
+                if (dashboardLink) {
+                    setActiveSidebar(dashboardLink);
+                }
+            };
 
 
             function toggleSidebar() {
@@ -673,8 +689,9 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
 
             function modalHandler(e) {
 
-               if (suppressNextModalClose) return;
-    
+                if (suppressNextModalClose)
+                    return;
+
                 const studentPanel = document.getElementById("studentPanel");
                 const teacherPanel = document.getElementById("teacherPanel");
                 const viewparaPanel = document.getElementById("viewparaPanel");
@@ -687,21 +704,21 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
 
                 if (e.target.closest("#openChangePassword") && changePasswordModal) {
 
-    suppressNextModalClose = true;   // 👈 ADD
+                    suppressNextModalClose = true;   // 👈 ADD
 
-    if (settingsModal)
-        settingsModal.classList.remove("show");
+                    if (settingsModal)
+                        settingsModal.classList.remove("show");
 
-    changePasswordModal.classList.add("show");
+                    changePasswordModal.classList.add("show");
 
-    initChangePasswordModalUI();
-    initPasswordValidation();
+                    initChangePasswordModalUI();
+                    initPasswordValidation();
 
-    setTimeout(() => suppressNextModalClose = false, 100); // 👈 ADD
-     e.stopPropagation();
+                    setTimeout(() => suppressNextModalClose = false, 100); // 👈 ADD
+                    e.stopPropagation();
 
-    return;
-}
+                    return;
+                }
 
 
 
@@ -714,11 +731,15 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
                 // Student
                 if (e.target.closest(".student-add-btn") && studentPanel) {
                     studentPanel.classList.add("show");
+                        document.body.style.overflow = "hidden"; // ✅ ADD
+
                 }
 
                 // Teacher
                 if (e.target.closest(".teacher-add-btn") && teacherPanel) {
                     teacherPanel.classList.add("show");
+                        document.body.style.overflow = "hidden"; // ✅ ADD
+
                 }
                 // addparameter
                 if (e.target.closest(".viewpara")) {
@@ -768,16 +789,22 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
                         changePasswordModal.classList.remove("show");
 
 
+                    document.body.style.overflow = ""; // ✅ ADD
 
 
                 }
 
                 // Click outside modal
-                if (suppressNextModalClose) return;
+                if (suppressNextModalClose)
+                    return;
                 if (e.target === studentPanel)
                     studentPanel.classList.remove("show");
+                    document.body.style.overflow = ""; // ✅ ADD
+
                 if (e.target === teacherPanel)
                     teacherPanel.classList.remove("show");
+                    document.body.style.overflow = ""; // ✅ ADD
+
                 if (e.target === viewparaPanel)
                     viewparaPanel.classList.remove("show");
                 if (e.target === sessionModal)
@@ -790,13 +817,13 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
                     semesterModal.classList.remove("show");
                 if (e.target === courseModal)
                     courseModal.classList.remove("show");
-              if (
-  e.target === changePasswordModal &&
-  !e.target.closest(".password-modal-container") &&
-  !document.body.dataset.forceChange
-) {
-  changePasswordModal.classList.remove("show");
-}
+                if (
+                        e.target === changePasswordModal &&
+                        !e.target.closest(".password-modal-container") &&
+                        !document.body.dataset.forceChange
+                        ) {
+                    changePasswordModal.classList.remove("show");
+                }
 
 
 
@@ -1007,17 +1034,41 @@ if (pageUrl.includes("teacher-evaluation-history.html")) {
 
             }
         </script>
+        <script>
+            function setActiveSidebar(linkEl) {
+                // Remove active from all
+                document.querySelectorAll(".nav-item").forEach(item => {
+                    item.classList.remove("active");
+                });
 
+                // Add active to clicked one
+                const navItem = linkEl.closest(".nav-item");
+                if (navItem) {
+                    navItem.classList.add("active");
+                }
+            }
+        </script>
+
+
+        <!-- 🔐 AUTH MUST BE FIRST -->
+        <script src="/js/auth.js"></script>
+
+        <!-- Common -->
         <script src="/js/topbar.js"></script>
 
-        <script src="js/sessionplan.js"></script>
-        <script src="js/student.js"></script>
-        <script src="js/teacher.js"></script>
+        <!-- Pages -->
+        <script src="/js/sessionplan.js"></script>
+        <script src="/js/student.js"></script>
+        <script src="/js/teacher.js"></script>
         <script src="/js/session-details.js"></script>
         <script src="/js/academic-management.js"></script>
         <script src="/js/setting.js"></script>
         <script src="/js/change-password-validate.js"></script>
+        <script src="/js/dashboard-content.js"></script>
+
+
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-      
+
+
     </body>
 </html>
