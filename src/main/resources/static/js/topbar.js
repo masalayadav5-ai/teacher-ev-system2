@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.currentUser = userData;
         localStorage.setItem("currentUser", JSON.stringify(userData));
         localStorage.setItem("role", userData.role);
-        applyRoleBasedUI(userData.role);
+       // applyRoleBasedUI(userData.role);
 
         // 🔹 Determine display name
         // Prefer fullName → fallback to username

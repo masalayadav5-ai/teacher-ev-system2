@@ -359,7 +359,7 @@ if (role === "TEACHER" && profileView === "TEACHER_ANALYTICS") {
 function setupEventListeners() {
     const backButton = document.querySelector(".btn-back");
     if (backButton) {
-        backButton.addEventListener("click", loadStudentListPage);
+        backButton.addEventListener("click", loadStudentProfilePage);
     }
 
     const editButton = document.querySelector(".btn-edit");
@@ -374,21 +374,10 @@ function setupEventListeners() {
 }
 
 // ================= LOAD STUDENT LIST PAGE =================
-function loadStudentListPage() {
-    fetch('/pages/student.html')
-        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
-        .then(html => {
-            const area = document.getElementById("content-area");
-            if (!area) return;
-            area.innerHTML = html;
-
-            const script = document.createElement('script');
-            script.src = '/js/student.js';
-            script.onload = () => { if (window.initStudentPage) window.initStudentPage(); };
-            document.body.appendChild(script);
-        })
-        .catch(console.error);
+function loadStudentProfilePage() {
+    loadPage("/pages/StudentProfile.html"); // ✅ IMPORTANT
 }
+
 
 // ================= SETUP TABS =================
 function setupTabs() {
@@ -446,13 +435,10 @@ function showProfileMessage(msg, type) {
 
 // ================= MAKE FUNCTIONS GLOBALLY AVAILABLE =================
 window.initStudentProfile = initStudentProfile;
-window.loadStudentListPage = loadStudentListPage;
+window.loadStudentProfilePage = loadStudentProfilePage;
 window.showProfileMessage = showProfileMessage;
 
-// ================= AUTO-INITIALIZE =================
-if (document.getElementById("student-id")) {
-    setTimeout(initStudentProfile, 100);
-}
+ 
 function loadAcademicData(profile) {
     if (!profile.studentId) return;
 

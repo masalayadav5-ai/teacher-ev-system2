@@ -149,7 +149,6 @@
 
                 <!-- CONTENT AREA -->
                 <div id="content-area"></div>
-                <link rel="stylesheet" href="css/setting.css">
                 <!-- Settings Modal Overlay -->
                 <div class="settings-overlay" id="settingsModal">
                     <div class="settings-modal">
@@ -261,8 +260,8 @@
 
         <!-- ========================================================= -->
 
-        <div class="password-modal-overlay" id="changePasswordModal">
-            <div class="password-modal-container">
+        <div class="dashboard-modal-overlay" id="dashboardChangePasswordModal">
+  <div class="dashboard-password-container">
 
                 <div class="password-modal-header">
                     <div class="password-modal-logo">
@@ -323,35 +322,119 @@
         <!-- JS FUNCTIONS -->
         <script>
             const loadedCSS = new Set();
+let currentPageUrl = "";
+      function loadCSSOnce(href, dynamic = true) {
+    return new Promise(resolve => {
+        if (loadedCSS.has(href)) {
+            resolve();
+            return;
+        }
 
-            function loadCSSOnce(href, dynamic = true) {
-                if (loadedCSS.has(href))
-                    return;
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
 
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href = href;
+        if (dynamic) {
+            link.dataset.dynamic = "true";
+        }
 
-                if (dynamic) {
-                    link.dataset.dynamic = "true";
-                }
+        link.onload = () => resolve();   // ✅ wait for CSS
+        link.onerror = () => resolve();  // fail-safe
 
-                document.head.appendChild(link);
-                loadedCSS.add(href);
+        document.head.appendChild(link);
+        loadedCSS.add(href);
+    });
+}
+
+
+
+            function unloadAllDynamicCSS() {
+
+                document.querySelectorAll('link[data-dynamic="true"]').forEach(link => {
+                    const href = link.getAttribute("href");
+                    if (
+                            href.includes("common.css") ||
+                            href.includes("dashboard.css") ||
+                            href.includes("dashboard-content.css") ||
+                            href.includes("setting.css")
+                            )
+                        return;
+                    const neededForCurrentPage = Object.entries(PAGE_CSS).some(
+            ([page, cssList]) =>
+                currentPageUrl.includes(page) && cssList.includes(href)
+        );
+
+        if (neededForCurrentPage) return;
+                    link.remove();
+                    loadedCSS.delete(href); // ✅ THIS FIXES IT
+                });
             }
 
 
-           function unloadAllDynamicCSS() {
-  document.querySelectorAll('link[data-dynamic="true"]').forEach(link => {
+        </script>
+        <script>
+            const PAGE_CSS = {
+                "evaldashboard.html": [
+                    "/css/evaldashboard.css"
+                ],
 
-    // 🚫 NEVER remove global CSS
-    if (link.href.includes("common.css")) return;
-    if (link.href.includes("dashboard.css")) return;
+                "AdminEvaluationAnalytics.html": [
+                    "/css/evaldashboard.css"
+                ],
 
-    const href = link.getAttribute("href"); // 👈 RELATIVE path
-    link.remove();
-    loadedCSS.delete(href); // ✅ THIS FIXES IT
-  });
+                "student.html": [
+                    "/css/student.css"
+
+                ],
+
+                "teacher.html": [
+                    "/css/teacher.css"
+                ],
+
+                "academic-management.html": [
+                    "/css/academic-management.css"
+                ],
+
+                "sessionplan.html": [
+                    "/css/sessionplan.css"
+                ],
+
+                "AdminEvaluation.html": [
+                    "/css/evaluation.css"
+                ],
+                
+                "EvaluationForm.html": [
+                    "/css/evaluation.css",
+                    "/css/global.css"],
+
+                "StudentProfile.html": ["/css/StudentProfile.css"],
+
+                "session-details.html": ["/css/session-details.css"],
+
+                "student-evaluation-history.html": ["/css/evaluation-history.css"],
+
+                "teacher-evaluation-history.html": ["/css/teacher-evaluation-history.css"],
+                
+                "dashboard-content.html": [
+  "/css/change-password-dashboard.css"
+]
+
+ 
+
+            };
+
+  async function applyPageCSS(pageUrl) {
+    unloadAllDynamicCSS();
+
+    for (const page in PAGE_CSS) {
+        if (pageUrl.includes(page)) {
+            const cssFiles = PAGE_CSS[page];
+            await Promise.all(cssFiles.map(css => loadCSSOnce(css)));
+              await new Promise(requestAnimationFrame); // ✅ THIS LINE
+
+            break;
+        }
+    }
 }
 
 
@@ -367,129 +450,87 @@
                 s.src = src;
                 document.head.appendChild(s);
             }
+async function loadPage(pageUrl) {
+    currentPageUrl = pageUrl;
 
-            function loadPage(pageUrl) {
-                const changePasswordModal = document.getElementById("changePasswordModal");
-                if (changePasswordModal) {
-                    changePasswordModal.classList.remove("show");
-                }
-                const area = document.getElementById("content-area");
-                area.classList.remove("loaded");
-                // 🔥 REMOVE OLD PAGE CSS
-                unloadAllDynamicCSS();
-                fetch(pageUrl)
-                        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Page Not Found</h3>")
-                        .then(html => {
-                            // Create a temporary div to parse HTML
-                            const tempDiv = document.createElement('div');
-                            tempDiv.innerHTML = html;
+    const area = document.getElementById("content-area");
+    area.classList.remove("loaded");
 
-                            // Collect all scripts
-                            const scripts = tempDiv.querySelectorAll('script');
-                            const inlineScripts = [];
+    try {
+        const res = await fetch(pageUrl);
+        const html = await res.text();
 
-                            // Process scripts
-                            scripts.forEach(script => {
-                                if (script.src) {
-                                    console.log('External script found:', script.src);
-                                    loadScriptOnce(script.src); // ✅ here
-                                } else if (script.textContent.trim()) {
-                                    inlineScripts.push(script.textContent);
-                                }
-                                script.remove();
-                            });
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = html;
 
+        // remove scripts first
+        const scripts = tempDiv.querySelectorAll("script");
+        const inlineScripts = [];
 
-                            // Set the HTML content
-                            area.innerHTML = tempDiv.innerHTML;
-                            // 🔁 Re-apply role-based UI after dynamic page load
-                            setTimeout(() => {
-                                if (window.currentUser?.role) {
-                                    applyRoleBasedUI(window.currentUser.role);
-                                }
-                            }, 50);
-
-                            requestAnimationFrame(() => {
-                                area.classList.add("loaded");
-                            });
-
-                            // Execute all inline scripts AFTER HTML is loaded
-                            setTimeout(() => {
-                                inlineScripts.forEach(scriptContent => {
-                                    try {
-                                        // Create and execute the script
-                                        const script = document.createElement('script');
-                                        script.textContent = scriptContent;
-                                        area.appendChild(script);
-                                    } catch (error) {
-                                        console.error('Error executing script:', error);
-                                    }
-                                });
-
-                                // Now handle specific pages
-                                handlePageSpecificFunctions(pageUrl);
-                            }, 100);
-
-                            initModals();
-                        })
-                        .catch(err => {
-                            console.error('Error loading page:', err);
-                            area.innerHTML = `<h3 class='text-danger'>Error loading page</h3>`;
-                        });
+        scripts.forEach(script => {
+            if (script.src) {
+                loadScriptOnce(script.src);
+            } else if (script.textContent.trim()) {
+                inlineScripts.push(script.textContent);
             }
+            script.remove();
+        });
+
+        // ✅ 1️⃣ inject HTML FIRST
+        area.innerHTML = tempDiv.innerHTML;
+
+        // ✅ 2️⃣ apply page CSS AFTER HTML exists
+        await applyPageCSS(pageUrl);
+
+        // ✅ 3️⃣ wait one frame so DOM is real
+        requestAnimationFrame(() => {
+
+            // ✅ 4️⃣ NOW apply role-based UI
+            if (window.currentUser?.role) {
+                applyRoleBasedUI(window.currentUser.role);
+            }
+
+            // ✅ 5️⃣ page-specific init
+            handlePageSpecificFunctions(pageUrl);
+
+            area.classList.add("loaded");
+        });
+
+        // inline scripts
+        inlineScripts.forEach(code => {
+            const s = document.createElement("script");
+            s.textContent = code;
+            area.appendChild(s);
+        });
+
+        initModals();
+
+    } catch (err) {
+        console.error(err);
+        area.innerHTML = `<h3>Error loading page</h3>`;
+    }
+}
+
+
 
             // Separate function to handle page-specific initialization
             function handlePageSpecificFunctions(pageUrl) {
                 console.log('Handling page:', pageUrl);
+// ✅ DASHBOARD CONTENT
+if (pageUrl.includes("dashboard-content.html")) {
+    console.log("Initializing Dashboard Content");
 
-                // 🔥 DASHBOARD
-                if (pageUrl.includes("dashboard-content.html")) {
-                    // Do NOT unload CSS
-                    loadScriptOnce("/js/dashboard-content.js");
+    setTimeout(() => {
+        if (typeof window.initDashboardContent === "function") {
+            window.initDashboardContent();
+        } else {
+            console.error("initDashboardContent not found");
+        }
+    }, 100);
 
-                    requestAnimationFrame(() => {
-                        window.initDashboardContent?.();
-                    });
-                }
+    return;
+}
 
-
-
-
-                // 🔥 SESSION PLAN
-                if (pageUrl.includes("sessionplan.html")) {
-                    loadCSSOnce("/css/sessionplan.css");
-                }
-
-                // 🔥 EVALUATION DASHBOARD
-                if (pageUrl.includes("evaldashboard.html")) {
-                    loadCSSOnce("/css/evaldashboard.css");
-                }
-
-                // 🔥 STUDENT PAGE
-                if (pageUrl.includes("student.html")) {
-                    loadCSSOnce("/css/student.css");
-                    loadCSSOnce("/css/register_stu.css");
-                }
-
-                // 🔥 TEACHER PAGE
-                if (pageUrl.includes("teacher.html")) {
-                    loadCSSOnce("/css/teacher.css");
-                }
-
-                // 🔥 ADMIN ANALYTICS
-                if (pageUrl.includes("AdminEvaluationAnalytics.html")) {
-                    loadCSSOnce("/css/evaldashboard.css");
-                }
-
-                // 🔥 ACADEMIC MANAGEMENT
-                if (pageUrl.includes("academic-management.html")) {
-                    loadCSSOnce("/css/academic-management.css");
-                }
-
-                // 🔥 SETTINGS
-                if (pageUrl.includes("settings.html")) {
-                    loadCSSOnce("/css/setting.css");
-                }
                 if (pageUrl.includes("EvaluationForm.html")) {
                     setTimeout(() => {
                         if (typeof window.initEvaluationForm === "function") {
@@ -581,6 +622,19 @@
                         }
                     }, 200);
                 }
+                // ✅ Student Profile Page
+if (pageUrl.includes("StudentProfile.html")) {
+    console.log("Initializing Student Profile");
+
+    setTimeout(() => {
+        if (typeof window.initStudentProfile === "function") {
+            window.initStudentProfile();
+        } else {
+            console.error("initStudentProfile not found");
+        }
+    }, 150); // wait for HTML + CSS
+}
+
 // ✅ Student Evaluation History
                 if (pageUrl.includes("student-evaluation-history.html")) {
                     console.log("Initializing Student Evaluation History");
@@ -635,11 +689,13 @@
             window.addEventListener("error", function (e) {
                 console.error("GLOBAL JS ERROR:", e.message);
             });
-            window.onload = function () {
-                const changePasswordModal = document.getElementById("changePasswordModal");
-                if (changePasswordModal) {
-                    changePasswordModal.classList.remove("show");
-                }
+           window.onload = function () {
+    const changePasswordModal =
+        document.getElementById("dashboardChangePasswordModal");
+    if (changePasswordModal) {
+        changePasswordModal.classList.remove("show");
+    }
+
 
                 loadPage('/pages/dashboard-content.html');
                 const dashboardLink = document.querySelector('.nav-link[onclick*="dashboard-content"]');
@@ -700,25 +756,26 @@
                 const programModal = document.getElementById("programModal");
                 const semesterModal = document.getElementById("semesterModal");
                 const courseModal = document.getElementById("courseModal");
-                const changePasswordModal = document.getElementById("changePasswordModal");
+                const changePasswordModal = document.getElementById("dashboardChangePasswordModal");
 
-                if (e.target.closest("#openChangePassword") && changePasswordModal) {
+              if (e.target.closest("#openChangePassword")) {
+  const modal = document.getElementById("dashboardChangePasswordModal");
 
-                    suppressNextModalClose = true;   // 👈 ADD
+  suppressNextModalClose = true;
 
-                    if (settingsModal)
-                        settingsModal.classList.remove("show");
+  settingsModal?.classList.remove("show");
+  modal.classList.add("show");
 
-                    changePasswordModal.classList.add("show");
+  document.body.style.overflow = "hidden"; // 🔥 IMPORTANT
 
-                    initChangePasswordModalUI();
-                    initPasswordValidation();
+  initChangePasswordModalUI();
+  initPasswordValidation();
 
-                    setTimeout(() => suppressNextModalClose = false, 100); // 👈 ADD
-                    e.stopPropagation();
+  setTimeout(() => suppressNextModalClose = false, 100);
+  e.stopPropagation();
+  return;
+}
 
-                    return;
-                }
 
 
 
@@ -731,14 +788,14 @@
                 // Student
                 if (e.target.closest(".student-add-btn") && studentPanel) {
                     studentPanel.classList.add("show");
-                        document.body.style.overflow = "hidden"; // ✅ ADD
+                    document.body.style.overflow = "hidden"; // ✅ ADD
 
                 }
 
                 // Teacher
                 if (e.target.closest(".teacher-add-btn") && teacherPanel) {
                     teacherPanel.classList.add("show");
-                        document.body.style.overflow = "hidden"; // ✅ ADD
+                    document.body.style.overflow = "hidden"; // ✅ ADD
 
                 }
                 // addparameter
@@ -799,11 +856,11 @@
                     return;
                 if (e.target === studentPanel)
                     studentPanel.classList.remove("show");
-                    document.body.style.overflow = ""; // ✅ ADD
+                document.body.style.overflow = ""; // ✅ ADD
 
                 if (e.target === teacherPanel)
                     teacherPanel.classList.remove("show");
-                    document.body.style.overflow = ""; // ✅ ADD
+                document.body.style.overflow = ""; // ✅ ADD
 
                 if (e.target === viewparaPanel)
                     viewparaPanel.classList.remove("show");
@@ -819,7 +876,7 @@
                     courseModal.classList.remove("show");
                 if (
                         e.target === changePasswordModal &&
-                        !e.target.closest(".password-modal-container") &&
+                        !e.target.closest(".dashboard-password-container") &&
                         !document.body.dataset.forceChange
                         ) {
                     changePasswordModal.classList.remove("show");
@@ -930,27 +987,29 @@
 
                 // Toggle avatar dropdown
                 if (e.target.closest("#avatarBtn")) {
+                    
                     dropdown.classList.toggle("show");
                     return;
                 }
 
                 // Profile
-                if (e.target.closest("#profileBtn")) {
-                    dropdown.classList.remove("show");
+               if (e.target.closest("#profileBtn")) {
+    dropdown.classList.remove("show");
 
-                    const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
+    const user = window.currentUser || JSON.parse(localStorage.getItem("currentUser"));
 
-                    sessionStorage.setItem("profileMode", "SELF");
+    sessionStorage.setItem("profileMode", "SELF");
 
-                    if (user?.role === "TEACHER") {
-                        sessionStorage.setItem("profileView", "TEACHER_ANALYTICS");
-                    } else {
-                        sessionStorage.setItem("profileView", "STUDENT");
-                    }
+    if (user?.role === "TEACHER") {
+        sessionStorage.setItem("profileView", "TEACHER_ANALYTICS");
+    } else {
+        sessionStorage.setItem("profileView", "STUDENT");
+    }
 
-                    loadStudentProfilePage();
-                    return;
-                }
+    loadPage("/pages/StudentProfile.html"); // ✅ THIS
+    return;
+}
+
                 if (e.target.closest("#settingsBtn")) {
                     dropdown.classList.remove("show");
                     settingsModal.classList.add("show");
@@ -983,32 +1042,13 @@
                 }
             });
 
-            function applyRoleBasedUI(role) {
-                console.log("Applying UI for role:", role);
+           function applyRoleBasedUI(role) {
+    document.querySelectorAll("[data-role]").forEach(el => {
+        const roles = el.dataset.role.split(",");
+        el.style.display = roles.includes(role) ? "" : "none";
+    });
+}
 
-                // Sidebar items
-                document.querySelectorAll(".nav-item").forEach(item => {
-                    const allowedRoles = item.dataset.role;
-                    if (!allowedRoles)
-                        return;
-
-                    if (allowedRoles.split(",").includes(role)) {
-                        item.style.display = "block";
-                    } else {
-                        item.style.display = "none";
-                    }
-                });
-
-                // Session Planner → Add Session button
-                const addSessionBtn = document.querySelector(".addsession");
-                if (addSessionBtn) {
-                    if (role === "STUDENT" || role === "ADMIN") {
-                        addSessionBtn.style.display = "none";
-                    } else {
-                        addSessionBtn.style.display = "inline-block";
-                    }
-                }
-            }
 
 
         </script>
@@ -1065,6 +1105,8 @@
         <script src="/js/setting.js"></script>
         <script src="/js/change-password-validate.js"></script>
         <script src="/js/dashboard-content.js"></script>
+        <script src="/js/studentprofile.js"></script>
+        
 
 
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

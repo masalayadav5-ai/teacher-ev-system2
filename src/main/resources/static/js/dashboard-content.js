@@ -1,6 +1,8 @@
 
 
 async function initDashboardContent() {
+        console.log("initDashboardContent running");
+
   const user = await getCurrentUser();
   if (!user?.role) return;
 

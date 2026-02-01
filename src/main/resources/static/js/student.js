@@ -22,7 +22,7 @@ loadBatchesForStudent();   // 🔥 REAL batch loader
          loadSemestersForStudent();
     });
     // ================= SUBMIT (ADD / UPDATE) =================
-    submitStudentBtn.onclick = async (e) => {
+submitStudentBtn?.addEventListener("click", async (e) => {
         e.preventDefault();
 
         const fullName = document.getElementById("fullName");
@@ -147,15 +147,15 @@ loadBatchesForStudent();   // 🔥 REAL batch loader
             showMessage("Server error. Please try again!", "error");
             console.error(error);
         }
-    };
+    });
 
     // ================= SEARCH =================
-    searchStudent.oninput = () => {
+searchStudent?.addEventListener("input", () => {
         const term = searchStudent.value.toLowerCase();
         [...document.getElementById("studentTableBody").rows].forEach(row => {
             row.style.display = row.textContent.toLowerCase().includes(term) ? "" : "none";
         });
-    };
+    });
 }
 
 // ================= LOAD STUDENTS =================
@@ -397,27 +397,27 @@ function viewStudent(studentId) {
 
 
 // ================= LOAD STUDENT PROFILE PAGE =================
-function loadStudentProfilePage() {
-    fetch('/pages/studentprofile.html')
-        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>")
-        .then(html => {
-            const area = document.getElementById("content-area");
-            area.innerHTML = html;
-
-            // Load profile script
-            const script = document.createElement('script');
-            script.src = '/js/studentprofile.js?v=' + Date.now();
-            script.onload = () => {
-                if (typeof window.initStudentProfile === 'function') {
-                    window.initStudentProfile();
-                }
-            };
-            document.body.appendChild(script);
-        })
-        .catch(error => {
-            console.error("Error loading profile page:", error);
-        });
-}
+//function loadStudentProfilePage() {
+//    fetch('/pages/studentprofile.html')
+//        .then(res => res.ok ? res.text() : "<h3 class='text-danger'>Profile Page Not Found</h3>")
+//        .then(html => {
+//            const area = document.getElementById("content-area");
+//            area.innerHTML = html;
+//
+//            // Load profile script
+//            const script = document.createElement('script');
+//            script.src = '/js/studentprofile.js?v=' + Date.now();
+//            script.onload = () => {
+//                if (typeof window.initStudentProfile === 'function') {
+//                    window.initStudentProfile();
+//                }
+//            };
+//            document.body.appendChild(script);
+//        })
+//        .catch(error => {
+//            console.error("Error loading profile page:", error);
+//        });
+//}
 
 // ================= LOAD PROGRAMS DYNAMICALLY =================
 async function loadPrograms(selectedProgramId = null) {
@@ -563,12 +563,13 @@ function showMessage(msg, type) {
 }
 
 // ================= CLOSE MODAL =================
-document.querySelector("#studentPanel .modal-close").onclick = () => {
+document.querySelector("#studentPanel .modal-close")?.addEventListener("click", () => {
     document.getElementById("studentPanel").classList.remove("show");
     document.body.style.overflow = "";
-        editingStudentId = null;
+    editingStudentId = null;
     resetStudentForm();
-};
+});
+
 
 async function loadBatchesForStudent(selectedBatch = null) {
     try {
