@@ -5,6 +5,14 @@
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
 }
+html, body {
+    height: 100%;
+    overflow: hidden;   /* 🔴 stops scrollbar */
+}
+body {
+    display: flex;
+    flex-direction: column;
+}
 
 /* VIDEO BACKGROUND */
 .bg-video {
@@ -60,6 +68,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 5;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -120,15 +129,17 @@ nav a:hover::after {
 
 /* ---------------- HERO SECTION ------------------- */
 .hero {
+    flex: 1; /* 🔥 takes remaining screen space */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 90px 70px;
+    padding: 60px 70px;
     color: white;
     position: relative;
     z-index: 1;
     flex-wrap: wrap;
 }
+
 
 /* Typing Effect */
 .typing {
@@ -159,6 +170,8 @@ nav a:hover::after {
 .text-area {
     width: 50%;
     margin-top: 40px;
+    max-width: 700px;
+
 }
 .text-area h1 {
     font-size: 3.6rem;
@@ -191,7 +204,7 @@ nav a:hover::after {
 /* ---------------- LOGIN GLASS CARD ------------------- */
 .auth-wrapper {
     width: 360px;
-    margin: 40px 0;
+    max-width: 90vw;
 }
 .login-box {
     background: rgba(255,255,255,0.08);
@@ -305,7 +318,8 @@ nav a:hover::after {
 .footer {
     background: rgba(0,0,0,0.35);
     backdrop-filter: blur(15px);
-    padding: 25px 50px;
+    flex-shrink: 0;
+    padding: 12px 40px;  
     color: white;
     text-align: center;
     border-top: 1px solid rgba(255,255,255,0.1);
@@ -313,8 +327,8 @@ nav a:hover::after {
 
 /* Social icons with gradient glow & float */
 .footer-social a {
-    margin: 0 12px;
-    font-size: 1.5rem;
+      margin: 0 8px;        /* was 12px */
+    font-size: 1.2rem;
     color: #00f2fe;
     transition: 0.3s;
     display: inline-block;
@@ -331,13 +345,13 @@ nav a:hover::after {
 /* Floating animation */
 @keyframes float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+    50% { transform: translateY(-2px); }
 }
 
 /* Footer bottom */
 .footer-bottom {
-    margin-top: 15px;
-    font-size: 0.85rem;
+    margin-top: 6px;
+    font-size: 0.75rem;
     color: rgba(255,255,255,0.7);
 }
 
@@ -566,4 +580,12 @@ nav a:hover::after {
 .otp-close:hover {
     color: #ff6b6b;
 }
- 
+ @media (max-height: 720px) {
+    html, body {
+        overflow-y: auto;
+    }
+
+    .hero {
+        padding: 40px 30px;
+    }
+}
