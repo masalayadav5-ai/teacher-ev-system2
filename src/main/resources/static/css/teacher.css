@@ -256,7 +256,7 @@
 
 /* ===== TEACHER MODAL CARD ===== */
 .teacher-modal-card {
-  width: 640px;                 /* same visual size as student */
+  width: 520px;                 /* same visual size as student */
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -283,3 +283,39 @@
   background: #fff;
 }
 
+/* ================= FIX TEACHER TABLE LAYOUT ================= */
+
+/* Keep all cells consistent */
+.teacher-page .teacher-table td {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Email column (ellipsis, single line) */
+.teacher-page .teacher-table td:nth-child(3),
+.teacher-page .teacher-table th:nth-child(3) {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Program column */
+.teacher-page .teacher-table td:nth-child(4) {
+    max-width: 240px;
+    white-space: normal;        /* allow clean wrap like student */
+}
+
+/* Action column FIX */
+.teacher-page .action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+/* Buttons same height & inline */
+.teacher-page .action-btn {
+    min-width: 80px;
+    padding: 8px 14px;
+    white-space: nowrap;
+}

@@ -589,3 +589,43 @@ nav a:hover::after {
         padding: 40px 30px;
     }
 }
+/* Info Modal */
+.info-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.info-modal-overlay.show {
+    display: flex;
+}
+
+.info-modal {
+    width: 420px;
+    max-width: 90%;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(18px);
+    padding: 30px;
+    border-radius: 18px;
+    color: white;
+    text-align: center;
+}
+
+.info-modal h2 {
+    margin-bottom: 12px;
+    color: #00f2fe;
+}
+
+.info-modal button {
+    margin-top: 20px;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(90deg,#4facfe,#00f2fe);
+    color: white;
+    cursor: pointer;
+}

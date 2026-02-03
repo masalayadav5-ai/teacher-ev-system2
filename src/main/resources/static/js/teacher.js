@@ -339,11 +339,14 @@ async function loadTeachers() {
                         ${teacher.status === 'Pending' ? 'Pending' : 'Active'}
                     </button>
                 </td>
-                <td>
-                    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
-                    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
-                    <button class="action-btn hide" onclick="hideTeacher(${teacher.id})">Delete</button>
-                </td>
+               <td>
+  <div class="action-group">
+    <button class="action-btn edit" onclick="editTeacher(${teacher.id})">Edit</button>
+    <button class="action-btn view" onclick="viewTeacher(${teacher.id})">View</button>
+    <button class="action-btn hide" onclick="hideTeacher(${teacher.id})">Delete</button>
+  </div>
+</td>
+
             `;
             tbody.appendChild(row);
         });

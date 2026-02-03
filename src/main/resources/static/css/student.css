@@ -241,7 +241,7 @@
 /* ===== STUDENT MODAL ===== */
 
 .student-modal-card {
-  width: 640px;
+  width: 520px;
   max-height: 85vh;
   display: flex;
   flex-direction: column;

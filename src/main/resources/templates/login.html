@@ -26,17 +26,22 @@
                 <i class="fa-solid fa-chalkboard-user"></i> SmarTeach
             </div>
 
-            <nav>
-                <a href="#">Home</a>
-                <a href="#">Courses</a>
-                <a href="#">About</a>
-                <a href="#">Contact</a>
-            </nav>
+    <nav>
+    <a href="#" onclick="openHome()">Home</a>
+    <a href="#" onclick="openCourses()">Courses</a>
+    <a href="#" onclick="openAbout()">About</a>
+    <a href="#" onclick="openContact()">Contact</a>
+</nav>
 
-            <div class="search-box">
-                <input type="text" placeholder="Search...">
-                <button><i class="fa fa-search"></i></button>
-            </div>
+
+      <div class="search-box">
+    <input type="text" id="publicSearch" placeholder="Search...">
+    <button onclick="publicSearch()">
+        <i class="fa fa-search"></i>
+    </button>
+</div>
+
+
         </header>
 
         <!-- HERO SECTION -->
@@ -49,7 +54,7 @@
                 <p class="tagline">Transforming Feedback Into Better Teaching.<br>
                     <span class="rotating-text">Plan Better Sessions • Evaluate Smarter • Improve Outcomes</span>
                 </p>
-                <button class="join-btn">Get Started</button>
+<button class="join-btn" id="getStartedBtn">Get Started</button>
             </div>
 
             <!-- LOGIN CARD -->
@@ -86,6 +91,15 @@
                 </div>
             </div>
         </section>
+        <!-- INFO MODAL -->
+<div class="info-modal-overlay" id="infoModal">
+  <div class="info-modal">
+    <h2 id="infoTitle"></h2>
+    <p id="infoContent"></p>
+    <button onclick="closeInfoModal()">Close</button>
+  </div>
+</div>
+
         <!-- Forgot Password Modal -->
         <div class="forgot-modal-overlay" id="forgotPasswordModal">
             <div class="forgot-modal-container">
@@ -228,6 +242,80 @@
 
             </div>
         </div>
+<script>
+function openInfoModal(title, html) {
+    document.getElementById("infoTitle").textContent = title;
+    document.getElementById("infoContent").innerHTML = html;
+    document.getElementById("infoModal").classList.add("show");
+    document.body.style.overflow = "hidden";
+}
+
+function closeInfoModal() {
+    document.getElementById("infoModal").classList.remove("show");
+    document.body.style.overflow = "";
+}
+
+/* NAV ACTIONS */
+
+function openHome() {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function openCourses() {
+    openInfoModal("Courses", `
+        <ul style="text-align:left">
+            <li>Computer Science</li>
+            <li>Information Technology</li>
+            <li>Management Studies</li>
+            <li>Engineering Programs</li>
+        </ul>
+        <p style="opacity:.6;margin-top:10px">
+            Login required to view course details.
+        </p>
+    `);
+}
+
+function openAbout() {
+    openInfoModal("About SmarTeach", `
+        <p>
+            SmarTeach is an academic evaluation and session planning platform
+            designed for institutions.
+        </p>
+        <ul style="text-align:left;margin-top:10px">
+            <li>Administrators</li>
+            <li>Teachers</li>
+            <li>Students</li>
+        </ul>
+    `);
+}
+
+function openContact() {
+    openInfoModal("Contact", `
+        <p><strong>Email:</strong> support@smarteach.edu</p>
+        <p style="margin-top:8px">
+            For institutional onboarding and technical support.
+        </p>
+    `);
+}
+</script>
+<script>
+function publicSearch() {
+    const value = document.getElementById("publicSearch").value.toLowerCase();
+
+    if (!value) return;
+
+    if (value.includes("course")) openCourses();
+    else if (value.includes("about")) openAbout();
+    else if (value.includes("contact") || value.includes("support")) openContact();
+    else {
+        openInfoModal("Search", `
+            <p>No public results found.</p>
+            <p style="opacity:.6">Login required for advanced search.</p>
+        `);
+    }
+}
+</script>
+
 
 
         <script src="/js/script.js"></script>
@@ -282,6 +370,44 @@
 
             });
         </script>
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const getStartedBtn = document.getElementById("getStartedBtn");
+    const username = document.getElementById("usernameInput");
+
+    if (!getStartedBtn || !username) return;
+
+    getStartedBtn.addEventListener("click", () => {
+        // Smooth scroll to login input
+        username.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+        // Focus after scroll
+        setTimeout(() => {
+            username.focus();
+        }, 400);
+    });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("publicSearch");
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            publicSearch();
+        }
+    });
+});
+</script>
+
         <script src="/js/change-password-validate.js"></script>
 
 
