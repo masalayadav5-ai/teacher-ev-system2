@@ -158,6 +158,7 @@ nav a:hover::after {
 /* Rotating tagline */
 .rotating-text {
     display: inline-block;
+    white-space: nowrap;
     animation: rotateText 6s linear infinite;
 }
 @keyframes rotateText {
@@ -629,3 +630,34 @@ nav a:hover::after {
     color: white;
     cursor: pointer;
 }
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    color: #00f2fe;
+}
+
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.brand-main {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg,#4facfe,#00f2fe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
+/*.brand-sub {
+    font-size: 0.9rem;
+    letter-spacing: 0.6px;
+    color: rgba(255,255,255,0.5);
+}*/

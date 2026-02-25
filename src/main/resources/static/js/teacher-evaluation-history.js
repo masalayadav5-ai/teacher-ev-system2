@@ -1,4 +1,4 @@
-let teacherChart = null;
+window.teacherChart = window.teacherChart || null;
 let currentEvalPage = 1;
 const EVALS_PER_PAGE = 6;
 let _latestSummaryData = null;
@@ -41,6 +41,7 @@ if (!teacherDbId) {
     if (!res.ok) throw new Error("Failed to load teachers");
 
     const teachers = await res.json();
+    
     const teacher = teachers.find(
      t => Number(t.teacherId) === Number(teacherDbId));
 
@@ -231,9 +232,9 @@ function reloadTeacherEvalUI() {
   _selectedWeek = null;
   _summaryLoading = false;
 
-  if (teacherChart) {
-    teacherChart.destroy();
-    teacherChart = null;
+  if (window.teacherChart ) {
+    window.teacherChart .destroy();
+    window.teacherChart  = null;
   }
 const container = document.getElementById("teacherEvaluationHistoryContainer");
 if (container) {
@@ -520,8 +521,7 @@ function renderSummaryUI(data) {
     tbody.innerHTML += `
       <tr>
         <td>${p.questionText}</td>
-        <td class="${cls}">${p.average}</td>
-      </tr>
+<td class="${cls}">${Number(p.average || 0).toFixed(2)}</td>      </tr>
     `;
   });
 
@@ -531,7 +531,7 @@ function renderSummaryUI(data) {
  function renderTeacherChart(labels, values) {
   const ctx = document.getElementById("teacherChart");
 
-  if (teacherChart) teacherChart.destroy();
+  if (window.teacherChart ) window.teacherChart .destroy();
 
   // 🔹 Create visual-safe values (0 → 0.2 so bar is visible)
   const visualValues = values.map(v => v === 0 ? 0.1 : v);
@@ -541,7 +541,7 @@ function renderSummaryUI(data) {
     v === 0 ? "#ff5c5c" : "#4c6fff"
   );
 
-  teacherChart = new Chart(ctx, {
+  window.teacherChart  = new Chart(ctx, {
     type: "bar",
     data: {
       labels: labels.map(() => ""), // ❌ hide question text under bars

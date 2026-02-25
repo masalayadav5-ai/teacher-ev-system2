@@ -65,4 +65,4 @@ public void setOtpExpiry(LocalDateTime otpExpiry) {
     this.otpExpiry = otpExpiry;
 }
 
-}   
+}

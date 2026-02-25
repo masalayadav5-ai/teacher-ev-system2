@@ -25,8 +25,8 @@ JOIN r.evaluation e
 WHERE e.teacherId = :teacherId
 AND e.courseId = :courseId
 AND e.weekStart = :weekStart
-AND p.parameterType IN ('rating', 'overall_rating', 'select', 'multiple_choice')
-GROUP BY p.id, p.questionText
+AND p.parameterType IN ('rating', 'overall_rating')
+GROUP BY p.id, p.questionText, p.sortOrder
 ORDER BY p.sortOrder
 """)
 List<Object[]> parameterAverageForCourseWeek(

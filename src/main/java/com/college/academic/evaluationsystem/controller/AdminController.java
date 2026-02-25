@@ -201,7 +201,7 @@ public class AdminController {
                     // 🔥 IMPORTANT: return BOTH ids
                     map.put("teacherDbId", t.getId());           // numeric DB id (for API URLs)
                     map.put("teacherCode", t.getTeacherId());   // string code like "23" (for matching)
-
+                    map.put("qualification", t.getQualification());
                     map.put("fullName", t.getFullName());
                     map.put("contact", t.getContact());
                     map.put("address", t.getAddress());

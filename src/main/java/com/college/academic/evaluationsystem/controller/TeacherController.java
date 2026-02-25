@@ -30,7 +30,9 @@ public class TeacherController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    @Autowired private StudentEvaluationRepository evaluationRepository;
+@Autowired private StudentRepository studentRepository;
+@Autowired private CourseRepository courseRepository;
     // ================= CREATE TEACHER =================
     @PostMapping
     public ResponseEntity<?> createTeacher(@RequestBody Map<String, Object> requestData) {
@@ -316,6 +318,55 @@ public ResponseEntity<?> getTeacherById(@PathVariable Long id) {
     return teacherRepository.findById(id)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+}
+
+@GetMapping("/recent-feedback")
+public ResponseEntity<?> getRecentFeedback(
+        org.springframework.security.core.Authentication auth,
+        @RequestParam(defaultValue = "5") int limit
+) {
+    try {
+        String username = auth.getName();
+
+        Teacher teacher = teacherService.getTeacherByUsername(username);
+        if (teacher == null) return ResponseEntity.status(404).body(Map.of("message", "Teacher not found"));
+
+        Long teacherId = teacher.getId();
+
+        // repository method (create this query like I showed earlier)
+        List<StudentEvaluation> recent =
+                evaluationRepository.findRecentSubmittedByTeacher(
+                        teacherId,
+                        org.springframework.data.domain.PageRequest.of(0, Math.min(limit, 20))
+                );
+
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+
+        for (StudentEvaluation e : recent) {
+            String courseName = courseRepository.findById(e.getCourseId())
+                    .map(Course::getName).orElse("Course");
+
+            String studentName = studentRepository.findById(e.getStudentId())
+                    .map(Student::getFullName).orElse("Student");
+
+            Map<String, Object> m = new java.util.HashMap<>();
+            m.put("courseName", courseName);
+            m.put("studentName", studentName);
+            m.put("overallRating", e.getOverallRating());
+            m.put("submittedAt", e.getSubmittedAt());
+
+            // OPTIONAL: if you store comment somewhere
+            // m.put("comment", e.getComment());
+
+            result.add(m);
+        }
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        return ResponseEntity.status(500).body(Map.of("message", "Failed to load recent feedback"));
+    }
 }
 
 }

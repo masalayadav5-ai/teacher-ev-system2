@@ -762,3 +762,51 @@ nav {
   pointer-events: auto;
 }
 
+/* Page must NOT scroll */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* App takes full height */
+.app {
+  height: 100vh;
+  overflow: hidden;   /* prevent app scrolling */
+  display: flex;
+  padding: 28px;
+  gap: 20px;          /* instead of sidebar margin-right */
+}
+
+/* Sidebar stays fixed height and does not scroll with content */
+.sidebar {
+  flex: 0 0 305px;     /* fixed width */
+  height: calc(100vh - 56px); /* 28px top + 28px bottom padding */
+  overflow: hidden;    /* or auto if you WANT sidebar internal scroll */
+  margin-right: 0;     /* remove if using gap */
+}
+
+/* Main area: only this scrolls */
+.main {
+  flex: 1;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content area scrolls */
+#content-area {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* IMPORTANT for flex scrolling */
+}
+/* sidebar should shrink by width */
+.sidebar {
+  flex: 0 0 auto;   /* remove fixed flex-basis */
+  width: 305px;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+}

@@ -66,10 +66,9 @@ ctx().courseId  = urlParams.get('courseId');
         // Load teacher and course details (you need to implement these endpoints)
         await loadTeacherAndCourseDetails();
       
-
-ctx.teacherName = ctx.teacherName || `Teacher ${ctx.teacherId}`;
-ctx.courseCode  = ctx.courseCode  || `Course ${ctx.courseId}`;
-ctx.courseName  = ctx.courseName  || '';
+ctx().teacherName = ctx().teacherName || `Teacher ${ctx().teacherId}`;
+ctx().courseCode  = ctx().courseCode  || `Course ${ctx().courseId}`;
+ctx().courseName  = ctx().courseName  || '';
 
         // Load form structure from backend
         console.log('Fetching form structure...');

@@ -293,13 +293,22 @@ for (StudentEvaluation e : evaluations) {
                     teacherId, courseId, weekStart
             );
 
-    List<Map<String, Object>> parameterAverages =
-            paramStats.stream()
-                    .map(r -> Map.of(
+   List<Map<String, Object>> parameterAverages =
+        paramStats.stream()
+                .map(r -> {
+                    double avg = 0.0;
+
+                    if (r[1] != null) {
+                        avg = ((Number) r[1]).doubleValue();
+                        avg = Math.round(avg * 100.0) / 100.0; // ✅ 2 decimals
+                    }
+
+                    return Map.of(
                             "questionText", r[0],
-                            "average", r[1]
-                    ))
-                    .collect(Collectors.toList());
+                            "average", avg
+                    );
+                })
+                .collect(Collectors.toList());
 
     /* ---------- RESPONSE ---------- */
     return ResponseEntity.ok(Map.of(
@@ -400,5 +409,19 @@ List<StudentEvaluation> evaluations =
 
     return ResponseEntity.ok(result);
 }
+@GetMapping("/trend")
+public ResponseEntity<List<Map<String, Object>>> getSystemTrend() {
 
+    List<Object[]> rows = evaluationRepository.systemWeeklyTrend(); 
+    // returns: weekStart, avgRating
+
+        List out = rows.stream().map(r -> {
+        LocalDate weekStart = (LocalDate) r[0];
+        double avg = r[1] == null ? 0.0 : ((Number) r[1]).doubleValue();
+        avg = Math.round(avg * 100.0) / 100.0;
+        return Map.of("weekStart", weekStart.toString(), "average", avg);
+    }).toList();
+
+    return ResponseEntity.ok(out);
+}
 }

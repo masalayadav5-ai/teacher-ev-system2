@@ -40,17 +40,17 @@ List<StudentEvaluation> findByStudentIdAndWeekStart(Long studentId, LocalDate we
 SELECT DISTINCT e.weekStart
 FROM StudentEvaluation e
 WHERE e.teacherId = :teacherId
-AND e.courseId = :courseId
-AND e.weekStart >= DATE(:assignedAt)
-AND (:removedAt IS NULL OR e.weekStart <= DATE(:removedAt))
-AND e.isSubmitted = true
+  AND e.courseId  = :courseId
+  AND e.isSubmitted = true
+  AND e.submittedAt >= :assignedAt
+  AND (:removedAt IS NULL OR e.submittedAt <= :removedAt)
 ORDER BY e.weekStart DESC
 """)
 List<LocalDate> findDistinctWeeksForTeacherCourseWindowed(
-    Long teacherId,
-    Long courseId,
-    LocalDateTime assignedAt,
-    LocalDateTime removedAt
+    @Param("teacherId") Long teacherId,
+    @Param("courseId") Long courseId,
+    @Param("assignedAt") LocalDateTime assignedAt,
+    @Param("removedAt") LocalDateTime removedAt
 );
 
 
@@ -99,5 +99,24 @@ GROUP BY se.teacherId
 ORDER BY AVG(se.overallRating) DESC
 """)
 List<Object[]> getTeacherLeaderboard();
+
+@Query("""
+select e
+from StudentEvaluation e
+where e.teacherId = :teacherId
+  and e.isSubmitted = true
+order by e.submittedAt desc
+""")
+List<StudentEvaluation> findRecentSubmittedByTeacher(Long teacherId, org.springframework.data.domain.Pageable pageable);
+
+@Query("""
+  select e.weekStart, avg(e.overallRating)
+  from StudentEvaluation e
+  where e.isSubmitted = true
+    and e.overallRating is not null
+  group by e.weekStart
+  order by e.weekStart
+""")
+List<Object[]> systemWeeklyTrend();
 
 }

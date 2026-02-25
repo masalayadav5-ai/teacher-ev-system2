@@ -151,16 +151,16 @@ public ResponseEntity<Map<String, Object>> completeSubmit(
     Long studentId = Long.parseLong(request.get("studentId").toString());
     Long courseId  = Long.parseLong(request.get("courseId").toString());
 
-    Double overallRating = request.get("overallRating") != null
-            ? Double.parseDouble(request.get("overallRating").toString())
-            : null;
+//    Double overallRating = request.get("overallRating") != null
+//            ? Double.parseDouble(request.get("overallRating").toString())
+//            : null;
 
     String predictedGrade = (String) request.get("predictedGrade");
 
     @SuppressWarnings("unchecked")
     Map<String, Object> responses =
             (Map<String, Object>) request.get("responses");
-
+Double overallRating = computeOverallFromResponses(responses);
     LocalDate weekStart = getCurrentWeekStart();
 
     // ✅ duplicate check
@@ -331,4 +331,37 @@ public ResponseEntity<Map<String, Object>> checkEvaluationStatus(
         
         return paramData;
     }
+    private Double computeOverallFromResponses(Map<String, Object> responses) {
+
+    double sum = 0;
+    int count = 0;
+
+    for (Map.Entry<String, Object> entry : responses.entrySet()) {
+
+        Long paramId = Long.parseLong(entry.getKey());
+        Object value = entry.getValue();
+        if (value == null) continue;
+
+        EvaluationParameter p = parameterRepository.findById(paramId).orElse(null);
+        if (p == null) continue;
+
+        // ✅ Include ONLY numeric rating questions
+        if (!("rating".equals(p.getParameterType())
+                || "overall_rating".equals(p.getParameterType()))) {
+            continue;
+        }
+
+        try {
+            double v = Double.parseDouble(String.valueOf(value));
+            sum += v;
+            count++;
+        } catch (NumberFormatException ignored) {
+        }
+    }
+
+    if (count == 0) return 0.0;
+
+    double avg = sum / count;
+return Math.round(avg * 100.0) / 100.0;
+}
 }

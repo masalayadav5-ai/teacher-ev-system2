@@ -126,8 +126,10 @@ function handlePasswordSubmit(event) {
         text: "Your password has been updated successfully"
       });
 
-      document.getElementById("changePasswordModal")
-        .classList.remove("show");
+ const form = document.getElementById("changePasswordForm");
+const overlay = form?.closest(".password-modal-overlay, .dashboard-modal-overlay");
+overlay?.classList.remove("show");
+document.body.style.overflow = "";
 
       newPassword.value = "";
       confirmPassword.value = "";

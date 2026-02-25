@@ -500,7 +500,11 @@
     padding: 11px 14px;
     font-size: 14px;
 }
-
+.form-group select {
+    height: 42px;
+    line-height: 42px;
+    padding: 0 14px;   /* remove top/bottom padding */
+}
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
@@ -574,9 +578,11 @@
 /* ============================================
    COMMON STYLES (Both forms)
    ============================================ */
-
+ 
 /* Back button styles */
 .back-container {
+    display: flex;
+    justify-content: flex-end;
     margin-bottom: 15px;
 }
 

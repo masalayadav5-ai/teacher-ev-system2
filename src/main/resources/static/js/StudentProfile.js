@@ -14,6 +14,7 @@ function initStudentProfile() {
     } else{
         loadSelectedProfile();
     }
+    setupPrintButton();
     setupTabs();          // ✅ ADD THIS
     setupEventListeners();
 }
@@ -57,23 +58,21 @@ function loadLoggedInUserProfile() {
         .then(user => {
             const role = user.role || "STUDENT";
 
-            const profile = {
+           const profile = {
   studentId: user.studentId || null,
-  teacherId: user.teacherId || null,
+  teacherId: user.teacherDbId ?? null,
+  teacherCode: user.teacherCode ?? null,
+  userId: user.userId ?? null,
+
   fullName: user.fullName || user.username,
   email: user.email || "-",
   contact: user.contact || "-",
   address: user.address || "-",
 
-  // 🔥 NORMALIZE BACKEND DATA
-  program: user.department
-    ? { code: "", name: user.department }
-    : null,
+  qualification: user.qualification || "-",   // ✅ ADD
 
-  semester: user.semester
-    ? { name: user.semester }
-    : null,
-
+  program: user.department ? { code: "", name: user.department } : null,
+  semester: user.semester ? { name: user.semester } : null,
   batch: user.batch || "-",
   status: "Active"
 };
@@ -297,62 +296,87 @@ function renderTeacherAnalyticsChart(labels, values) {
 
 // ================= POPULATE STUDENT DATA =================
 function populateProfile(user, role) {
-    console.log("Populating profile for:", user, role);
+  console.log("Populating profile for:", user, role);
 
-    // Main fields
-    const studentIdElem = document.getElementById("student-id");
-    const nameElem = document.querySelector(".student-name");
-    const deptElem = document.getElementById("department");
-    const semesterElem = document.getElementById("semester");
-    const batchElem = document.getElementById("batch");
-    const emailElem = document.getElementById("student-email");
-    const phoneElem = document.getElementById("student-phone");
-    const addressElem = document.getElementById("student-address");
-    const statusBadge = document.querySelector(".badge-status");
+  const studentIdElem = document.getElementById("student-id");
+  const nameElem = document.querySelector(".student-name");
+  const deptElem = document.getElementById("department");
+  const semesterElem = document.getElementById("semester");
+  const batchElem = document.getElementById("batch");
+  const emailElem = document.getElementById("student-email");
+  const phoneElem = document.getElementById("student-phone");
+  const addressElem = document.getElementById("student-address");
+  const statusBadge = document.querySelector(".badge-status");
+  const qualElem = document.getElementById("qualification");
 
-    if (studentIdElem) studentIdElem.textContent = user.studentId || user.teacherId || "-";
-    if (nameElem) nameElem.textContent = user.fullName || "-";
-    if (deptElem) {
-  if (user.program?.name) {
-    deptElem.textContent =
-      (user.program.code ? user.program.code + " - " : "") + user.program.name;
-  } else if (user.department) {
-    deptElem.textContent = user.department;
-  } else {
-    deptElem.textContent = "-";
+
+  // ✅ ID (based on role)
+  if (studentIdElem) {
+    studentIdElem.textContent =
+      role === "TEACHER" ? (user.teacherId || "-") :
+      role === "STUDENT" ? (user.studentId || "-") :
+      (user.userId || "-");
   }
-}
 
-if (semesterElem) {
-  semesterElem.textContent =
-    typeof user.semester === "string"
-      ? user.semester
-      : user.semester?.name || "-";
-}
-    if (batchElem) batchElem.textContent = user.batch || "-";
-    if (emailElem) emailElem.textContent = user.email || "-";
-    if (phoneElem) phoneElem.textContent = user.contact || "-";
-    if (addressElem) addressElem.textContent = user.address || "-";
+  if (nameElem) nameElem.textContent = user.fullName || "-";
 
-    if (statusBadge) {
-        statusBadge.textContent = user.status || "-";
-        statusBadge.className = `badge badge-status ${user.status === "Active" ? "active" : "inactive"}`;
+  // ✅ Department text
+  if (deptElem) {
+    if (user.program?.name) {
+      deptElem.textContent =
+        (user.program.code ? user.program.code + " - " : "") + user.program.name;
+    } else if (user.department) {
+      deptElem.textContent = user.department;
+    } else {
+      deptElem.textContent = "-";
     }
+  }
 
-    // Hide student-only tabs for teacher/admin
-    if (role !== "STUDENT") {
-        document.querySelectorAll(".info-card, .tab-btn, .tab-pane").forEach(el => {
-            if (el.dataset?.tab && ["academic","performance","attendance","documents"].includes(el.dataset.tab)) {
-                el.style.display = "none";
-            }
-        });
-    }
-    const profileView = sessionStorage.getItem("profileView");
+  if (semesterElem) {
+    semesterElem.textContent =
+      typeof user.semester === "string"
+        ? user.semester
+        : user.semester?.name || "-";
+  }
+ if (qualElem) {
+  qualElem.textContent = user.qualification || "-";
+}
+  if (batchElem) batchElem.textContent = user.batch || "-";
+  if (emailElem) emailElem.textContent = user.email || "-";
+  if (phoneElem) phoneElem.textContent = user.contact || "-";
+  if (addressElem) addressElem.textContent = user.address || "-";
 
-if (role === "TEACHER" && profileView === "TEACHER_ANALYTICS") {
+  if (statusBadge) {
+    statusBadge.textContent = user.status || "-";
+    statusBadge.className =
+      `badge badge-status ${user.status === "Active" ? "active" : "inactive"}`;
+  }
+
+  // ✅ HIDE Semester & Batch unless STUDENT
+  document.querySelectorAll(".student-only").forEach(el => {
+    el.style.display = (role === "STUDENT") ? "" : "none";
+  });
+
+  // ✅ HIDE Department for ADMIN only
+  document.querySelectorAll(".teacher-student-only").forEach(el => {
+    el.style.display = (role === "ADMIN") ? "none" : "";
+  });
+document.querySelectorAll(".teacher-only").forEach(el => {
+  el.style.display = (role === "TEACHER") ? "" : "none";
+});
+  // ✅ Hide student-only tabs for teacher/admin
+  if (role !== "STUDENT") {
+    document.querySelectorAll(".info-card, .tab-btn, .tab-pane").forEach(el => {
+      if (el.dataset?.tab && ["academic","performance","attendance","documents"].includes(el.dataset.tab)) {
+        el.style.display = "none";
+      }
+    });
+  }
+
+  const profileView = sessionStorage.getItem("profileView");
+  if (role === "TEACHER" && profileView === "TEACHER_ANALYTICS") {
     showTeacherAnalyticsInProfile();
-}
-
+  }
 }
  
 // ================= SETUP EVENT LISTENERS =================
@@ -630,4 +654,55 @@ function renderEvaluationHistory(data, courseName, teacherName) {
             <div>Submitted At: ${submittedAt}</div>
         </div>
     `;
+}
+function setupPrintButton() {
+    const printBtn = document.getElementById("printProfileBtn");
+    if (!printBtn) return;
+
+    printBtn.addEventListener("click", () => {
+        printProfile();
+    });
+}
+function printProfile() {
+
+    const profileContent = document.querySelector(".profile-container");
+
+    if (!profileContent) return;
+
+    const printWindow = window.open('', '', 'width=900,height=700');
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>User Profile Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h2 { text-align: center; margin-bottom: 20px; }
+                .info-card { 
+                    border: 1px solid #ccc; 
+                    padding: 15px; 
+                    margin-bottom: 15px; 
+                    border-radius: 8px;
+                }
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 8px;
+                }
+                .meta-item {
+                    margin-bottom: 8px;
+                }
+            </style>
+        </head>
+        <body>
+            <h2>User Profile Report</h2>
+            ${profileContent.innerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
 }

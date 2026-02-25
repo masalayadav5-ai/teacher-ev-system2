@@ -1147,3 +1147,17 @@
     color: #16a34a;
     font-weight: 700;
 }
+@media print {
+
+  .btn,
+  .profile-tabs-nav,
+  .btn-upload,
+  .header-actions {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+}
