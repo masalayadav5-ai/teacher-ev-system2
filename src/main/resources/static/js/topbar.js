@@ -10,16 +10,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             throw new Error("Not authenticated");
 
         const userData = await res.json();
-
+        
         // 🔹 Top title
-        topTitle.textContent = `Welcome, ${userData.username} (${userData.role})`;
-
+topTitle.textContent = `Welcome, ${userData.username}`;
         // 🔹 Store globally
         window.currentUser = userData;
         localStorage.setItem("currentUser", JSON.stringify(userData));
         localStorage.setItem("role", userData.role);
        // applyRoleBasedUI(userData.role);
-
+const brandRole = document.getElementById("brandRole");
+if (brandRole) {
+brandRole.textContent = userData.role.charAt(0) + userData.role.slice(1).toLowerCase();}
         // 🔹 Determine display name
         // Prefer fullName → fallback to username
         const displayName =

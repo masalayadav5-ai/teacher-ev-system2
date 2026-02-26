@@ -165,3 +165,19 @@
     color: #1d4ed8;
     border-left-color: #1d4ed8;
 }
+.settings-modal {
+  position: relative;
+}
+
+.settings-header .modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 22px;
+  cursor: pointer;
+  color: #999;
+}
+
+.settings-header .modal-close:hover {
+  color: #000;
+}

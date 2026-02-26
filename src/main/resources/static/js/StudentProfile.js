@@ -30,13 +30,13 @@ function loadSelectedProfile() {
   const role = sessionStorage.getItem("profileMode") || "STUDENT";
 
   const profile = {
-    studentId: data.studentId || data.id || null,
-    teacherId: data.teacherId || null,
+ studentId: data.studentId || null,
+  dbId: data.dbId || data.id || null,    teacherId: data.teacherId || null,
     fullName: data.fullName || "-",
     email: data.email || "-",
     contact: data.contact || "-",
     address: data.address || "-",
-    batch: data.batch || "-",
+  batch: data.batchLabel || data.batch || "-",
 
     // ✅ program object exists in student list
     program: data.program || null,
@@ -46,6 +46,7 @@ function loadSelectedProfile() {
   };
 
   populateProfile(profile, role);
+  loadAcademicData(profile);
 }
 
 
@@ -60,6 +61,7 @@ function loadLoggedInUserProfile() {
 
            const profile = {
   studentId: user.studentId || null,
+  dbId: user.studentDbId ?? user.studentId ?? null,
   teacherId: user.teacherDbId ?? null,
   teacherCode: user.teacherCode ?? null,
   userId: user.userId ?? null,
@@ -381,20 +383,21 @@ document.querySelectorAll(".teacher-only").forEach(el => {
  
 // ================= SETUP EVENT LISTENERS =================
 function setupEventListeners() {
-    const backButton = document.querySelector(".btn-back");
-    if (backButton) {
-        backButton.addEventListener("click", loadStudentProfilePage);
+  const backButton = document.querySelector(".btn-back");
+  if (!backButton) return;
+
+  backButton.addEventListener("click", () => {
+    const returnPage = sessionStorage.getItem("profileReturnPage");
+
+    if (returnPage) {
+      loadPage(returnPage);
+      return;
     }
 
-    const editButton = document.querySelector(".btn-edit");
-    if (editButton) {
-        editButton.addEventListener("click", () => {
-            const studentData = JSON.parse(localStorage.getItem('currentStudentProfile'));
-            if (studentData && studentData.id && window.editStudent) {
-                window.editStudent(studentData.id);
-            }
-        });
-    }
+    // fallback
+    const viewerRole = window.currentUser?.role || JSON.parse(localStorage.getItem("currentUser"))?.role;
+    loadPage(viewerRole === "ADMIN" ? "/pages/student.html" : "/pages/dashboard-content.html");
+  });
 }
 
 // ================= LOAD STUDENT LIST PAGE =================
@@ -464,42 +467,53 @@ window.showProfileMessage = showProfileMessage;
 
  
 function loadAcademicData(profile) {
-    if (!profile.studentId) return;
+  if (profile.dbId) {
+    loadCurrentCourses(profile.dbId);
+  } else {
+    console.warn("No dbId found, skipping teacher-courses API");
+  }
 
-    window.currentStudentId = profile.studentId;
-
-    loadCurrentCourses(profile.studentId);
-    loadEvaluationWeeks(profile.studentId); // ✅ ADD THIS
+  if (profile.studentId) {
+    loadEvaluationWeeks(profile.studentId);
+  }
 }
 
 function loadCurrentCourses(studentId) {
-    const holder = document.getElementById("current-courses");
-    if (!holder) return;
+  const holder = document.getElementById("current-courses");
+  if (!holder) return;
 
-    fetch(`/api/students/${studentId}/teacher-courses`)
-        .then(res => res.json())
-        .then(data => {
-            if (!data || data.length === 0) {
-                holder.innerHTML = `<p class="no-data">No courses enrolled</p>`;
-                return;
-            }
+  fetch(`${PROFILE_API_BASE_URL}/students/${studentId}/teacher-courses`, {
+    credentials: "same-origin"
+  })
+    .then(async res => {
+      if (!res.ok) {
+        const text = await res.text(); // helps debugging
+        console.error("Teacher-courses API failed:", res.status, text);
+        throw new Error("Endpoint not found or failed");
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (!Array.isArray(data) || data.length === 0) {
+        holder.innerHTML = `<p class="no-data">No courses enrolled</p>`;
+        return;
+      }
 
-            holder.innerHTML = data.map(item => `
-                <div class="course-item">
-                    <div class="course-name">
-                       COURSE : ${item.courseCode} - ${item.courseName}
-                    </div>
-                    <div class="course-instructor">
-                        ${item.teacherName}
-                    </div>
-                 
-                </div>
-            `).join("");
-        })
-        .catch(err => {
-            console.error(err);
-            holder.innerHTML = `<p class="no-data">Failed to load courses</p>`;
-        });
+      holder.innerHTML = data.map(item => `
+        <div class="course-item">
+          <div class="course-name">
+            COURSE : ${item.courseCode} - ${item.courseName}
+          </div>
+          <div class="course-instructor">
+            ${item.teacherName}
+          </div>
+        </div>
+      `).join("");
+    })
+    .catch(err => {
+      console.error(err);
+      holder.innerHTML = `<p class="no-data">Courses endpoint missing (404)</p>`;
+    });
 }
 
 

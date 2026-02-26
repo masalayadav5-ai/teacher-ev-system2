@@ -386,6 +386,7 @@ function viewStudent(studentId) {
 
     // Store in localStorage
     localStorage.setItem('currentSelectedProfile', JSON.stringify(student));
+  sessionStorage.setItem("profileReturnPage", "/pages/student.html"); // ✅ ADD
 
     // Set mode to STUDENT
     sessionStorage.setItem('profileMode', 'STUDENT');

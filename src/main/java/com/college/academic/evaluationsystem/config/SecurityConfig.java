@@ -147,7 +147,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
+import org.springframework.http.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -191,6 +191,9 @@ public class SecurityConfig {
 
     .requestMatchers("/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/teacher/**").hasRole("TEACHER")
+                        
+    .requestMatchers(HttpMethod.GET, "/api/settings").hasAnyRole("ADMIN","TEACHER","STUDENT")
+    .requestMatchers(HttpMethod.PUT, "/api/settings").hasRole("ADMIN")
     .anyRequest().authenticated()
 )
 //            .authorizeHttpRequests(auth -> auth
