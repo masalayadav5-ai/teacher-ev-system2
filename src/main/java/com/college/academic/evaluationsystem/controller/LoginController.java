@@ -225,52 +225,39 @@ return "login";
     }
  
 @PostMapping("/reset-password-otp")
+@ResponseBody
 @Transactional
-public String resetPasswordWithOtp(
+public Map<String, Object> resetPasswordWithOtp(
         @RequestParam Long userId,
         @RequestParam String newPassword,
-        @RequestParam String confirmPassword,
-        Model model) {
+        @RequestParam String confirmPassword) {
 
-    logger.info("🔐 RESET PASSWORD OTP HIT | userId={}", userId);
+    Map<String, Object> response = new HashMap<>();
 
     User user = userRepository.findById(userId).orElse(null);
-
     if (user == null) {
-        logger.warn("❌ User not found for userId={}", userId);
-        return otpError(model, "User not found", userId);
+        response.put("success", false);
+        response.put("message", "User not found");
+        return response;
     }
 
-    logger.info("📌 Stored password hash = {}", user.getPassword());
-    logger.info("📌 New password entered = {}", newPassword);
-
     if (!newPassword.equals(confirmPassword)) {
-        logger.warn("❌ Passwords do not match");
-        return otpError(model, "Passwords do not match", userId);
+        response.put("success", false);
+        response.put("message", "Passwords do not match");
+        return response;
     }
 
     if (!newPassword.matches(STRONG_PASSWORD_REGEX)) {
-        logger.warn("❌ Password does not match strength regex");
-        return otpError(
-            model,
-            "Password must include uppercase, lowercase, number and symbol",
-            userId
-        );
+        response.put("success", false);
+        response.put("message", "Password must include uppercase, lowercase, number and symbol");
+        return response;
     }
 
-    boolean sameAsOld = passwordEncoder.matches(newPassword, user.getPassword());
-    logger.info("🔍 newPassword == oldPassword ? {}", sameAsOld);
-
-    if (sameAsOld) {
-        logger.warn("❌ New password SAME as old password");
-        return otpError(
-            model,
-            "New password cannot be same as old password",
-            userId
-        );
+    if (passwordEncoder.matches(newPassword, user.getPassword())) {
+        response.put("success", false);
+        response.put("message", "New password cannot be same as old password");
+        return response;
     }
-
-    logger.info("✅ Password valid & different → updating DB");
 
     updateBothUserAndStudent(user, newPassword);
 
@@ -278,9 +265,8 @@ public String resetPasswordWithOtp(
     user.setOtpExpiry(null);
     userRepository.save(user);
 
-    logger.info("🎉 Password reset successful for userId={}", userId);
-
-    return "redirect:/login?passwordChanged=true";
+    response.put("success", true);
+    return response;
 }
 
 

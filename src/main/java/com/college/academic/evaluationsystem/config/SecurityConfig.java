@@ -173,7 +173,7 @@ public class SecurityConfig {
     .requestMatchers(
         "/login", "/do-login", "/change-password",
         "/css/**", "/js/**", "/images/**",
-        "/forgot-password", "/verify-otp",
+        "/forgot-password", "/verify-otp","/reset-password-otp",
         "/videos/**", "/pages/**"
     ).permitAll()
 
@@ -188,7 +188,8 @@ public class SecurityConfig {
     .requestMatchers("/api/admin/evaluations/**").hasAnyRole("ADMIN", "TEACHER")
 
     .requestMatchers("/api/evaluation/**").permitAll() // (or hasRole("STUDENT"))
-
+    .requestMatchers(HttpMethod.GET, "/api/admin/teachers/*/courses-for-session")
+    .hasAnyRole("ADMIN","TEACHER")
     .requestMatchers("/api/admin/**").hasRole("ADMIN")
     .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         

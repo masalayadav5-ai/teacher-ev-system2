@@ -75,7 +75,7 @@ function initSessionPlan() {
             processCourses(courses);
         } catch (error) {
             console.error('Error fetching courses:', error);
-            showMesssage("Failed to load your assigned courses.", "error");
+            showMessage("Failed to load your assigned courses.", "error");
             setupStaticOptions();
         }
     }
